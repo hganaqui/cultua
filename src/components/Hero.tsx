@@ -1,30 +1,29 @@
-// src/components/Hero.tsx
 import Link from 'next/link'
 
 export default function Hero() {
   return (
     <section style={{
       background: 'linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 50%, #1A1A1A 100%)',
-      padding: '80px 16px',
+      padding: '60px 16px',
       textAlign: 'center',
-      position: 'relative',
-      overflow: 'hidden',
     }}>
+      <style>{`
+        .hero-title { font-size: 64px; }
+        .hero-subtitle { font-size: 24px; }
+        .hero-desc { font-size: 16px; }
+        .hero-buttons { flex-direction: row; }
+        .hero-stats { gap: 48px; }
 
-      {/* Efeito de fundo */}
-      <div style={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: '600px',
-        height: '600px',
-        background: 'radial-gradient(circle, rgba(184,134,11,0.1) 0%, transparent 70%)',
-        borderRadius: '50%',
-        pointerEvents: 'none',
-      }} />
+        @media (max-width: 768px) {
+          .hero-title { font-size: 40px !important; }
+          .hero-subtitle { font-size: 18px !important; }
+          .hero-desc { font-size: 14px !important; }
+          .hero-buttons { flex-direction: column !important; align-items: center !important; }
+          .hero-stats { gap: 24px !important; }
+        }
+      `}</style>
 
-      <div style={{ maxWidth: '800px', margin: '0 auto', position: 'relative' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
 
         {/* Badge */}
         <div style={{
@@ -44,8 +43,7 @@ export default function Hero() {
         </div>
 
         {/* Título */}
-        <h1 style={{
-          fontSize: '64px',
+        <h1 className="hero-title" style={{
           fontWeight: '900',
           color: '#B8860B',
           lineHeight: 1.1,
@@ -56,8 +54,7 @@ export default function Hero() {
         </h1>
 
         {/* Subtítulo */}
-        <p style={{
-          fontSize: '24px',
+        <p className="hero-subtitle" style={{
           color: '#CCCCCC',
           fontWeight: '400',
           marginBottom: '16px',
@@ -67,8 +64,7 @@ export default function Hero() {
         </p>
 
         {/* Descrição */}
-        <p style={{
-          fontSize: '16px',
+        <p className="hero-desc" style={{
           color: '#999999',
           maxWidth: '560px',
           margin: '0 auto 40px',
@@ -79,24 +75,25 @@ export default function Hero() {
         </p>
 
         {/* Botões */}
-        <div style={{
+        <div className="hero-buttons" style={{
           display: 'flex',
           gap: '16px',
           justifyContent: 'center',
           flexWrap: 'wrap',
-          marginBottom: '64px',
+          marginBottom: '48px',
         }}>
           <Link href="/auth/signup" style={{
             backgroundColor: '#B8860B',
             color: 'white',
             textDecoration: 'none',
-            padding: '16px 32px',
+            padding: '14px 28px',
             borderRadius: '12px',
             fontSize: '16px',
             fontWeight: '700',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
+            width: 'fit-content',
           }}>
             🎵 Começar Gratuitamente
           </Link>
@@ -105,7 +102,7 @@ export default function Hero() {
             backgroundColor: 'transparent',
             color: '#CCCCCC',
             textDecoration: 'none',
-            padding: '16px 32px',
+            padding: '14px 28px',
             borderRadius: '12px',
             fontSize: '16px',
             fontWeight: '600',
@@ -113,15 +110,15 @@ export default function Hero() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
+            width: 'fit-content',
           }}>
             📖 Ver Conteúdo
           </Link>
         </div>
 
         {/* Stats */}
-        <div style={{
+        <div className="hero-stats" style={{
           display: 'flex',
-          gap: '48px',
           justifyContent: 'center',
           flexWrap: 'wrap',
         }}>

@@ -1,4 +1,3 @@
-// src/components/CategorySection.tsx
 'use client'
 
 import Link from 'next/link'
@@ -44,20 +43,29 @@ const categories = [
 
 export default function CategorySection() {
   return (
-    <section style={{
-      padding: '64px 16px',
-      backgroundColor: '#F5F5F5',
-    }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+    <section style={{ padding: '64px 16px', backgroundColor: '#F5F5F5' }}>
+      <style>{`
+        .category-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 24px;
+        }
+        @media (max-width: 1024px) {
+          .category-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        }
+        @media (max-width: 480px) {
+          .category-grid { grid-template-columns: 1fr !important; }
+        }
+        .category-card:hover {
+          border-color: var(--cat-color) !important;
+          transform: translateY(-4px) !important;
+          box-shadow: 0 12px 24px rgba(0,0,0,0.1) !important;
+        }
+      `}</style>
 
-        {/* Título */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <h2 style={{
-            fontSize: '36px',
-            fontWeight: '700',
-            color: '#1A1A1A',
-            marginBottom: '12px',
-          }}>
+          <h2 style={{ fontSize: '32px', fontWeight: '700', color: '#1A1A1A', marginBottom: '12px' }}>
             Explore por Categoria
           </h2>
           <p style={{ color: '#666666', fontSize: '16px' }}>
@@ -65,73 +73,47 @@ export default function CategorySection() {
           </p>
         </div>
 
-        {/* Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: '24px',
-        }}>
+        <div className="category-grid">
           {categories.map((cat) => (
-            <Link key={cat.id} href={`/categoria/${cat.id}`} style={{
-              textDecoration: 'none',
-              backgroundColor: 'white',
-              borderRadius: '16px',
-              padding: '32px 24px',
-              boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
-              border: `2px solid transparent`,
-              transition: 'all 0.3s ease',
-              cursor: 'pointer',
-              display: 'block',
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = cat.color
-              ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'
-              ;(e.currentTarget as HTMLElement).style.boxShadow = '0 12px 24px rgba(0,0,0,0.1)'
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = 'transparent'
-              ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
-              ;(e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)'
-            }}>
-
-              {/* Icon */}
+            <Link
+              key={cat.id}
+              href={`/categoria/${cat.id}`}
+              className="category-card"
+              style={{
+                textDecoration: 'none',
+                backgroundColor: 'white',
+                borderRadius: '16px',
+                padding: '28px 20px',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+                border: '2px solid transparent',
+                transition: 'all 0.3s ease',
+                display: 'block',
+              }}
+            >
               <div style={{
-                width: '56px',
-                height: '56px',
+                width: '52px',
+                height: '52px',
                 backgroundColor: cat.bg,
                 borderRadius: '12px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '28px',
-                marginBottom: '16px',
+                fontSize: '26px',
+                marginBottom: '14px',
               }}>
                 {cat.icon}
               </div>
 
-              {/* Name */}
-              <h3 style={{
-                fontSize: '20px',
-                fontWeight: '700',
-                color: '#1A1A1A',
-                marginBottom: '8px',
-              }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1A1A1A', marginBottom: '8px' }}>
                 {cat.name}
               </h3>
 
-              {/* Description */}
-              <p style={{
-                fontSize: '14px',
-                color: '#666666',
-                marginBottom: '16px',
-                lineHeight: 1.5,
-              }}>
+              <p style={{ fontSize: '13px', color: '#666666', marginBottom: '14px', lineHeight: 1.5 }}>
                 {cat.description}
               </p>
 
-              {/* Count */}
               <span style={{
-                fontSize: '12px',
+                fontSize: '11px',
                 fontWeight: '600',
                 color: cat.color,
                 backgroundColor: cat.bg,
