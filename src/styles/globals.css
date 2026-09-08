@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import './cultua.css';
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  
+  body {
+    @apply bg-gray-100 text-gray-900;
+  }
+  
+  h1 {
+    @apply text-5xl font-black text-copper-500;
+  }
+  
+  h2 {
+    @apply text-4xl font-bold text-black;
+  }
+  
+  h3 {
+    @apply text-3xl font-bold text-black;
+  }
+  
+  h4 {
+    @apply text-2xl font-semibold text-black;
+  }
+}
+
+@layer components {
+  .container-cultua {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .btn-cultua {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 border-2 rounded-lg font-semibold transition-all cursor-pointer;
+  }
+  
+  .btn-cultua-primary {
+    @apply bg-copper-500 text-white border-copper-500 hover:bg-copper-400 hover:border-copper-400;
+  }
+  
+  .card-cultua {
+    @apply bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all;
+  }
+  
+  .input-cultua {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-copper-200 transition-all;
+  }
+}

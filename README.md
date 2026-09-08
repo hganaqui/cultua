@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎵 CULTUA
 
-## Getting Started
+**Celebre sua fé sem distrações**
 
-First, run the development server:
+Plataforma cristã de conteúdo 100% sem anúncios. Pregações, louvores, devocionais e comunidade em um único lugar.
+
+## 🎯 Visão
+
+Criar um espaço seguro, curado e livre de distrações para que cristãos possam consumir conteúdo edificante em paz.
+
+## ✨ Características
+
+- ✅ 100% SEM ANÚNCIOS (nunca!)
+- ✅ Conteúdo curado por moderadores
+- ✅ Seguro para famílias
+- ✅ Comunidade engajada
+- ✅ Player robusto sem publicidade
+- ✅ Playlists personalizadas
+- ✅ Compartilhamento fácil
+
+## 🛠️ Stack Tecnológico
+
+- **Frontend**: Next.js 14 + React 18 + TypeScript + Tailwind CSS
+- **Backend**: Supabase (PostgreSQL + Auth)
+- **Storage**: Cloudflare R2 (vídeos/áudios)
+- **Deploy**: Vercel
+- **Mobile**: React Native + Expo (em desenvolvimento)
+
+## 📅 Roadmap
+
+- **Q1 (10 semanas)**: MVP - Auth + Browse + Player sem anúncios
+- **Q2 (6 semanas)**: Upload + Curadoria + Comunidade
+- **Q3 (4 semanas)**: Salas de Igreja (B2B)
+- **Q4 (8 semanas)**: IA + Mobile Apps
+
+## 🚀 Como Começar
+
+### Instalação
 
 ```bash
+git clone https://github.com/seu-usuario/cultua.git
+cd cultua
+npm install
+
+Desenvolvimento
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Acesse: http://localhost:3000
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Build para Produção
+npm run build
+npm start
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+🔧 Variáveis de Ambiente
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-aqui
+SUPABASE_SERVICE_ROLE_KEY=sua-chave-aqui
+CLOUDFLARE_R2_ACCOUNT_ID=seu-id
+CLOUDFLARE_R2_ACCESS_KEY=sua-chave
+CLOUDFLARE_R2_SECRET=seu-secret
+CLOUDFLARE_R2_BUCKET_NAME=cultua-media
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+📁 Estrutura de Pastas
+cultua/
+├── src/
+│   ├── app/              # Rotas e páginas
+│   ├── components/       # Componentes React
+│   ├── lib/              # Utilitários e configurações
+│   ├── hooks/            # Custom hooks
+│   ├── types/            # Tipos TypeScript
+│   └── styles/           # Estilos CSS
+├── public/               # Assets estáticos
+└── .env.local            # Variáveis de ambiente
 
-## Learn More
+🤝 Como Contribuir
+Fork o repositório
+Crie uma branch: git checkout -b feature/sua-feature
+Commit: git commit -am 'Add nova feature'
+Push: git push origin feature/sua-feature
+Abra Pull Request
+📝 Código de Conduta
+Seja respeitoso. Este é um projeto cristão dedicado a servir a comunidade de fé.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+📞 Suporte
+Email: suporte@cultua.app
+Instagram: @cultua
+📄 Licença
+MIT License
