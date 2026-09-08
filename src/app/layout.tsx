@@ -5,31 +5,14 @@ import '@/styles/cultua.css'
 
 export const metadata: Metadata = {
   title: {
-    default: `${CULTUA_CONFIG.app.name} - ${CULTUA_CONFIG.app.tagline}`,
-    template: `%s | ${CULTUA_CONFIG.app.name}`,
+    default: 'CULTUA - Celebre sua fé sem distrações',
+    template: '%s | CULTUA',
   },
-  description: CULTUA_CONFIG.app.description,
-  keywords: [
-    'cristão',
-    'conteúdo cristão',
-    'louvor',
-    'pregação',
-    'devocional',
-    'sem anúncios',
-    'comunidade cristã',
-  ],
-  authors: [{ name: 'CULTUA' }],
-  creator: 'CULTUA',
-  openGraph: {
-    type: 'website',
-    locale: 'pt_BR',
-    url: CULTUA_CONFIG.urls.base,
-    siteName: CULTUA_CONFIG.app.name,
-    title: `${CULTUA_CONFIG.app.name} - ${CULTUA_CONFIG.app.tagline}`,
-    description: CULTUA_CONFIG.app.description,
-  },
+  description: 'Plataforma cristã de conteúdo 100% sem anúncios',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/logo-cultua.jpg',
+    apple: '/logo-cultua.jpg',
+    shortcut: '/logo-cultua.jpg',
   },
 }
 
@@ -41,14 +24,11 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content={CULTUA_CONFIG.colors.primary.main} />
+        <link rel="icon" href="/logo-cultua.jpg" type="image/jpeg" />
+        <link rel="apple-touch-icon" href="/logo-cultua.jpg" />
+        <meta name="theme-color" content="#B8860B" />
       </head>
-      <body style={{
-        backgroundColor: CULTUA_CONFIG.colors.background,
-        color: CULTUA_CONFIG.colors.text.primary,
-        fontFamily: CULTUA_CONFIG.typography.fontFamily.body,
-      }}>
+      <body>
         {children}
       </body>
     </html>
