@@ -7,7 +7,7 @@ export const CULTUA_CONFIG = {
   app: {
     name: 'CULTUA',
     description: 'Celebre sua fé sem distrações',
-    tagline: 'Conteúdo cristão 100% sem anúncios',
+    tagline: 'Conteúdo cristão 100% sem interrupções',
     version: '1.0.0',
     environment: process.env.NODE_ENV || 'development',
   },

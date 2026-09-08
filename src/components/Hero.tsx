@@ -39,7 +39,7 @@ export default function Hero() {
           marginBottom: '24px',
           border: '1px solid rgba(184,134,11,0.3)',
         }}>
-          ✨ 100% Sem Anúncios · Sempre Gratuito
+          ✨ 100% Sem Interrupções · Sempre Gratuito
         </div>
 
         {/* Título */}
@@ -71,7 +71,7 @@ export default function Hero() {
           lineHeight: 1.7,
         }}>
           Pregações, louvores, devocionais e comunidade cristã em um único lugar.
-          Sem anúncios. Nunca. Conteúdo curado para edificar sua fé.
+          Sem interrupções. Nunca. Conteúdo curado para edificar sua fé.
         </p>
 
         {/* Botões */}
@@ -124,7 +124,7 @@ export default function Hero() {
         }}>
           {[
             { number: '500+', label: 'Vídeos e Áudios' },
-            { number: '0', label: 'Anúncios' },
+            { number: '0', label: 'Interrupções' },
             { number: '100%', label: 'Gratuito' },
           ].map((stat) => (
             <div key={stat.label} style={{ textAlign: 'center' }}>

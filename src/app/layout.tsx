@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     default: 'CULTUA - Celebre sua fé sem distrações',
     template: '%s | CULTUA',
   },
-  description: 'Plataforma cristã de conteúdo 100% sem anúncios',
+  description: 'Plataforma cristã de conteúdo 100% sem interrupções',
   icons: {
     icon: '/logo-cultua.jpg',
     apple: '/logo-cultua.jpg',

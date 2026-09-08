@@ -2,7 +2,7 @@
 
 **Celebre sua fé sem distrações**
 
-Plataforma cristã de conteúdo 100% sem anúncios. Pregações, louvores, devocionais e comunidade em um único lugar.
+Plataforma cristã de conteúdo 100% sem interrupções. Pregações, louvores, devocionais e comunidade em um único lugar.
 
 ## 🎯 Visão
 
@@ -10,7 +10,7 @@ Criar um espaço seguro, curado e livre de distrações para que cristãos possa
 
 ## ✨ Características
 
-- ✅ 100% SEM ANÚNCIOS (nunca!)
+- ✅ 100% SEM INTERRUPÇÕES (nunca!)
 - ✅ Conteúdo curado por moderadores
 - ✅ Seguro para famílias
 - ✅ Comunidade engajada
@@ -28,7 +28,7 @@ Criar um espaço seguro, curado e livre de distrações para que cristãos possa
 
 ## 📅 Roadmap
 
-- **Q1 (10 semanas)**: MVP - Auth + Browse + Player sem anúncios
+- **Q1 (10 semanas)**: MVP - Auth + Browse + Player sem interrupções
 - **Q2 (6 semanas)**: Upload + Curadoria + Comunidade
 - **Q3 (4 semanas)**: Salas de Igreja (B2B)
 - **Q4 (8 semanas)**: IA + Mobile Apps

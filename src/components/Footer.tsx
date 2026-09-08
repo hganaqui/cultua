@@ -36,10 +36,10 @@ export default function Footer() {
               marginBottom: '16px',
             }}>
               Celebre sua fé sem distrações.
-              Conteúdo cristão 100% sem anúncios.
+              Conteúdo cristão 100% sem interrupções.
             </p>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {['🚫 Sem Anúncios', '✅ Curado', '🔒 Seguro'].map(tag => (
+              {['🚫 Sem Interrupções', '✅ Curado', '🔒 Seguro'].map(tag => (
                 <span key={tag} style={{
                   fontSize: '11px',
                   fontWeight: '600',
