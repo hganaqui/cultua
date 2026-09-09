@@ -39,7 +39,7 @@ export default function Hero() {
           marginBottom: '24px',
           border: '1px solid rgba(184,134,11,0.3)',
         }}>
-          ✨ 100% Sem Interrupções · Sempre Gratuito
+          ✨ 100% Sem Interrupções
         </div>
 
         {/* Título */}
@@ -125,7 +125,6 @@ export default function Hero() {
           {[
             { number: '500+', label: 'Vídeos e Áudios' },
             { number: '0', label: 'Interrupções' },
-            { number: '100%', label: 'Gratuito' },
           ].map((stat) => (
             <div key={stat.label} style={{ textAlign: 'center' }}>
               <div style={{

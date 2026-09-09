@@ -89,7 +89,7 @@ export default function HomePage() {
             Junte-se à CULTUA
           </h2>
           <p style={{ color: '#CCCCCC', fontSize: '16px', marginBottom: '32px', lineHeight: 1.7 }}>
-            Acesse conteúdo cristão de qualidade, sem interrupções e totalmente gratuito.
+            Acesse conteúdo cristão de qualidade e sem interrupções.
           </p>
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="/auth/signup" style={{
