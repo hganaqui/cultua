@@ -10,7 +10,7 @@ const categories = [
     description: 'Músicas de louvor e adoração',
     color: '#B8860B',
     bg: 'rgba(184,134,11,0.1)',
-    count: '120+ vídeos',
+    count: 'Explorar',
   },
   {
     id: 'pregacao',
@@ -19,25 +19,25 @@ const categories = [
     description: 'Mensagens e ensinamentos bíblicos',
     color: '#D4AF37',
     bg: 'rgba(212,175,55,0.1)',
-    count: '200+ vídeos',
+    count: 'Explorar',
   },
   {
     id: 'crescimento',
     name: 'Crescimento',
-    icon: '💪',
+    icon: '🌱', 
     description: 'Devocionais e estudos bíblicos',
     color: '#4CAF50',
     bg: 'rgba(76,175,80,0.1)',
-    count: '90+ vídeos',
+    count: 'Explorar',
   },
   {
-    id: 'comunidade',
-    name: 'Comunidade',
-    icon: '🤝',
-    description: 'Testemunhos e histórias de fé',
-    color: '#1A3A52',
-    bg: 'rgba(26,58,82,0.1)',
-    count: '60+ vídeos',
+    id: 'testemunhos',
+    name: 'Testemunhos',
+    icon: '🙏', // era 🤝
+    description: 'Histórias reais de fé e transformação',
+    color: '#7C3AED',
+    bg: 'rgba(124,58,237,0.1)',
+    count: 'Explorar',
   },
 ]
 
@@ -66,10 +66,10 @@ export default function CategorySection() {
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
           <h2 style={{ fontSize: '32px', fontWeight: '700', color: '#1A1A1A', marginBottom: '12px' }}>
-            Explore por Categoria
+            O que você quer explorar hoje?
           </h2>
           <p style={{ color: '#666666', fontSize: '16px' }}>
-            Encontre conteúdo que edifica e inspira
+            Cada categoria curada para edificar e aproximar você de Deus
           </p>
         </div>
 

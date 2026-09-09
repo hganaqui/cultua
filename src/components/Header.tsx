@@ -131,7 +131,7 @@ export default function Header() {
             { href: '/categoria/louvor', label: '🎵 Louvor' },
             { href: '/categoria/pregacao', label: '📖 Pregação' },
             { href: '/categoria/crescimento', label: '💪 Crescimento' },
-            { href: '/categoria/comunidade', label: '🤝 Comunidade' },
+            { href: '/categoria/testemunhos', label: '🙏 Testemunhos' },
           ].map(item => (
             <Link
               key={item.href}

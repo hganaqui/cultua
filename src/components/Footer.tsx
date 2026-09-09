@@ -64,7 +64,7 @@ export default function Footer() {
               { icon: '🎵', name: 'Louvor', href: '/categoria/louvor' },
               { icon: '📖', name: 'Pregação', href: '/categoria/pregacao' },
               { icon: '💪', name: 'Crescimento', href: '/categoria/crescimento' },
-              { icon: '🤝', name: 'Comunidade', href: '/categoria/comunidade' },
+              { icon: '🙏', name: 'Testemunhos', href: '/categoria/testemunhos' },
             ].map(item => (
               <Link key={item.name} href={item.href} style={{
                 display: 'flex',

@@ -25,7 +25,6 @@ export default function Hero() {
 
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
 
-        {/* Badge */}
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -39,10 +38,9 @@ export default function Hero() {
           marginBottom: '24px',
           border: '1px solid rgba(184,134,11,0.3)',
         }}>
-          ✨ 100% Sem Interrupções
+          📖 Conteúdo cristão curado para edificar sua fé
         </div>
 
-        {/* Título */}
         <h1 className="hero-title" style={{
           fontWeight: '900',
           color: '#B8860B',
@@ -53,28 +51,25 @@ export default function Hero() {
           CULTUA
         </h1>
 
-        {/* Subtítulo */}
         <p className="hero-subtitle" style={{
           color: '#CCCCCC',
           fontWeight: '400',
           marginBottom: '16px',
           lineHeight: 1.4,
         }}>
-          Celebre sua fé sem distrações
+          Conteúdo para alimentar sua fé.
         </p>
 
-        {/* Descrição */}
         <p className="hero-desc" style={{
           color: '#999999',
           maxWidth: '560px',
           margin: '0 auto 40px',
           lineHeight: 1.7,
         }}>
-          Pregações, louvores, devocionais e comunidade cristã em um único lugar.
-          Sem interrupções. Nunca. Conteúdo curado para edificar sua fé.
+          Pregações, louvores, devocionais, estudos e testemunhos —
+          organizados em um só lugar, para você encontrar o que realmente edifica.
         </p>
 
-        {/* Botões */}
         <div className="hero-buttons" style={{
           display: 'flex',
           gap: '16px',
@@ -116,15 +111,14 @@ export default function Hero() {
           </Link>
         </div>
 
-        {/* Stats */}
         <div className="hero-stats" style={{
           display: 'flex',
           justifyContent: 'center',
           flexWrap: 'wrap',
         }}>
           {[
-            { number: '500+', label: 'Vídeos e Áudios' },
-            { number: '0', label: 'Interrupções' },
+            { number: '0',    label: 'Anúncios. Nunca.' },
+            { number: '100%', label: 'Curadoria Humana' },
           ].map((stat) => (
             <div key={stat.label} style={{ textAlign: 'center' }}>
               <div style={{
@@ -146,6 +140,7 @@ export default function Hero() {
             </div>
           ))}
         </div>
+
       </div>
     </section>
   )

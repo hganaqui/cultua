@@ -1,4 +1,3 @@
-// src/components/VideoCard.tsx
 'use client'
 
 import Link from 'next/link'
@@ -10,7 +9,8 @@ interface VideoCardProps {
   category: string
   categoryColor: string
   duration: string
-  views: number
+  isFeatured?: boolean // selecionado pela curadoria
+  isNew?: boolean      // conteúdo recente
   thumbnail?: string
 }
 
@@ -21,28 +21,30 @@ export default function VideoCard({
   category,
   categoryColor,
   duration,
-  views,
+  isFeatured = false,
+  isNew = false,
   thumbnail,
 }: VideoCardProps) {
   return (
     <Link href={`/content/${id}`} style={{ textDecoration: 'none' }}>
-      <div style={{
-        backgroundColor: 'white',
-        borderRadius: '16px',
-        overflow: 'hidden',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
-        transition: 'all 0.3s ease',
-        cursor: 'pointer',
-      }}
-      onMouseEnter={(e) => {
-        ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'
-        ;(e.currentTarget as HTMLElement).style.boxShadow = '0 12px 24px rgba(0,0,0,0.1)'
-      }}
-      onMouseLeave={(e) => {
-        ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
-        ;(e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)'
-      }}>
-
+      <div
+        style={{
+          backgroundColor: 'white',
+          borderRadius: '16px',
+          overflow: 'hidden',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+          transition: 'all 0.3s ease',
+          cursor: 'pointer',
+        }}
+        onMouseEnter={(e) => {
+          ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'
+          ;(e.currentTarget as HTMLElement).style.boxShadow = '0 12px 24px rgba(0,0,0,0.1)'
+        }}
+        onMouseLeave={(e) => {
+          ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
+          ;(e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)'
+        }}
+      >
         {/* Thumbnail */}
         <div style={{
           width: '100%',
@@ -60,7 +62,7 @@ export default function VideoCard({
             <div style={{ fontSize: '40px' }}>🎵</div>
           )}
 
-          {/* Duration badge */}
+          {/* Duration badge — dado real, sempre existe */}
           <div style={{
             position: 'absolute',
             bottom: '8px',
@@ -74,6 +76,37 @@ export default function VideoCard({
           }}>
             {duration}
           </div>
+
+          {isFeatured && (
+            <div style={{
+              position: 'absolute',
+              top: '8px',
+              left: '8px',
+              backgroundColor: '#B8860B',
+              color: 'white',
+              padding: '3px 10px',
+              borderRadius: '9999px',
+              fontSize: '11px',
+              fontWeight: '700',
+            }}>
+              ✨ Destaque
+            </div>
+          )}
+          {isNew && !isFeatured && (
+            <div style={{
+              position: 'absolute',
+              top: '8px',
+              left: '8px',
+              backgroundColor: '#4CAF50',
+              color: 'white',
+              padding: '3px 10px',
+              borderRadius: '9999px',
+              fontSize: '11px',
+              fontWeight: '700',
+            }}>
+              Novo
+            </div>
+          )}
 
           {/* Play button */}
           <div style={{
@@ -96,8 +129,6 @@ export default function VideoCard({
 
         {/* Info */}
         <div style={{ padding: '16px' }}>
-
-          {/* Category */}
           <span style={{
             fontSize: '11px',
             fontWeight: '600',
@@ -108,7 +139,6 @@ export default function VideoCard({
             {category}
           </span>
 
-          {/* Title */}
           <h3 style={{
             fontSize: '15px',
             fontWeight: '700',
@@ -123,26 +153,13 @@ export default function VideoCard({
             {title}
           </h3>
 
-          {/* Creator & Views */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+          <span style={{
+            fontSize: '13px',
+            color: '#666666',
+            fontWeight: '500',
           }}>
-            <span style={{
-              fontSize: '13px',
-              color: '#666666',
-              fontWeight: '500',
-            }}>
-              {creator}
-            </span>
-            <span style={{
-              fontSize: '12px',
-              color: '#999999',
-            }}>
-              {views >= 1000 ? `${(views/1000).toFixed(1)}K` : views} views
-            </span>
-          </div>
+            {creator}
+          </span>
         </div>
       </div>
     </Link>

@@ -5,11 +5,11 @@ import '@/styles/cultua.css'
 
 export const metadata: Metadata = {
   title: {
-    default: 'CULTUA - Celebre sua fé sem distrações',
+    default: 'CULTUA - Conteúdo para alimentar sua fé',  // era: "Celebre sua fé sem distrações"
     template: '%s | CULTUA',
   },
-  description: 'Plataforma cristã de conteúdo 100% sem interrupções. Pregações, louvores e devocionais.',
-  keywords: ['cristão', 'louvor', 'pregação', 'devocional', 'sem anúncios', 'fé'],
+  description: 'Plataforma cristã com pregações, louvores, devocionais e testemunhos. Conteúdo curado para edificar sua fé.',
+keywords: ['cristão', 'louvor', 'pregação', 'devocional', 'testemunhos', 'curadoria', 'fé', 'sem anúncios'],
   authors: [{ name: 'CULTUA' }],
   creator: 'CULTUA',
   openGraph: {
@@ -17,8 +17,8 @@ export const metadata: Metadata = {
     locale: 'pt_BR',
     url: 'https://cultua.vercel.app',
     siteName: 'CULTUA',
-    title: 'CULTUA - Celebre sua fé sem distrações',
-    description: 'Plataforma cristã de conteúdo 100% sem interrupções.',
+title: 'CULTUA - Conteúdo para alimentar sua fé',
+    description: 'Pregações, louvores, devocionais e testemunhos. Curado para edificar.',
     images: [
       {
         url: '/icon-512.png',
