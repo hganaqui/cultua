@@ -15,7 +15,7 @@ export default async function ConfiguracoesPage() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F5F5F5' }}>
       <Header />
-      <ConfiguracoesClient />  {/* ← toda a interatividade aqui */}
+      <ConfiguracoesClient />  
       <Footer />
     </div>
   )
