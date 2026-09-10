@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     template: '%s | CULTUA',
   },
   description: 'Plataforma cristã com pregações, louvores, devocionais e testemunhos. Conteúdo curado para edificar sua fé.',
-keywords: ['cristão', 'louvor', 'pregação', 'devocional', 'testemunhos', 'curadoria', 'fé', 'sem anúncios'],
+keywords: ['cristão', 'louvor', 'pregação', 'devocional', 'testemunhos', 'curadoria', 'fé'],
   authors: [{ name: 'CULTUA' }],
   creator: 'CULTUA',
   openGraph: {

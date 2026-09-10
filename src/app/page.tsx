@@ -85,7 +85,7 @@ export default function HomePage() {
           </h2>
           <p style={{ color: '#CCCCCC', fontSize: '16px', marginBottom: '32px', lineHeight: 1.7 }}>
             Encontre conteúdo que realmente edifica —
-            curado por pessoas, sem anúncios, sem distrações.
+            curado por pessoas.
           </p>
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="/auth/signup" style={{

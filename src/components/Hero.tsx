@@ -117,7 +117,6 @@ export default function Hero() {
           flexWrap: 'wrap',
         }}>
           {[
-            { number: '0',    label: 'Anúncios. Nunca.' },
             { number: '100%', label: 'Curadoria Humana' },
           ].map((stat) => (
             <div key={stat.label} style={{ textAlign: 'center' }}>

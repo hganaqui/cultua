@@ -12,7 +12,7 @@ export default function SignupPage() {
         Criar conta gratuita ✨
       </h1>
       <p style={{ color: '#666666', fontSize: '14px', textAlign: 'center', marginBottom: '28px' }}>
-        Acesse conteúdo cristão curado e sem anúncios
+        Acesse conteúdo cristão
       </p>
       <SignupForm />
     </AuthLayout>
