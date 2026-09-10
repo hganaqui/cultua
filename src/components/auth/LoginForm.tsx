@@ -28,7 +28,7 @@ export default function LoginForm({ redirectTo = '/' }: LoginFormProps) {
     setError(null)
     setLoading(true)
 
-    const { error } = await signIn(email, password)
+    const { data, error } = await signIn(email, password)
 
     if (error) {
       setError(translateAuthError(error.message))
@@ -36,7 +36,7 @@ export default function LoginForm({ redirectTo = '/' }: LoginFormProps) {
       return
     }
 
-    router.push(redirectTo) // ✅ agora existe no escopo
+    router.push(redirectTo)
     router.refresh()
   }
 

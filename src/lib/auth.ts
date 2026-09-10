@@ -5,7 +5,8 @@
 import supabase from '@/lib/supabase'
 import type { User } from '@/types'
 
-// ── Login ──────────────────────────────────────────────────────────────────
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL!  // já existe no .env.local
+
 export async function signIn(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({
     email: email.trim().toLowerCase(),
@@ -14,15 +15,14 @@ export async function signIn(email: string, password: string) {
   return { data, error }
 }
 
-// ── Cadastro ───────────────────────────────────────────────────────────────
 export async function signUp(email: string, password: string, name: string) {
   const { data, error } = await supabase.auth.signUp({
     email: email.trim().toLowerCase(),
     password,
     options: {
-      data: {
-        full_name: name.trim(),   // → auth.users.raw_user_meta_data
-      },
+      data: { full_name: name.trim() },
+      // ✅ garante redirect para o host correto (Vercel ou localhost)
+      emailRedirectTo: `${APP_URL}/auth/callback`,
     },
   })
   return { data, error }

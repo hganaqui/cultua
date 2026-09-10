@@ -1,5 +1,5 @@
-// src/lib/supabase.ts — APENAS o cliente público (browser-safe)
-import { createClient } from '@supabase/supabase-js'
+// src/lib/supabase.ts — versão final limpa
+import { createBrowserClient } from '@supabase/ssr'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -11,13 +11,6 @@ if (!supabaseUrl || !supabaseKey) {
   )
 }
 
-// ✅ Só este — sem supabaseAdmin aqui
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    storageKey: 'cultua-auth',
-  },
-})
+export const supabase = createBrowserClient(supabaseUrl, supabaseKey)
 
 export default supabase
