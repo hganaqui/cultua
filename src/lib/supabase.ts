@@ -1,26 +1,23 @@
-// src/lib/supabase.ts 
-import { createBrowserClient } from '@supabase/ssr'
+// src/lib/supabase.ts — APENAS o cliente público (browser-safe)
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!supabaseUrl || !supabaseKey) {
   throw new Error(
-    '❌ CULTUA: Missing Supabase environment variables!\n' +
-    'Make sure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set in .env.local'
+    '❌ CULTUA: Variáveis do Supabase não encontradas!\n' +
+    'Verifique NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY no .env.local'
   )
 }
 
-export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
-
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRole, {
+// ✅ Só este — sem supabaseAdmin aqui
+export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
-    persistSession: false,
-    autoRefreshToken: false,
+    persistSession: true,
+    autoRefreshToken: true,
+    storageKey: 'cultua-auth',
   },
 })
 
-export type Database = any
 export default supabase
