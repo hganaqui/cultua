@@ -157,40 +157,44 @@ export const CULTUA_CONFIG = {
     commentsPerPage: 10,
   },
 
-  categories: [
-    {
-      id: 'louvor',
-      name: 'Louvor',
-      description: 'Músicas de louvor e adoração',
-      icon: '🎵',
-      color: '#B8860B',
-      slug: 'louvor',
-    },
-    {
-      id: 'pregacao',
-      name: 'Pregação',
-      description: 'Pregações e mensagens',
-      icon: '📖',
-      color: '#D4AF37',
-      slug: 'pregacao',
-    },
-    {
-      id: 'comunidade',
-      name: 'Comunidade',
-      description: 'Comunidade e testemunhos',
-      icon: '🤝',
-      color: '#1A3A52',
-      slug: 'comunidade',
-    },
-    {
-      id: 'crescimento',
-      name: 'Crescimento',
-      description: 'Devocionais e estudos',
-      icon: '💪',
-      color: '#4CAF50',
-      slug: 'crescimento',
-    },
-  ],
+// src/lib/cultua-config.ts
+// Só o array categories muda — resto do arquivo igual
+
+categories: [
+  {
+    id: 'louvor',
+    name: 'Louvor',
+    description: 'Músicas de louvor e adoração',
+    icon: '🎵',
+    color: '#B8860B',
+    slug: 'louvor',
+  },
+  {
+    id: 'pregacao',
+    name: 'Pregação',
+    description: 'Pregações e mensagens',
+    icon: '📖',
+    color: '#D4AF37',
+    slug: 'pregacao',
+  },
+  {
+    // FASE 0: comunidade → testemunhos (alinhado com CategorySection.tsx)
+    id: 'testemunhos',
+    name: 'Testemunhos',
+    description: 'Histórias reais de fé e transformação',
+    icon: '🙏',
+    color: '#7C3AED',
+    slug: 'testemunhos',
+  },
+  {
+    id: 'crescimento',
+    name: 'Crescimento',
+    description: 'Devocionais e estudos',
+    icon: '🌱',
+    color: '#4CAF50',
+    slug: 'crescimento',
+  },
+],
 
   features: {
     authentication: true,

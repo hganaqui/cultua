@@ -18,9 +18,9 @@ export const COLORS = {
 }
 
 export const CATEGORY_COLORS: Record<string, string> = {
-  louvor: '#B8860B',
-  pregacao: '#D4AF37',
-  comunidade: '#1A3A52',
+  louvor:      '#B8860B',
+  pregacao:    '#D4AF37',
+  testemunhos: '#7C3AED', 
   crescimento: '#4CAF50',
 }
 
