@@ -80,7 +80,13 @@ export default function AdminClient() {
           Aprove, rejeite e gerencie conteúdos da plataforma
         </p>
       </div>
-
+      <a href="/admin/upload" style={{
+    backgroundColor: '#B8860B', color: 'white', textDecoration: 'none',
+    padding: '10px 20px', borderRadius: '10px', fontSize: '14px',
+    fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px',
+  }}>
+    📤 Novo Upload
+  </a>
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
         {([
