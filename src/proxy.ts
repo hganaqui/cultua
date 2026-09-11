@@ -7,6 +7,7 @@ const PROTECTED_ROUTES = [
   '/playlist',
   '/historico',
   '/configuracoes',
+  '/admin',
 ]
 
 const AUTH_ROUTES = [
