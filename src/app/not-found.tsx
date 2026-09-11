@@ -22,14 +22,10 @@ export default function NotFound() {
         />
       </div>
 
-      {/* Título */}
-      <h1 className="text-3xl sm:text-4xl font-bold text-amber-500 mb-3 tracking-tight">
-        Conteúdo não encontrado
-      </h1>
-
       {/* Subtítulo */}
       <p className="text-gray-400 text-base max-w-sm leading-relaxed mb-10">
-        O conteúdo que você procura pode ter sido removido ou o endereço está incorreto.
+        O conteúdo que você procura pode ter sido removido ou o endereço está incorreto
+        ou pagina inexistente.
       </p>
 
       {/* Versículo */}
