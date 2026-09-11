@@ -1,7 +1,7 @@
 // src/app/admin/upload/UploadClient.tsx
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { UPLOAD_LIMITS, formatBytes } from '@/lib/r2'
@@ -46,7 +46,7 @@ export default function UploadClient() {
   const thumbRef = useRef<HTMLInputElement>(null)
 
   // Verifica permissão ao montar
-  useState(() => {
+  useEffect(() => {
     async function check() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
@@ -66,7 +66,7 @@ export default function UploadClient() {
       if (cats?.[0]) setForm(f => ({ ...f, categoryId: cats[0].id }))
     }
     check()
-  })
+  }, [router])
 
   // ── Seleção de arquivo de vídeo ──────────────────────────────
   function handleVideoSelect(e: React.ChangeEvent<HTMLInputElement>) {
