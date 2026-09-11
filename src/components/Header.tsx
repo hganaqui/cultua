@@ -10,27 +10,43 @@ import type { User } from '@supabase/supabase-js'
 
 export default function Header() {
   const router = useRouter()
-  const [user, setUser]           = useState<User | null>(null)
-  const [menuOpen, setMenuOpen]   = useState(false)
-  const [userMenu, setUserMenu]   = useState(false)
-  const [loading, setLoading]     = useState(true)
+  const [user, setUser]         = useState<User | null>(null)
+  const [role, setRole]         = useState<string | null>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [userMenu, setUserMenu] = useState(false)
+  const [loading, setLoading]   = useState(true)
 
   useEffect(() => {
-    // Lê sessão atual ao montar
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null)
+    supabase.auth.getSession().then(async ({ data }) => {
+      const currentUser = data.session?.user ?? null
+      setUser(currentUser)
       setLoading(false)
+
+      if (currentUser) {
+        const { data: profile } = await supabase
+          .from('profiles').select('role').eq('id', currentUser.id).single()
+        setRole(profile?.role ?? 'user')
+      }
     })
 
-    // Escuta mudanças de auth (login/logout)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const currentUser = session?.user ?? null
+      setUser(currentUser)
       setLoading(false)
+
+      if (currentUser) {
+        const { data: profile } = await supabase
+          .from('profiles').select('role').eq('id', currentUser.id).single()
+        setRole(profile?.role ?? 'user')
+      } else {
+        setRole(null)
+      }
     })
 
     return () => subscription.unsubscribe()
   }, [])
 
+  const isAdmin     = role === 'admin' || role === 'moderator'
   const displayName = user?.user_metadata?.full_name?.split(' ')[0]
     ?? user?.email?.split('@')[0]
     ?? 'Usuário'
@@ -38,6 +54,7 @@ export default function Header() {
   async function handleSignOut() {
     await signOut()
     setUserMenu(false)
+    setMenuOpen(false)
     router.push('/')
     router.refresh()
   }
@@ -53,13 +70,13 @@ export default function Header() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '60px',
       }}>
 
-        {/* LOGO */}
+        {/* ── LOGO ── */}
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', flexShrink: 0 }}>
           <img src="/logo-cultua.jpg" alt="CULTUA" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
           <span style={{ fontSize: '18px', fontWeight: '900', color: '#B8860B', letterSpacing: '2px' }}>CULTUA</span>
         </Link>
 
-        {/* NAV desktop */}
+        {/* ── NAV desktop ── */}
         <nav className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
           {[
             { href: '/',                      label: 'Início' },
@@ -74,13 +91,14 @@ export default function Header() {
           ))}
         </nav>
 
-        {/* Auth — desktop */}
+        {/* ── Auth desktop ── */}
         <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {loading ? (
-            // Placeholder enquanto carrega — evita flash
             <div style={{ width: '100px', height: '32px', backgroundColor: '#2D2D2D', borderRadius: '9999px' }} />
           ) : user ? (
             <div style={{ position: 'relative' }}>
+
+              {/* Botão do avatar */}
               <button
                 onClick={() => setUserMenu(!userMenu)}
                 style={{
@@ -101,9 +119,9 @@ export default function Header() {
                 <span style={{ fontSize: '10px', color: '#666' }}>▼</span>
               </button>
 
+              {/* Dropdown */}
               {userMenu && (
                 <>
-                  {/* Overlay para fechar o menu */}
                   <div
                     style={{ position: 'fixed', inset: 0, zIndex: 150 }}
                     onClick={() => setUserMenu(false)}
@@ -111,14 +129,28 @@ export default function Header() {
                   <div style={{
                     position: 'absolute', top: 'calc(100% + 8px)', right: 0,
                     backgroundColor: '#222222', border: '1px solid #333333',
-                    borderRadius: '12px', padding: '8px', minWidth: '180px',
+                    borderRadius: '12px', padding: '8px', minWidth: '200px',
                     boxShadow: '0 8px 24px rgba(0,0,0,0.4)', zIndex: 200,
                   }}>
+
+                    {/* Info do usuário */}
                     <div style={{ padding: '8px 12px 12px', borderBottom: '1px solid #333333', marginBottom: '8px' }}>
                       <div style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: '600' }}>{displayName}</div>
                       <div style={{ color: '#666666', fontSize: '11px', marginTop: '2px' }}>{user.email}</div>
+                      {isAdmin && (
+                        <span style={{
+                          display: 'inline-block', marginTop: '6px',
+                          backgroundColor: 'rgba(184,134,11,0.15)', color: '#B8860B',
+                          fontSize: '10px', fontWeight: '700', padding: '2px 8px',
+                          borderRadius: '9999px', border: '1px solid rgba(184,134,11,0.3)',
+                          textTransform: 'uppercase', letterSpacing: '0.5px',
+                        }}>
+                          {role === 'admin' ? '⭐ Admin' : '🛡️ Moderador'}
+                        </span>
+                      )}
                     </div>
 
+                    {/* Links normais */}
                     {[
                       { href: '/perfil',        label: '👤 Meu Perfil' },
                       { href: '/historico',     label: '📺 Histórico' },
@@ -135,11 +167,32 @@ export default function Header() {
                       </Link>
                     ))}
 
+                    {/* Links admin — só para admin/moderador */}
+                    {isAdmin && (
+                      <>
+                        <div style={{ borderTop: '1px solid #333333', margin: '8px 0 4px' }} />
+                        <Link href="/admin" onClick={() => setUserMenu(false)} style={{
+                          display: 'block', color: '#B8860B', textDecoration: 'none',
+                          fontSize: '13px', padding: '8px 12px', borderRadius: '8px', fontWeight: '600',
+                        }}>
+                          🛡️ Painel de Curadoria
+                        </Link>
+                        <Link href="/admin/upload" onClick={() => setUserMenu(false)} style={{
+                          display: 'block', color: '#B8860B', textDecoration: 'none',
+                          fontSize: '13px', padding: '8px 12px', borderRadius: '8px', fontWeight: '600',
+                        }}>
+                          📤 Novo Upload
+                        </Link>
+                      </>
+                    )}
+
+                    {/* Logout */}
                     <button onClick={handleSignOut} style={{
                       display: 'block', width: '100%', textAlign: 'left',
                       backgroundColor: 'transparent', border: 'none', color: '#EF4444',
                       fontSize: '13px', padding: '8px 12px', borderRadius: '8px',
-                      cursor: 'pointer', marginTop: '4px', borderTop: '1px solid #333333', paddingTop: '12px',
+                      cursor: 'pointer', marginTop: '4px',
+                      borderTop: '1px solid #333333', paddingTop: '12px',
                     }}>
                       🚪 Sair
                     </button>
@@ -149,7 +202,9 @@ export default function Header() {
             </div>
           ) : (
             <>
-              <Link href="/auth/login" style={{ color: '#CCCCCC', textDecoration: 'none', fontSize: '14px', padding: '8px 12px' }}>
+              <Link href="/auth/login" style={{
+                color: '#CCCCCC', textDecoration: 'none', fontSize: '14px', padding: '8px 12px',
+              }}>
                 Entrar
               </Link>
               <Link href="/auth/signup" style={{
@@ -162,7 +217,7 @@ export default function Header() {
           )}
         </div>
 
-        {/* Hamburger mobile */}
+        {/* ── Hamburger mobile ── */}
         <button
           className="mobile-menu-btn"
           onClick={() => setMenuOpen(!menuOpen)}
@@ -175,13 +230,16 @@ export default function Header() {
         </button>
       </div>
 
-      {/* Menu mobile */}
+      {/* ── Menu mobile ── */}
       {menuOpen && (
         <div style={{
           position: 'fixed', top: '60px', left: 0, right: 0,
           backgroundColor: '#222222', borderTop: '1px solid #333333',
           padding: '16px', zIndex: 99,
+          maxHeight: 'calc(100vh - 60px)', overflowY: 'auto',
         }}>
+
+          {/* Nav links */}
           {[
             { href: '/',                      label: 'Início' },
             { href: '/categoria/louvor',      label: '🎵 Louvor' },
@@ -202,6 +260,7 @@ export default function Header() {
           <div style={{ marginTop: '16px' }}>
             {user ? (
               <>
+                {/* Info mobile */}
                 <div style={{
                   display: 'flex', alignItems: 'center', gap: '10px',
                   padding: '12px 0', borderBottom: '1px solid #333333', marginBottom: '12px',
@@ -210,14 +269,28 @@ export default function Header() {
                     width: '36px', height: '36px', backgroundColor: '#B8860B',
                     borderRadius: '50%', display: 'flex', alignItems: 'center',
                     justifyContent: 'center', fontSize: '16px', fontWeight: '700', color: 'white',
+                    flexShrink: 0,
                   }}>
                     {displayName[0].toUpperCase()}
                   </div>
                   <div>
-                    <div style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: '600' }}>{displayName}</div>
-                    <div style={{ color: '#666666', fontSize: '11px' }}>{user.email}</div>
+                    <div style={{ color: '#FFF', fontSize: '14px', fontWeight: '600' }}>{displayName}</div>
+                    <div style={{ color: '#666', fontSize: '11px' }}>{user.email}</div>
+                    {isAdmin && (
+                      <span style={{
+                        display: 'inline-block', marginTop: '4px',
+                        backgroundColor: 'rgba(184,134,11,0.15)', color: '#B8860B',
+                        fontSize: '10px', fontWeight: '700', padding: '2px 8px',
+                        borderRadius: '9999px', border: '1px solid rgba(184,134,11,0.3)',
+                        textTransform: 'uppercase', letterSpacing: '0.5px',
+                      }}>
+                        {role === 'admin' ? '⭐ Admin' : '🛡️ Moderador'}
+                      </span>
+                    )}
                   </div>
                 </div>
+
+                {/* Links normais mobile */}
                 {[
                   { href: '/perfil',        label: '👤 Meu Perfil' },
                   { href: '/historico',     label: '📺 Histórico' },
@@ -233,11 +306,34 @@ export default function Header() {
                     {item.label}
                   </Link>
                 ))}
+
+                {/* Links admin mobile — só para admin/moderador */}
+                {isAdmin && (
+                  <>
+                    <div style={{ borderTop: '1px solid #333', marginTop: '4px' }} />
+                    <Link href="/admin" onClick={() => setMenuOpen(false)} style={{
+                      display: 'block', color: '#B8860B', textDecoration: 'none',
+                      fontSize: '15px', padding: '10px 0', borderBottom: '1px solid #2a2a2a',
+                      fontWeight: '600',
+                    }}>
+                      🛡️ Painel de Curadoria
+                    </Link>
+                    <Link href="/admin/upload" onClick={() => setMenuOpen(false)} style={{
+                      display: 'block', color: '#B8860B', textDecoration: 'none',
+                      fontSize: '15px', padding: '10px 0', borderBottom: '1px solid #2a2a2a',
+                      fontWeight: '600',
+                    }}>
+                      📤 Novo Upload
+                    </Link>
+                  </>
+                )}
+
+                {/* Sair mobile */}
                 <button onClick={handleSignOut} style={{
-                  marginTop: '12px', width: '100%', backgroundColor: 'rgba(239,68,68,0.1)',
-                  color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)',
-                  borderRadius: '8px', padding: '12px', fontSize: '15px',
-                  fontWeight: '600', cursor: 'pointer',
+                  marginTop: '12px', width: '100%',
+                  backgroundColor: 'rgba(239,68,68,0.1)', color: '#EF4444',
+                  border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px',
+                  padding: '12px', fontSize: '15px', fontWeight: '600', cursor: 'pointer',
                 }}>
                   🚪 Sair
                 </button>

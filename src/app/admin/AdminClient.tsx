@@ -11,10 +11,10 @@ type Tab = 'pending' | 'approved' | 'rejected'
 export default function AdminClient() {
   const router = useRouter()
   const [authorized, setAuthorized] = useState(false)
-  const [contents, setContents]     = useState<Content[]>([])
-  const [tab, setTab]               = useState<Tab>('pending')
-  const [loading, setLoading]       = useState(true)
-  const [actionId, setActionId]     = useState<string | null>(null)
+  const [contents, setContents] = useState<Content[]>([])
+  const [tab, setTab] = useState<Tab>('pending')
+  const [loading, setLoading] = useState(true)
+  const [actionId, setActionId] = useState<string | null>(null)
 
   // Verifica se é moderador/admin
   useEffect(() => {
@@ -72,26 +72,44 @@ export default function AdminClient() {
     <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 16px' }}>
 
       {/* Título */}
-      <div style={{ marginBottom: '28px' }}>
-        <h1 style={{ fontSize: '26px', fontWeight: '800', color: '#FFFFFF', marginBottom: '4px' }}>
-          🛡️ Painel de Curadoria
-        </h1>
-        <p style={{ color: '#666', fontSize: '14px' }}>
-          Aprove, rejeite e gerencie conteúdos da plataforma
-        </p>
+      <div style={{
+        display: 'flex',                    // ← pai é flex
+        justifyContent: 'space-between',   // ← título à esquerda, botão à direita
+        alignItems: 'flex-start',
+        flexWrap: 'wrap',
+        gap: '12px',
+        marginBottom: '28px',
+      }}>
+        <div>
+          <h1 style={{ fontSize: '26px', fontWeight: '800', color: '#FFFFFF', marginBottom: '4px' }}>
+            🛡️ Painel de Curadoria
+          </h1>
+          <p style={{ color: '#666', fontSize: '14px' }}>
+            Aprove, rejeite e gerencie conteúdos da plataforma
+          </p>
+        </div>
+
+        <a href="/admin/upload" style={{
+          backgroundColor: '#B8860B',
+          color: 'white',
+          textDecoration: 'none',
+          padding: '10px 20px',
+          borderRadius: '10px',
+          fontSize: '14px',
+          fontWeight: '700',
+          display: 'inline-flex',    // ← inline-flex, não flex
+          alignItems: 'center',
+          gap: '8px',
+          whiteSpace: 'nowrap',
+        }}>
+          📤 Novo Upload
+        </a>
       </div>
-      <a href="/admin/upload" style={{
-    backgroundColor: '#B8860B', color: 'white', textDecoration: 'none',
-    padding: '10px 20px', borderRadius: '10px', fontSize: '14px',
-    fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px',
-  }}>
-    📤 Novo Upload
-  </a>
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
         {([
-          { key: 'pending',  label: '⏳ Pendentes'  },
-          { key: 'approved', label: '✅ Aprovados'  },
+          { key: 'pending', label: '⏳ Pendentes' },
+          { key: 'approved', label: '✅ Aprovados' },
           { key: 'rejected', label: '❌ Rejeitados' },
         ] as { key: Tab; label: string }[]).map(t => (
           <button
