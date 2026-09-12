@@ -8,6 +8,7 @@ const PROTECTED_ROUTES = [
   '/historico',
   '/configuracoes',
   '/admin',
+  '/meus-uploads',   // ← novo
 ]
 
 const AUTH_ROUTES = [
@@ -15,7 +16,11 @@ const AUTH_ROUTES = [
   '/auth/signup',
 ]
 
-// ✅ Next.js 16: função exportada como "proxy", não "middleware"
+// Rotas que exigem role específica
+const ROLE_ROUTES: { path: string; role: string }[] = [
+  { path: '/admin/usuarios', role: 'superadmin' },  // ← novo
+]
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
@@ -42,18 +47,34 @@ export async function proxy(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   const isProtected = PROTECTED_ROUTES.some(r => pathname.startsWith(r))
-  const isAuthRoute  = AUTH_ROUTES.some(r => pathname.startsWith(r))
+  const isAuthRoute = AUTH_ROUTES.some(r => pathname.startsWith(r))
 
-  // Não logado tentando rota protegida → login
+  // Não logado → rota protegida → login
   if (!user && isProtected) {
     const loginUrl = new URL('/auth/login', request.url)
     loginUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
-  // Já logado tentando login/signup → home
+  // Já logado → login/signup → home
   if (user && isAuthRoute) {
     return NextResponse.redirect(new URL('/', request.url))
+  }
+
+  // Verifica rotas com role específica
+  const roleRoute = ROLE_ROUTES.find(r => pathname.startsWith(r.path))
+  if (roleRoute && user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.role !== roleRoute.role) {
+      // Redireciona para /admin se for admin, senão home
+      const fallback = profile?.role === 'admin' ? '/admin' : '/'
+      return NextResponse.redirect(new URL(fallback, request.url))
+    }
   }
 
   return response
