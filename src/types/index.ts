@@ -226,6 +226,16 @@ export function getCategoryName(
   if (Array.isArray(category)) return category[0]?.name ?? 'Sem categoria'
   return category.name ?? 'Sem categoria'
 }
+
+export function getCategory(
+  category: Category | Category[] | null | undefined
+): Category | null {
+  if (!category) return null
+  if (Array.isArray(category)) return category[0] ?? null
+  return category
+}
+
+
 /** Extrai nome do criador de um join */
 export function getCreatorName(
   creator: Content['creator']
