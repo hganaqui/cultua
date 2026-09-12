@@ -137,25 +137,42 @@ export default function Header() {
   }
 
   // ── Avatar (foto ou inicial) ──────────────────────────────────────────────
-  const Avatar = ({ size = 28 }: { size?: number }) => {
-    const avatarUrl = profile?.avatar_url
-    return avatarUrl ? (
-      <Image
-        src={avatarUrl} alt={displayName}
-        width={size} height={size}
-        style={{ borderRadius: '50%', objectFit: 'cover', width: size, height: size, flexShrink: 0 }}
-      />
-    ) : (
-      <div style={{
-        width: size, height: size, backgroundColor: '#B8860B', borderRadius: '50%',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: size * 0.46, fontWeight: '700', color: 'white', flexShrink: 0,
-      }}>
-        {displayName[0].toUpperCase()}
-      </div>
-    )
-  }
-
+const Avatar = ({ size = 28 }: { size?: number }) => {
+  const avatarUrl = profile?.avatar_url
+  return avatarUrl ? (
+    <img  // ✅ MUDOU: <img> nativo em vez de <Image>
+      src={avatarUrl + `?t=${Date.now()}`}  // ✅ CACHE BUST
+      alt={displayName}
+      onError={(e) => {
+        // Se der erro, mostra inicial
+        (e.target as HTMLImageElement).style.display = 'none'
+      }}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        objectFit: 'cover',
+        flexShrink: 0,
+      }}
+    />
+  ) : (
+    <div style={{
+      width: size,
+      height: size,
+      backgroundColor: '#B8860B',
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: size * 0.46,
+      fontWeight: '700',
+      color: 'white',
+      flexShrink: 0,
+    }}>
+      {displayName[0].toUpperCase()}
+    </div>
+  )
+}
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <header style={{

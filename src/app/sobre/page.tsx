@@ -14,7 +14,7 @@ export default function SobrePage() {
           Sobre o CULTUA
         </h1>
         <p style={{ color: '#666666', fontSize: '16px', lineHeight: 1.8, marginBottom: '12px' }}>
-          Uma plataforma cristã dedicada, sem anúncios, com curadoria humana.
+          Uma plataforma cristã dedicada com curadoria humana.
         </p>
         <p style={{ color: '#666666', fontSize: '16px', lineHeight: 1.8 }}>
           Pregações, louvores, devocionais e testemunhos — organizados em um só lugar,

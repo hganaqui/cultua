@@ -3,7 +3,6 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { signOut } from '@/lib/auth'
 import { createBrowserClient } from '@supabase/ssr'
@@ -85,31 +84,41 @@ export default function HeaderClient({ user, profile }: HeaderClientProps) {
   }
 
   // ── Avatar (foto ou inicial) ────────────────────────────────────────────
-  const Avatar = ({ size = 28 }: { size?: number }) => (
-    avatarUrl ? (
-      <Image
-        src={avatarUrl}
-        alt={displayName}
-        width={size}
-        height={size}
-        style={{ 
-          borderRadius: '50%', objectFit: 'cover',
-          width: size, height: size, flexShrink: 0 
-        }}
-      />
-    ) : (
-      <div style={{
-        width: size, height: size,
-        backgroundColor: '#B8860B',
+const Avatar = ({ size = 28 }: { size?: number }) => (
+  avatarUrl ? (
+    <img  // ✅ MUDOU: <img> nativo em vez de <Image>
+      src={avatarUrl + `?t=${Date.now()}`}  // ✅ CACHE BUST
+      alt={displayName}
+      onError={(e) => {
+        // Se der erro, mostra inicial
+        (e.target as HTMLImageElement).style.display = 'none'
+      }}
+      style={{
+        width: size,
+        height: size,
         borderRadius: '50%',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: size * 0.46, fontWeight: '700', color: 'white',
+        objectFit: 'cover',
         flexShrink: 0,
-      }}>
-        {displayName[0].toUpperCase()}
-      </div>
-    )
+      }}
+    />
+  ) : (
+    <div style={{
+      width: size,
+      height: size,
+      backgroundColor: '#B8860B',
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: size * 0.46,
+      fontWeight: '700',
+      color: 'white',
+      flexShrink: 0,
+    }}>
+      {displayName[0].toUpperCase()}
+    </div>
   )
+)
 
   const navLinks = [
     { href: '/categoria/louvor',       label: '🎵 Louvor' },

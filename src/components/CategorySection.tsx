@@ -43,7 +43,6 @@ const categories = [
 
 export default function CategorySection() {
   return (
-    // ✅ dark
     <section style={{ padding: '64px 16px', backgroundColor: '#111111' }}>
       <style>{`
         .category-grid {
@@ -59,16 +58,34 @@ export default function CategorySection() {
         }
         .category-card {
           text-decoration: none;
-          background-color: #1a1a1a;
-          border-radius: 16px;
-          padding: 28px 20px;
-          border: 1px solid #2a2a2a;
-          transition: all 0.2s ease;
-          display: block;
+          background-color: #FFFFFF; /* ✅ MUDOU: branco */
+          border-radius: 12px;
+          padding: 0; /* ✅ MUDOU: sem padding (quadrado puro) */
+          border: 1px solid #E0E0E0; /* ✅ MUDOU: borda cinza claro */
+          transition: all 0.3s ease;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          aspect-ratio: 1 / 1; /* ✅ NOVO: quadrado perfeito */
+          cursor: pointer;
+          position: relative;
+          overflow: hidden;
         }
         .category-card:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+          transform: translateY(-4px);
+          box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+          border-color: #B8860B;
+        }
+        .category-card-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 24px;
+          width: 100%;
+          height: 100%;
         }
       `}</style>
 
@@ -78,12 +95,12 @@ export default function CategorySection() {
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
           <h2 style={{
             fontSize: '32px', fontWeight: '700',
-            color: '#FFFFFF',              // ✅ branco
+            color: '#FFFFFF',
             marginBottom: '12px',
           }}>
             O que você quer explorar hoje?
           </h2>
-          <p style={{ color: '#555555', fontSize: '16px' }}>  {/* ✅ cinza escuro */}
+          <p style={{ color: '#555555', fontSize: '16px' }}>
             Cada categoria curada para edificar e aproximar você de Deus
           </p>
         </div>
@@ -94,55 +111,35 @@ export default function CategorySection() {
               key={cat.id}
               href={`/categoria/${cat.id}`}
               className="category-card"
-              onMouseEnter={e => {
-                e.currentTarget.style.borderColor = cat.color
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = '#2a2a2a'
-              }}
             >
-              {/* Ícone */}
-              <div style={{
-                width: '52px', height: '52px',
-                backgroundColor: cat.bg,
-                borderRadius: '12px',
-                display: 'flex', alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '26px', marginBottom: '14px',
-              }}>
-                {cat.icon}
+              <div className="category-card-content">
+                {/* Ícone */}
+                <div style={{
+                  fontSize: '48px', /* ✅ AUMENTADO: mais visível */
+                  marginBottom: '12px',
+                }}>
+                  {cat.icon}
+                </div>
+
+                {/* Nome */}
+                <h3 style={{
+                  fontSize: '18px', fontWeight: '700',
+                  color: '#111111', /* ✅ MUDOU: texto escuro */
+                  marginBottom: '8px',
+                  margin: 0,
+                }}>
+                  {cat.name}
+                </h3>
+
+                {/* Barra de cor */}
+                <div style={{
+                  width: '32px',
+                  height: '3px',
+                  backgroundColor: cat.color,
+                  borderRadius: '2px',
+                  marginTop: '12px',
+                }} />
               </div>
-
-              {/* Nome */}
-              <h3 style={{
-                fontSize: '18px', fontWeight: '700',
-                color: '#FFFFFF',          // ✅ branco
-                marginBottom: '8px',
-              }}>
-                {cat.name}
-              </h3>
-
-              {/* Descrição */}
-              <p style={{
-                fontSize: '13px',
-                color: '#555555',          // ✅ cinza escuro
-                marginBottom: '14px',
-                lineHeight: 1.5,
-              }}>
-                {cat.description}
-              </p>
-
-              {/* Badge */}
-              <span style={{
-                fontSize: '11px', fontWeight: '600',
-                color: cat.color,
-                backgroundColor: cat.bg,
-                padding: '4px 12px',
-                borderRadius: '9999px',
-                border: `1px solid ${cat.color}33`,
-              }}>
-                {cat.count} →
-              </span>
             </Link>
           ))}
         </div>

@@ -9,8 +9,8 @@ interface VideoCardProps {
   category: string
   categoryColor: string
   duration: string
-  isFeatured?: boolean // selecionado pela curadoria
-  isNew?: boolean      // conteúdo recente
+  isFeatured?: boolean
+  isNew?: boolean
   thumbnail?: string
 }
 
@@ -29,27 +29,31 @@ export default function VideoCard({
     <Link href={`/content/${id}`} style={{ textDecoration: 'none' }}>
       <div
         style={{
-          backgroundColor: 'white',
-          borderRadius: '16px',
+          backgroundColor: '#FFFFFF', /* ✅ MUDOU: branco */
+          borderRadius: '12px',
           overflow: 'hidden',
-          boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
           transition: 'all 0.3s ease',
           cursor: 'pointer',
+          border: '1px solid #E0E0E0', /* ✅ NOVO: borda cinza claro */
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
         }}
         onMouseEnter={(e) => {
           ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'
-          ;(e.currentTarget as HTMLElement).style.boxShadow = '0 12px 24px rgba(0,0,0,0.1)'
+          ;(e.currentTarget as HTMLElement).style.boxShadow = '0 12px 24px rgba(0,0,0,0.12)'
         }}
         onMouseLeave={(e) => {
           ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
-          ;(e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)'
+          ;(e.currentTarget as HTMLElement).style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)'
         }}
       >
         {/* Thumbnail */}
         <div style={{
           width: '100%',
           aspectRatio: '16/9',
-          backgroundColor: thumbnail ? 'transparent' : '#1A1A1A',
+          backgroundColor: thumbnail ? 'transparent' : '#F0F0F0', /* ✅ MUDOU: cinza claro */
           backgroundImage: thumbnail ? `url(${thumbnail})` : 'none',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -62,14 +66,14 @@ export default function VideoCard({
             <div style={{ fontSize: '40px' }}>🎵</div>
           )}
 
-          {/* Duration badge — dado real, sempre existe */}
+          {/* Duration badge */}
           <div style={{
             position: 'absolute',
             bottom: '8px',
             right: '8px',
-            backgroundColor: 'rgba(0,0,0,0.8)',
+            backgroundColor: 'rgba(0,0,0,0.7)',
             color: 'white',
-            padding: '2px 8px',
+            padding: '4px 8px',
             borderRadius: '4px',
             fontSize: '12px',
             fontWeight: '600',
@@ -84,7 +88,7 @@ export default function VideoCard({
               left: '8px',
               backgroundColor: '#B8860B',
               color: 'white',
-              padding: '3px 10px',
+              padding: '4px 10px',
               borderRadius: '9999px',
               fontSize: '11px',
               fontWeight: '700',
@@ -99,7 +103,7 @@ export default function VideoCard({
               left: '8px',
               backgroundColor: '#4CAF50',
               color: 'white',
-              padding: '3px 10px',
+              padding: '4px 10px',
               borderRadius: '9999px',
               fontSize: '11px',
               fontWeight: '700',
@@ -122,19 +126,22 @@ export default function VideoCard({
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '18px',
+            opacity: 0.8,
+            transition: 'opacity 0.3s',
           }}>
             ▶
           </div>
         </div>
 
         {/* Info */}
-        <div style={{ padding: '16px' }}>
+        <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
           <span style={{
             fontSize: '11px',
             fontWeight: '600',
             color: categoryColor,
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
+            marginBottom: '6px',
           }}>
             {category}
           </span>
@@ -142,8 +149,8 @@ export default function VideoCard({
           <h3 style={{
             fontSize: '15px',
             fontWeight: '700',
-            color: '#1A1A1A',
-            margin: '6px 0 8px',
+            color: '#111111', /* ✅ MUDOU: texto escuro */
+            margin: '0 0 8px 0',
             lineHeight: 1.4,
             display: '-webkit-box',
             WebkitLineClamp: 2,
@@ -155,8 +162,9 @@ export default function VideoCard({
 
           <span style={{
             fontSize: '13px',
-            color: '#666666',
+            color: '#666666', /* ✅ MUDOU: cinza */
             fontWeight: '500',
+            marginTop: 'auto',
           }}>
             {creator}
           </span>

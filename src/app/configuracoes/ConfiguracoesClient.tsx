@@ -20,22 +20,22 @@ interface Props {
 export default function ConfiguracoesClient({ profile, email }: Props) {
   const router = useRouter()
 
-  const [fullName, setFullName]   = useState(profile.full_name ?? '')
+  const [fullName, setFullName] = useState(profile.full_name ?? '')
   const [savingName, setSavingName] = useState(false)
-  const [nameMsg, setNameMsg]     = useState('')
+  const [nameMsg, setNameMsg] = useState('')
 
-  const [newPwd, setNewPwd]       = useState('')
+  const [newPwd, setNewPwd] = useState('')
   const [savingPwd, setSavingPwd] = useState(false)
-  const [pwdMsg, setPwdMsg]       = useState('')
+  const [pwdMsg, setPwdMsg] = useState('')
 
-  const [avatarUrl, setAvatarUrl]           = useState(profile.avatar_url ?? '')
-  const [imgError, setImgError]             = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '')
+  const [imgError, setImgError] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
-  const [avatarMsg, setAvatarMsg]           = useState('')
+  const [avatarMsg, setAvatarMsg] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const [loggingOut, setLoggingOut]         = useState(false)
-  const [confirmDelete, setConfirmDelete]   = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const displayName = fullName.split(' ')[0] || email.split('@')[0] || 'Usuário'
 
@@ -73,22 +73,22 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
     const file = e.target.files?.[0]
     if (!file) return
     if (!file.type.startsWith('image/')) { setAvatarMsg('❌ Selecione uma imagem.'); return }
-    if (file.size > 2 * 1024 * 1024)    { setAvatarMsg('❌ Máximo 2MB.'); return }
+    if (file.size > 2 * 1024 * 1024) { setAvatarMsg('❌ Máximo 2MB.'); return }
 
     setUploadingAvatar(true)
     setAvatarMsg('')
     const formData = new FormData()
     formData.append('avatar', file)
 
-    const res  = await fetch('/api/upload-avatar', { method: 'POST', body: formData })
+    const res = await fetch('/api/upload-avatar', { method: 'POST', body: formData })
     const data = await res.json()
     setUploadingAvatar(false)
 
     if (!res.ok) { setAvatarMsg('❌ ' + (data.error ?? 'Erro ao enviar.')); return }
 
-    // ✅ reset imgError para tentar carregar a nova imagem
+    // ✅ ← AQUI: reset imgError + cache bust
     setImgError(false)
-    setAvatarUrl(data.url + '?t=' + Date.now()) // cache bust
+    setAvatarUrl(data.url + '?t=' + Date.now()) // ← CACHE BUST
     setAvatarMsg('✅ Foto atualizada!')
     setTimeout(() => {
       setAvatarMsg('')
@@ -139,7 +139,7 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
               <img
                 src={avatarUrl}
                 alt="Avatar"
-                onError={() => setImgError(true)}
+                onError={() => setImgError(true)}  // ← TRATA 404
                 style={{
                   width: '100%', height: '100%',
                   objectFit: 'cover', display: 'block',
@@ -151,7 +151,7 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: '28px', fontWeight: '700', color: 'white',
               }}>
-                {displayName[0].toUpperCase()}
+                {displayName[0].toUpperCase()}  // ← FALLBACK: inicial
               </div>
             )}
 
