@@ -83,6 +83,7 @@ export default function Header() {
             { href: '/categoria/louvor',      label: '🎵 Louvor' },
             { href: '/categoria/pregacao',    label: '📖 Pregação' },
             { href: '/categoria/crescimento', label: '🌱 Crescimento' },
+            { href: '/categoria/testemunhos', label: '🙏 Testemunhos' },
           ].map(item => (
             <Link key={item.href} href={item.href}
               style={{ color: '#CCCCCC', textDecoration: 'none', fontSize: '14px' }}>
