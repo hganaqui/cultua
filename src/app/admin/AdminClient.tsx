@@ -44,7 +44,7 @@ export default function AdminClient() {
         .eq('id', user.id)
         .single()
 
-      if (!profile || !['moderator', 'admin'].includes(profile.role)) {
+      if (!profile || !['user', 'admin', 'superadmin'].includes(profile.role)) {
         router.push('/')
         return
       }
@@ -57,7 +57,7 @@ export default function AdminClient() {
   async function loadContents(status: Tab) {
     setLoading(true)
     setFilters({ searchTerm: '', category: '', author: '', sortBy: 'date' })
-    
+
     const { data } = await supabase
       .from('contents')
       .select(`*, category:categories(name, slug, color, icon), creator:profiles(full_name)`)

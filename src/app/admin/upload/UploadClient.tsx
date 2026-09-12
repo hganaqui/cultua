@@ -10,29 +10,29 @@ import { CULTUA_CONFIG } from '@/lib/cultua-config'
 const C = CULTUA_CONFIG.colors
 
 type ContentType = 'video' | 'audio' | 'text'
-type UploadStep  = 'form' | 'uploading' | 'success' | 'error'
+type UploadStep = 'form' | 'uploading' | 'success' | 'error'
 
 interface FormState {
-  title:       string
+  title: string
   description: string
-  type:        ContentType
-  categoryId:  string
-  duration:    string
+  type: ContentType
+  categoryId: string
+  duration: string
 }
 
 interface UploadProgress {
-  video:   number
-  thumb:   number
+  video: number
+  thumb: number
   current: 'video' | 'thumb' | 'saving' | 'done'
 }
 
 export default function UploadClient() {
-  const router  = useRouter()
+  const router = useRouter()
 
-  const [step, setStep]         = useState<UploadStep>('form')
-  const [authorized, setAuth]   = useState<boolean | null>(null)
-  const [categories, setCats]   = useState<{ id: string; name: string; icon: string | null }[]>([])
-  const [form, setForm]         = useState<FormState>({
+  const [step, setStep] = useState<UploadStep>('form')
+  const [authorized, setAuth] = useState<boolean | null>(null)
+  const [categories, setCats] = useState<{ id: string; name: string; icon: string | null }[]>([])
+  const [form, setForm] = useState<FormState>({
     title: '', description: '', type: 'video', categoryId: '', duration: '',
   })
   const [videoFile, setVideoFile] = useState<File | null>(null)
@@ -46,27 +46,48 @@ export default function UploadClient() {
   const thumbRef = useRef<HTMLInputElement>(null)
 
   // Verifica permissão ao montar
-  useEffect(() => {
-    async function check() {
+useEffect(() => {
+  async function check() {
+    try {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/auth/login'); return }
+      if (!user) { 
+        router.push('/auth/login')
+        return 
+      }
 
       const { data: profile } = await supabase
-        .from('profiles').select('role').eq('id', user.id).single()
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
 
-      if (!profile || !['moderator', 'admin'].includes(profile.role)) {
-        router.push('/'); return
+      // ✅ MUDE AQUI
+      if (!profile || !['user', 'admin', 'superadmin'].includes(profile.role)) {
+        setAuth(false)
+        router.push('/')
+        return
       }
+
       setAuth(true)
 
       // Carrega categorias
       const { data: cats } = await supabase
-        .from('categories').select('id, name, icon').order('name')
+        .from('categories')
+        .select('id, name, icon')
+        .order('name')
+      
       setCats(cats ?? [])
-      if (cats?.[0]) setForm(f => ({ ...f, categoryId: cats[0].id }))
+      if (cats?.[0]) {
+        setForm(f => ({ ...f, categoryId: cats[0].id }))
+      }
+    } catch (err) {
+      console.error('Erro na verificação:', err)
+      setAuth(false)
+      router.push('/')
     }
-    check()
-  }, [router])
+  }
+  check()
+}, [router])
 
   // ── Seleção de arquivo de vídeo ──────────────────────────────
   function handleVideoSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -115,11 +136,11 @@ export default function UploadClient() {
   ): Promise<string> {
     // 1. Pede presigned URL para o servidor
     const res = await fetch('/api/upload/presigned', {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({
-        fileName:   file.name,
-        fileType:   file.type,
+      body: JSON.stringify({
+        fileName: file.name,
+        fileType: file.type,
         uploadType,
       }),
     })
@@ -137,7 +158,7 @@ export default function UploadClient() {
         }
       }
 
-      xhr.onload  = () => xhr.status === 200 ? resolve() : reject(new Error(`Upload falhou: ${xhr.status}`))
+      xhr.onload = () => xhr.status === 200 ? resolve() : reject(new Error(`Upload falhou: ${xhr.status}`))
       xhr.onerror = () => reject(new Error('Erro de rede no upload'))
 
       xhr.open('PUT', presignedUrl)
@@ -192,15 +213,15 @@ export default function UploadClient() {
       const { data: content, error } = await supabase
         .from('contents')
         .insert({
-          title:       form.title.trim(),
+          title: form.title.trim(),
           description: form.description.trim() || null,
-          type:        form.type,
-          status:      'pending',      // vai para fila de curadoria
-          url_media:   urlMedia,
-          url_thumb:   urlThumb,
-          duration:    form.duration.trim() || null,
+          type: form.type,
+          status: 'pending',      // vai para fila de curadoria
+          url_media: urlMedia,
+          url_thumb: urlThumb,
+          duration: form.duration.trim() || null,
           category_id: form.categoryId,
-          creator_id:  user?.id ?? null,
+          creator_id: user?.id ?? null,
           is_featured: false,
         })
         .select('id')
@@ -266,10 +287,10 @@ export default function UploadClient() {
     <main style={{ maxWidth: '500px', margin: '80px auto', padding: '0 16px', textAlign: 'center' }}>
       <div style={{ fontSize: '48px', marginBottom: '20px' }}>⬆️</div>
       <h2 style={{ color: '#FFF', fontSize: '20px', fontWeight: '700', marginBottom: '24px' }}>
-        {progress.current === 'video'  && 'Enviando vídeo...'}
-        {progress.current === 'thumb'  && 'Enviando thumbnail...'}
+        {progress.current === 'video' && 'Enviando vídeo...'}
+        {progress.current === 'thumb' && 'Enviando thumbnail...'}
         {progress.current === 'saving' && 'Salvando no banco...'}
-        {progress.current === 'done'   && 'Concluído!'}
+        {progress.current === 'done' && 'Concluído!'}
       </h2>
 
       {/* Barra de progresso do vídeo */}
@@ -347,7 +368,7 @@ export default function UploadClient() {
             {([
               { value: 'video', label: '🎬 Vídeo' },
               { value: 'audio', label: '🎵 Áudio' },
-              { value: 'text',  label: '📝 Texto' },
+              { value: 'text', label: '📝 Texto' },
             ] as { value: ContentType; label: string }[]).map(opt => (
               <button key={opt.value} type="button"
                 onClick={() => setForm(f => ({ ...f, type: opt.value }))}
@@ -378,7 +399,7 @@ export default function UploadClient() {
               placeholder="Ex: A Graça de Deus em Nossas Vidas"
               style={inputStyle}
               onFocus={(e) => (e.target.style.borderColor = '#B8860B')}
-              onBlur={(e)  => (e.target.style.borderColor = '#3D3D3D')}
+              onBlur={(e) => (e.target.style.borderColor = '#3D3D3D')}
             />
           </div>
 
@@ -396,7 +417,7 @@ export default function UploadClient() {
                 fontFamily: 'inherit',
               }}
               onFocus={(e) => (e.target.style.borderColor = '#B8860B')}
-              onBlur={(e)  => (e.target.style.borderColor = '#3D3D3D')}
+              onBlur={(e) => (e.target.style.borderColor = '#3D3D3D')}
             />
           </div>
 
@@ -426,7 +447,7 @@ export default function UploadClient() {
                 placeholder="Ex: 45:30 ou 1h 20m"
                 style={inputStyle}
                 onFocus={(e) => (e.target.style.borderColor = '#B8860B')}
-                onBlur={(e)  => (e.target.style.borderColor = '#3D3D3D')}
+                onBlur={(e) => (e.target.style.borderColor = '#3D3D3D')}
               />
             </div>
           </div>

@@ -154,7 +154,7 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
             {/* ✅ img nativo — sem 400 do next/image */}
             {avatarUrl && !imgError ? (
               <img
-                src={avatarUrl}
+                src={avatarUrl + `?t=${Date.now()}`}  // ✅ ADICIONE ISTO
                 alt="Avatar"
                 onError={() => setImgError(true)}
                 style={{
