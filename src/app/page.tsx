@@ -7,7 +7,7 @@ import HomeClient from './HomeClient'
 
 export default function HomePage() {
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#F5F5F5' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#111111' }}>
       <Header />
       <Hero />
       <CategorySection />
