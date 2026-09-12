@@ -2,8 +2,12 @@
 import { createServerSupabase } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { redirect } from 'next/navigation'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 import UsuariosClient from './UsuariosClient'
 import type { AdminWithScopes, Category } from '@/types'
+
+export const metadata = { title: 'Gerenciar Usuários — CULTUA' }
 
 export default async function UsuariosPage() {
   const supabase = await createServerSupabase()
@@ -28,17 +32,14 @@ export default async function UsuariosPage() {
   const { data: allScopes } = await supabaseAdmin
     .from('admin_scopes').select('*')
 
-  // Categorias disponíveis
+  // Categorias
   const { data: categories } = await supabaseAdmin
     .from('categories').select('id, name, slug').order('name')
 
-  // Todos os criadores (role user com uploads)
+  // Criadores
   const { data: creators } = await supabaseAdmin
-    .from('profiles')
-    .select('id, full_name')
-    .order('full_name')
+    .from('profiles').select('id, full_name').order('full_name')
 
-  // Monta AdminWithScopes
   const users: AdminWithScopes[] = (profiles ?? []).map(p => ({
     id: p.id,
     full_name: p.full_name,
@@ -56,10 +57,15 @@ export default async function UsuariosPage() {
   }))
 
   return (
-    <UsuariosClient
-      users={users}
-      categories={(categories as Category[]) ?? []}
-      allCreators={(creators ?? []).map(c => ({ id: c.id, full_name: c.full_name }))}
-    />
+    // ✅ dark background + Header + Footer
+    <div style={{ minHeight: '100vh', backgroundColor: '#111111' }}>
+      <Header />
+      <UsuariosClient
+        users={users}
+        categories={(categories as Category[]) ?? []}
+        allCreators={(creators ?? []).map(c => ({ id: c.id, full_name: c.full_name }))}
+      />
+      <Footer />
+    </div>
   )
 }
