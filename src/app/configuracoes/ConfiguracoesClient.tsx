@@ -3,7 +3,6 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import { signOut } from '@/lib/auth'
 import { createBrowserClient } from '@supabase/ssr'
 import type { Profile } from '@/types'
@@ -21,23 +20,22 @@ interface Props {
 export default function ConfiguracoesClient({ profile, email }: Props) {
   const router = useRouter()
 
-  // Estados de cada seção
-  const [fullName, setFullName]     = useState(profile.full_name ?? '')
+  const [fullName, setFullName]   = useState(profile.full_name ?? '')
   const [savingName, setSavingName] = useState(false)
-  const [nameMsg, setNameMsg]       = useState('')
+  const [nameMsg, setNameMsg]     = useState('')
 
-  const [currentPwd, setCurrentPwd]   = useState('')
-  const [newPwd, setNewPwd]           = useState('')
-  const [savingPwd, setSavingPwd]     = useState(false)
-  const [pwdMsg, setPwdMsg]           = useState('')
+  const [newPwd, setNewPwd]       = useState('')
+  const [savingPwd, setSavingPwd] = useState(false)
+  const [pwdMsg, setPwdMsg]       = useState('')
 
-  const [avatarUrl, setAvatarUrl]   = useState(profile.avatar_url ?? '')
+  const [avatarUrl, setAvatarUrl]           = useState(profile.avatar_url ?? '')
+  const [imgError, setImgError]             = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
-  const [avatarMsg, setAvatarMsg]   = useState('')
+  const [avatarMsg, setAvatarMsg]           = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const [loggingOut, setLoggingOut]     = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [loggingOut, setLoggingOut]         = useState(false)
+  const [confirmDelete, setConfirmDelete]   = useState(false)
 
   const displayName = fullName.split(' ')[0] || email.split('@')[0] || 'Usuário'
 
@@ -66,7 +64,7 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
     setSavingPwd(false)
     if (error) { setPwdMsg('❌ ' + error.message); return }
     setPwdMsg('✅ Senha alterada com sucesso!')
-    setCurrentPwd(''); setNewPwd('')
+    setNewPwd('')
     setTimeout(() => setPwdMsg(''), 4000)
   }
 
@@ -75,22 +73,27 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
     const file = e.target.files?.[0]
     if (!file) return
     if (!file.type.startsWith('image/')) { setAvatarMsg('❌ Selecione uma imagem.'); return }
-    if (file.size > 2 * 1024 * 1024) { setAvatarMsg('❌ Máximo 2MB.'); return }
+    if (file.size > 2 * 1024 * 1024)    { setAvatarMsg('❌ Máximo 2MB.'); return }
 
     setUploadingAvatar(true)
     setAvatarMsg('')
     const formData = new FormData()
     formData.append('avatar', file)
 
-    const res = await fetch('/api/upload-avatar', { method: 'POST', body: formData })
+    const res  = await fetch('/api/upload-avatar', { method: 'POST', body: formData })
     const data = await res.json()
     setUploadingAvatar(false)
 
     if (!res.ok) { setAvatarMsg('❌ ' + (data.error ?? 'Erro ao enviar.')); return }
-    setAvatarUrl(data.url)
+
+    // ✅ reset imgError para tentar carregar a nova imagem
+    setImgError(false)
+    setAvatarUrl(data.url + '?t=' + Date.now()) // cache bust
     setAvatarMsg('✅ Foto atualizada!')
-    router.refresh()
-    setTimeout(() => setAvatarMsg(''), 3000)
+    setTimeout(() => {
+      setAvatarMsg('')
+      router.refresh()
+    }, 1500)
   }
 
   async function handleSignOut() {
@@ -112,7 +115,8 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
       {/* ── Foto de Perfil ─────────────────────────────────────────── */}
       <Section title="Foto de Perfil">
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '16px 0' }}>
-          {/* Preview */}
+
+          {/* Preview — ✅ <img> nativo com onError, sem next/image */}
           <div
             onClick={() => fileRef.current?.click()}
             style={{
@@ -121,9 +125,26 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
               border: '2px dashed #B8860B', overflow: 'hidden',
             }}
             title="Clique para alterar foto"
+            onMouseEnter={e => {
+              const overlay = e.currentTarget.querySelector('.overlay') as HTMLElement
+              if (overlay) overlay.style.opacity = '1'
+            }}
+            onMouseLeave={e => {
+              const overlay = e.currentTarget.querySelector('.overlay') as HTMLElement
+              if (overlay) overlay.style.opacity = '0'
+            }}
           >
-            {avatarUrl ? (
-              <Image src={avatarUrl} alt="Avatar" fill style={{ objectFit: 'cover' }} />
+            {/* ✅ img nativo — sem 400 do next/image */}
+            {avatarUrl && !imgError ? (
+              <img
+                src={avatarUrl}
+                alt="Avatar"
+                onError={() => setImgError(true)}
+                style={{
+                  width: '100%', height: '100%',
+                  objectFit: 'cover', display: 'block',
+                }}
+              />
             ) : (
               <div style={{
                 width: '100%', height: '100%', backgroundColor: '#B8860B',
@@ -133,16 +154,17 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
                 {displayName[0].toUpperCase()}
               </div>
             )}
-            {/* Overlay no hover */}
-            <div style={{
+
+            {/* Overlay câmera */}
+            <div className="overlay" style={{
               position: 'absolute', inset: 0,
-              backgroundColor: 'rgba(0,0,0,0.5)',
+              backgroundColor: 'rgba(0,0,0,0.55)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              opacity: 0, transition: 'opacity 0.2s', fontSize: '20px',
-            }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '0')}
-            >📷</div>
+              opacity: 0, transition: 'opacity 0.2s', fontSize: '22px',
+              pointerEvents: 'none',
+            }}>
+              📷
+            </div>
           </div>
 
           <div>
@@ -150,15 +172,17 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
               Clique na foto para alterar
             </p>
             <p style={{ color: '#666666', fontSize: '12px' }}>JPG, PNG, WebP — máximo 2MB</p>
-            {avatarMsg && (
+            {uploadingAvatar && (
+              <p style={{ marginTop: '8px', fontSize: '13px', color: '#B8860B' }}>
+                ⏳ Enviando...
+              </p>
+            )}
+            {avatarMsg && !uploadingAvatar && (
               <p style={{
                 marginTop: '8px', fontSize: '13px',
                 color: avatarMsg.startsWith('✅') ? '#22C55E' : '#EF4444',
-              }}>{avatarMsg}</p>
-            )}
-            {uploadingAvatar && (
-              <p style={{ marginTop: '8px', fontSize: '13px', color: '#B8860B' }}>
-                Enviando...
+              }}>
+                {avatarMsg}
               </p>
             )}
           </div>
@@ -173,34 +197,41 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
         </div>
       </Section>
 
-      {/* ── Editar Nome ────────────────────────────────────────────── */}
+      {/* ── Conta ──────────────────────────────────────────────────── */}
       <Section title="Conta">
+
+        {/* Nome */}
         <div style={{ padding: '16px 0', borderBottom: '1px solid #2a2a2a' }}>
-          <label style={{ color: '#999999', fontSize: '12px', fontWeight: '700', 
-            textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <label style={{
+            color: '#999999', fontSize: '12px', fontWeight: '700',
+            textTransform: 'uppercase', letterSpacing: '0.5px',
+          }}>
             Nome completo
           </label>
           <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
             <input
               value={fullName}
               onChange={e => setFullName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSaveName()}
               placeholder="Seu nome"
               style={{
-                flex: 1, backgroundColor: '#1a1a1a', border: '1px solid #333',
-                borderRadius: '8px', padding: '10px 14px', color: '#fff',
+                flex: 1, backgroundColor: '#111111', border: '1px solid #333333',
+                borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF',
                 fontSize: '14px', outline: 'none',
               }}
               onFocus={e => (e.currentTarget.style.borderColor = '#B8860B')}
-              onBlur={e => (e.currentTarget.style.borderColor = '#333')}
+              onBlur={e => (e.currentTarget.style.borderColor = '#333333')}
             />
             <button
               onClick={handleSaveName}
-              disabled={savingName}
+              disabled={savingName || !fullName.trim()}
               style={{
-                backgroundColor: '#B8860B', color: 'white', border: 'none',
-                borderRadius: '8px', padding: '10px 18px', fontSize: '14px',
-                fontWeight: '600', cursor: savingName ? 'not-allowed' : 'pointer',
-                opacity: savingName ? 0.7 : 1,
+                backgroundColor: fullName.trim() ? '#B8860B' : '#333333',
+                color: 'white', border: 'none', borderRadius: '8px',
+                padding: '10px 18px', fontSize: '14px', fontWeight: '600',
+                cursor: (savingName || !fullName.trim()) ? 'not-allowed' : 'pointer',
+                opacity: (savingName || !fullName.trim()) ? 0.7 : 1,
+                transition: 'all 0.15s',
               }}
             >
               {savingName ? 'Salvando...' : 'Salvar'}
@@ -210,32 +241,42 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
             <p style={{
               marginTop: '6px', fontSize: '13px',
               color: nameMsg.startsWith('✅') ? '#22C55E' : '#EF4444',
-            }}>{nameMsg}</p>
+            }}>
+              {nameMsg}
+            </p>
           )}
         </div>
 
-        {/* E-mail (somente leitura) */}
+        {/* E-mail */}
         <div style={{ padding: '16px 0', borderBottom: '1px solid #2a2a2a' }}>
-          <label style={{ color: '#999999', fontSize: '12px', fontWeight: '700',
-            textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <label style={{
+            color: '#999999', fontSize: '12px', fontWeight: '700',
+            textTransform: 'uppercase', letterSpacing: '0.5px',
+          }}>
             E-mail
           </label>
           <div style={{
-            marginTop: '8px', backgroundColor: '#111', border: '1px solid #2a2a2a',
-            borderRadius: '8px', padding: '10px 14px', color: '#666', fontSize: '14px',
+            marginTop: '8px', backgroundColor: '#111111', border: '1px solid #2a2a2a',
+            borderRadius: '8px', padding: '10px 14px', color: '#555555',
+            fontSize: '14px', display: 'flex', alignItems: 'center', gap: '10px',
           }}>
             {email}
             <span style={{
-              marginLeft: '10px', fontSize: '11px', color: '#B8860B',
-              backgroundColor: 'rgba(184,134,11,0.1)', padding: '2px 8px', borderRadius: '9999px',
-            }}>Em breve</span>
+              fontSize: '11px', color: '#B8860B',
+              backgroundColor: 'rgba(184,134,11,0.1)',
+              padding: '2px 8px', borderRadius: '9999px', flexShrink: 0,
+            }}>
+              Em breve
+            </span>
           </div>
         </div>
 
-        {/* Alterar senha */}
+        {/* Nova senha */}
         <div style={{ padding: '16px 0' }}>
-          <label style={{ color: '#999999', fontSize: '12px', fontWeight: '700',
-            textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <label style={{
+            color: '#999999', fontSize: '12px', fontWeight: '700',
+            textTransform: 'uppercase', letterSpacing: '0.5px',
+          }}>
             Nova senha
           </label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
@@ -245,22 +286,24 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
               onChange={e => setNewPwd(e.target.value)}
               placeholder="Nova senha (mín. 6 caracteres)"
               style={{
-                backgroundColor: '#1a1a1a', border: '1px solid #333',
-                borderRadius: '8px', padding: '10px 14px', color: '#fff',
+                backgroundColor: '#111111', border: '1px solid #333333',
+                borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF',
                 fontSize: '14px', outline: 'none',
               }}
               onFocus={e => (e.currentTarget.style.borderColor = '#B8860B')}
-              onBlur={e => (e.currentTarget.style.borderColor = '#333')}
+              onBlur={e => (e.currentTarget.style.borderColor = '#333333')}
             />
             <button
               onClick={handleChangePwd}
-              disabled={savingPwd || !newPwd}
+              disabled={savingPwd || newPwd.length < 6}
               style={{
                 alignSelf: 'flex-start',
-                backgroundColor: newPwd ? '#B8860B' : '#333', color: 'white', border: 'none',
-                borderRadius: '8px', padding: '10px 18px', fontSize: '14px',
-                fontWeight: '600', cursor: (!newPwd || savingPwd) ? 'not-allowed' : 'pointer',
-                opacity: (!newPwd || savingPwd) ? 0.6 : 1,
+                backgroundColor: newPwd.length >= 6 ? '#B8860B' : '#333333',
+                color: 'white', border: 'none', borderRadius: '8px',
+                padding: '10px 18px', fontSize: '14px', fontWeight: '600',
+                cursor: (savingPwd || newPwd.length < 6) ? 'not-allowed' : 'pointer',
+                opacity: (savingPwd || newPwd.length < 6) ? 0.6 : 1,
+                transition: 'all 0.15s',
               }}
             >
               {savingPwd ? 'Alterando...' : 'Alterar Senha'}
@@ -270,7 +313,9 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
             <p style={{
               marginTop: '6px', fontSize: '13px',
               color: pwdMsg.startsWith('✅') ? '#22C55E' : '#EF4444',
-            }}>{pwdMsg}</p>
+            }}>
+              {pwdMsg}
+            </p>
           )}
         </div>
       </Section>
@@ -287,7 +332,7 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
               color: '#EF4444', borderRadius: '10px', padding: '12px 20px',
               fontSize: '15px', fontWeight: '600',
               cursor: loggingOut ? 'not-allowed' : 'pointer',
-              opacity: loggingOut ? 0.6 : 1,
+              opacity: loggingOut ? 0.6 : 1, transition: 'opacity 0.2s',
             }}
           >
             🚪 {loggingOut ? 'Saindo...' : 'Encerrar sessão'}
@@ -324,16 +369,27 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
                 Todos os seus dados serão permanentemente removidos.
               </p>
               <div style={{ display: 'flex', gap: '12px' }}>
-                <button onClick={() => setConfirmDelete(false)} style={{
-                  backgroundColor: '#333', border: '1px solid #444',
-                  color: '#CCCCCC', borderRadius: '8px', padding: '8px 16px',
-                  fontSize: '14px', cursor: 'pointer',
-                }}>Cancelar</button>
-                <button disabled title="Em breve" style={{
-                  backgroundColor: '#EF4444', color: 'white', border: 'none',
-                  borderRadius: '8px', padding: '8px 16px', fontSize: '14px',
-                  fontWeight: '600', cursor: 'not-allowed', opacity: 0.6,
-                }}>Sim, excluir conta</button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  style={{
+                    backgroundColor: '#2a2a2a', border: '1px solid #444444',
+                    color: '#CCCCCC', borderRadius: '8px', padding: '8px 16px',
+                    fontSize: '14px', cursor: 'pointer',
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  disabled
+                  title="Em breve"
+                  style={{
+                    backgroundColor: '#EF4444', color: 'white', border: 'none',
+                    borderRadius: '8px', padding: '8px 16px', fontSize: '14px',
+                    fontWeight: '600', cursor: 'not-allowed', opacity: 0.6,
+                  }}
+                >
+                  Sim, excluir conta
+                </button>
               </div>
             </div>
           )}
@@ -343,6 +399,7 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
   )
 }
 
+// ── Section ───────────────────────────────────────────────────────────────────
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{
@@ -350,9 +407,11 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       marginBottom: '16px', border: '1px solid #2a2a2a',
     }}>
       <h2 style={{
-        fontSize: '13px', fontWeight: '700', color: '#666',
-        textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px',
-      }}>{title}</h2>
+        fontSize: '13px', fontWeight: '700', color: '#666666',
+        textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '16px',
+      }}>
+        {title}
+      </h2>
       {children}
     </div>
   )
