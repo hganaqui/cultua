@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getContentById, incrementViewCount, saveWatchHistory } from '@/lib/db'
 import type { Content } from '@/types'
+import { getCategory } from '@/types'
 import type { User } from '@supabase/supabase-js'
 
 export default function ContentPlayer({ contentId }: { contentId: string }) {
@@ -22,7 +23,6 @@ export default function ContentPlayer({ contentId }: { contentId: string }) {
       ])
 
       if (!contentData) { setNotFound(true); setLoading(false); return }
-
       setContent(contentData)
       setUser(currentUser)
       setLoading(false)
@@ -42,9 +42,14 @@ export default function ContentPlayer({ contentId }: { contentId: string }) {
 
   if (loading)  return <PlayerSkeleton />
   if (notFound) return <NotFound />
-  if (!content)  return null 
+  if (!content) return null
 
-  const categoryColor = content.category?.color ?? '#B8860B'
+  // ✅ resolve o join UMA VEZ aqui — sem erros de tipo em todo o JSX
+  const cat         = getCategory(content.category)
+  const categoryColor = cat?.color ?? '#B8860B'
+  const categoryIcon  = cat?.icon  ?? '🎵'
+  const categoryName  = cat?.name  ?? ''
+  const categorySlug  = cat?.slug  ?? ''
   const creatorName   = content.creator?.full_name ?? 'CULTUA'
 
   return (
@@ -55,7 +60,6 @@ export default function ContentPlayer({ contentId }: { contentId: string }) {
       `}</style>
 
       <div className="player-grid">
-
         {/* Player */}
         <div>
           <div style={{
@@ -68,7 +72,7 @@ export default function ContentPlayer({ contentId }: { contentId: string }) {
                 controls
                 autoPlay={false}
                 controlsList="nodownload"
-                onContextMenu={(e) => e.preventDefault()}
+                onContextMenu={e => e.preventDefault()}
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />
             ) : (
@@ -76,7 +80,8 @@ export default function ContentPlayer({ contentId }: { contentId: string }) {
                 width: '100%', height: '100%', display: 'flex',
                 flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#666',
               }}>
-                <div style={{ fontSize: '64px', marginBottom: '12px' }}>{content.category?.icon ?? '🎵'}</div>
+                {/* ✅ usa variável resolvida */}
+                <div style={{ fontSize: '64px', marginBottom: '12px' }}>{categoryIcon}</div>
                 <p style={{ fontSize: '14px' }}>Mídia em breve</p>
               </div>
             )}
@@ -90,7 +95,8 @@ export default function ContentPlayer({ contentId }: { contentId: string }) {
             borderRadius: '9999px', border: `1px solid ${categoryColor}40`,
             marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px',
           }}>
-            {content.category?.icon} {content.category?.name}
+            {/* ✅ usa variáveis resolvidas */}
+            {categoryIcon} {categoryName}
           </span>
 
           {/* Título */}
@@ -110,7 +116,9 @@ export default function ContentPlayer({ contentId }: { contentId: string }) {
           <div style={{ borderTop: '1px solid #2D2D2D', marginBottom: '20px' }} />
 
           {content.description && (
-            <p style={{ color: '#999', fontSize: '15px', lineHeight: 1.7 }}>{content.description}</p>
+            <p style={{ color: '#999', fontSize: '15px', lineHeight: 1.7 }}>
+              {content.description}
+            </p>
           )}
 
           {/* CTA não logado */}
@@ -122,7 +130,9 @@ export default function ContentPlayer({ contentId }: { contentId: string }) {
               flexWrap: 'wrap', gap: '12px',
             }}>
               <div>
-                <div style={{ color: '#B8860B', fontWeight: '700', fontSize: '15px' }}>🙏 Salve no histórico</div>
+                <div style={{ color: '#B8860B', fontWeight: '700', fontSize: '15px' }}>
+                  🙏 Salve no histórico
+                </div>
                 <div style={{ color: '#999', fontSize: '13px', marginTop: '2px' }}>
                   Crie uma conta gratuita para salvar o progresso
                 </div>
@@ -137,14 +147,14 @@ export default function ContentPlayer({ contentId }: { contentId: string }) {
           )}
         </div>
 
-        {/* ✅ content não é null aqui — TypeScript sabe */}
-        <RelatedSidebar currentId={contentId} categorySlug={content.category?.slug} />
+        {/* ✅ usa variável resolvida */}
+        <RelatedSidebar currentId={contentId} categorySlug={categorySlug} />
       </div>
     </main>
   )
 }
 
-// ── Sidebar ──────────────────────────────────────────────────
+// ── Sidebar ──────────────────────────────────────────────────────────────────
 
 function RelatedSidebar({
   currentId,
@@ -157,21 +167,18 @@ function RelatedSidebar({
 
   useEffect(() => {
     async function load() {
-      // Tenta buscar da mesma categoria primeiro
       const { data: catData } = categorySlug
         ? await supabase.from('categories').select('id').eq('slug', categorySlug).single()
         : { data: null }
 
       let query = supabase
         .from('contents')
-        .select('id, title, duration, url_thumb, is_featured, category:categories(name, slug, color, icon)')
+        .select('id, title, duration, url_thumb, is_featured, category:categories(id, name, slug, color, icon, description, created_at)')
         .eq('status', 'approved')
         .neq('id', currentId)
         .limit(6)
 
-      if (catData?.id) {
-        query = query.eq('category_id', catData.id)
-      }
+      if (catData?.id) query = query.eq('category_id', catData.id)
 
       const { data } = await query
       setRelated((data as unknown as Content[]) ?? [])
@@ -192,42 +199,46 @@ function RelatedSidebar({
         <p style={{ color: '#555', fontSize: '13px' }}>Nenhum conteúdo relacionado ainda.</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {related.map(item => (
-            <a key={item.id} href={`/content/${item.id}`} style={{
-              display: 'flex', gap: '10px', textDecoration: 'none',
-              backgroundColor: '#222', borderRadius: '10px', padding: '10px',
-            }}>
-              <div style={{
-                width: '96px', height: '60px', flexShrink: 0,
-                backgroundColor: '#1A1A1A', borderRadius: '6px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px',
-                backgroundImage: item.url_thumb ? `url(${item.url_thumb})` : 'none',
-                backgroundSize: 'cover', backgroundPosition: 'center',
+          {related.map(item => {
+            // ✅ resolve join em cada item
+            const cat = getCategory(item.category)
+            return (
+              <a key={item.id} href={`/content/${item.id}`} style={{
+                display: 'flex', gap: '10px', textDecoration: 'none',
+                backgroundColor: '#222', borderRadius: '10px', padding: '10px',
               }}>
-                {!item.url_thumb && (item.category?.icon ?? '🎵')}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
-                  color: '#FFF', fontSize: '13px', fontWeight: '600',
-                  lineHeight: 1.3, marginBottom: '4px',
-                  display: '-webkit-box', WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                  width: '96px', height: '60px', flexShrink: 0,
+                  backgroundColor: '#1A1A1A', borderRadius: '6px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px',
+                  backgroundImage: item.url_thumb ? `url(${item.url_thumb})` : 'none',
+                  backgroundSize: 'cover', backgroundPosition: 'center',
                 }}>
-                  {item.title}
+                  {!item.url_thumb && (cat?.icon ?? '🎵')}
                 </div>
-                <div style={{ color: '#666', fontSize: '11px' }}>
-                  {item.category?.name}{item.duration && ` · ${item.duration}`}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    color: '#FFF', fontSize: '13px', fontWeight: '600',
+                    lineHeight: 1.3, marginBottom: '4px',
+                    display: '-webkit-box', WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                  }}>
+                    {item.title}
+                  </div>
+                  <div style={{ color: '#666', fontSize: '11px' }}>
+                    {cat?.name}{item.duration && ` · ${item.duration}`}
+                  </div>
                 </div>
-              </div>
-            </a>
-          ))}
+              </a>
+            )
+          })}
         </div>
       )}
     </aside>
   )
 }
 
-// ── Skeletons ────────────────────────────────────────────────
+// ── Skeletons ────────────────────────────────────────────────────────────────
 
 function PlayerSkeleton() {
   return (
@@ -244,7 +255,9 @@ function NotFound() {
   return (
     <main style={{ maxWidth: '600px', margin: '80px auto', padding: '0 16px', textAlign: 'center' }}>
       <div style={{ fontSize: '56px', marginBottom: '16px' }}>😔</div>
-      <h1 style={{ color: '#FFF', fontSize: '24px', fontWeight: '800', marginBottom: '8px' }}>Conteúdo não encontrado</h1>
+      <h1 style={{ color: '#FFF', fontSize: '24px', fontWeight: '800', marginBottom: '8px' }}>
+        Conteúdo não encontrado
+      </h1>
       <p style={{ color: '#666', fontSize: '15px', marginBottom: '24px' }}>
         Este conteúdo pode ter sido removido ou ainda não foi aprovado.
       </p>

@@ -58,8 +58,8 @@ export type Content = {
   view_count: number
   created_at: string
   updated_at: string
-  // joins
-  category?: Category | { name: string } | null
+  // ✅ joins — sempre Category completo (tem color, icon, slug, etc.)
+  category?: Category | Category[] | null
   creator?: Pick<User, 'id' | 'full_name' | 'avatar_url'> | null
 }
 
@@ -71,7 +71,7 @@ export type ContentWithStatus = {
   creator_id: string | null
   created_at: string
   url_thumb: string | null
-  category: { name: string } | { name: string }[] | null
+  category: Category | Category[] | null
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -220,18 +220,12 @@ export type SupabaseJoin<T> = T | T[] | null
 
 /** Extrai nome de categoria de um join */
 export function getCategoryName(
-  category:
-    | Category
-    | { name: string }
-    | { name: string }[]
-    | null
-    | undefined
+  category: Category | Category[] | null | undefined
 ): string {
   if (!category) return 'Sem categoria'
   if (Array.isArray(category)) return category[0]?.name ?? 'Sem categoria'
   return category.name ?? 'Sem categoria'
 }
-
 /** Extrai nome do criador de um join */
 export function getCreatorName(
   creator: Content['creator']

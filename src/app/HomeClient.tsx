@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import VideoCard from '@/components/VideoCard'
 import { getFeaturedContents } from '@/lib/db'
 import type { Content } from '@/types'
+import { getCategory } from '@/types'
 
 export default function HomeClient() {
   const [contents, setContents] = useState<Content[]>([])
@@ -70,19 +71,23 @@ export default function HomeClient() {
           </div>
         ) : (
           <div className="video-grid">
-            {contents.map(item => (
-              <VideoCard
-                key={item.id}
-                id={item.id}
-                title={item.title}
-                creator={item.creator?.full_name ?? 'CULTUA'}
-                category={item.category?.name ?? ''}
-                categoryColor={item.category?.color ?? '#B8860B'}
-                duration={item.duration ?? ''}
-                isFeatured={item.is_featured}
-                thumbnail={item.url_thumb ?? undefined}
-              />
-            ))}
+            {contents.map(item => {
+              // ✅ resolve o join antes de acessar propriedades
+              const cat = getCategory(item.category)
+              return (
+                <VideoCard
+                  key={item.id}
+                  id={item.id}
+                  title={item.title}
+                  creator={item.creator?.full_name ?? 'CULTUA'}
+                  category={cat?.name ?? ''}
+                  categoryColor={cat?.color ?? '#B8860B'}
+                  duration={item.duration ?? ''}
+                  isFeatured={item.is_featured}
+                  thumbnail={item.url_thumb ?? undefined}
+                />
+              )
+            })}
           </div>
         )}
       </div>
