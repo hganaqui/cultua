@@ -58,7 +58,7 @@ export default function CategorySection() {
         }
         .category-card {
           text-decoration: none;
-          background-color: #FFFFFF; /* ✅ MUDOU: branco */
+          background-color: #F8F8F8; /* ✅ MUDOU: branco */
           border-radius: 12px;
           padding: 0; /* ✅ MUDOU: sem padding (quadrado puro) */
           border: 1px solid #E0E0E0; /* ✅ MUDOU: borda cinza claro */

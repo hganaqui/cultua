@@ -29,7 +29,7 @@ export default function VideoCard({
     <Link href={`/content/${id}`} style={{ textDecoration: 'none' }}>
       <div
         style={{
-          backgroundColor: '#FFFFFF', /* ✅ MUDOU: branco */
+          backgroundColor: '#F8F8F8', /* ✅ MUDOU: branco */
           borderRadius: '12px',
           overflow: 'hidden',
           boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
@@ -149,7 +149,7 @@ export default function VideoCard({
           <h3 style={{
             fontSize: '15px',
             fontWeight: '700',
-            color: '#111111', /* ✅ MUDOU: texto escuro */
+            color: '#222222', /* ✅ MUDOU: texto escuro */
             margin: '0 0 8px 0',
             lineHeight: 1.4,
             display: '-webkit-box',

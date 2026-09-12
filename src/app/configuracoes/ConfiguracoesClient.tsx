@@ -1,4 +1,3 @@
-// src/app/configuracoes/ConfiguracoesClient.tsx
 'use client'
 
 import { useState, useRef } from 'react'
@@ -86,9 +85,9 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
 
     if (!res.ok) { setAvatarMsg('❌ ' + (data.error ?? 'Erro ao enviar.')); return }
 
-    // ✅ ← AQUI: reset imgError + cache bust
+    // ✅ reset imgError + cache bust
     setImgError(false)
-    setAvatarUrl(data.url + '?t=' + Date.now()) // ← CACHE BUST
+    setAvatarUrl(data.url + '?t=' + Date.now())
     setAvatarMsg('✅ Foto atualizada!')
     setTimeout(() => {
       setAvatarMsg('')
@@ -104,7 +103,7 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
   }
 
   return (
-    <main style={{ maxWidth: '700px', margin: '0 auto', padding: '40px 16px' }}>
+    <main style={{ maxWidth: '700px', margin: '0 auto', padding: '40px 16px', backgroundColor: '#111111', minHeight: '100vh' }}>
       <div style={{ marginBottom: '32px' }}>
         <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#FFFFFF', marginBottom: '4px' }}>
           ⚙️ Configurações
@@ -114,24 +113,42 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
 
       {/* ── Foto de Perfil ─────────────────────────────────────────── */}
       <Section title="Foto de Perfil">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '16px 0' }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '20px',
+          padding: '24px 0',
+        }}>
 
-          {/* Preview — ✅ <img> nativo com onError, sem next/image */}
+          {/* Avatar grande ✅ */}
           <div
             onClick={() => fileRef.current?.click()}
             style={{
-              width: '72px', height: '72px', borderRadius: '50%',
-              cursor: 'pointer', position: 'relative', flexShrink: 0,
-              border: '2px dashed #B8860B', overflow: 'hidden',
+              width: '100px',
+              height: '100px',
+              borderRadius: '50%',
+              cursor: 'pointer',
+              position: 'relative',
+              flexShrink: 0,
+              border: '3px solid #B8860B',
+              overflow: 'hidden',
+              transition: 'all 0.3s ease',
             }}
             title="Clique para alterar foto"
-            onMouseEnter={e => {
+            onMouseEnter={(e) => {
               const overlay = e.currentTarget.querySelector('.overlay') as HTMLElement
-              if (overlay) overlay.style.opacity = '1'
+              if (overlay) {
+                overlay.style.opacity = '1'
+                e.currentTarget.style.transform = 'scale(1.05)'
+              }
             }}
-            onMouseLeave={e => {
+            onMouseLeave={(e) => {
               const overlay = e.currentTarget.querySelector('.overlay') as HTMLElement
-              if (overlay) overlay.style.opacity = '0'
+              if (overlay) {
+                overlay.style.opacity = '0'
+                e.currentTarget.style.transform = 'scale(1)'
+              }
             }}
           >
             {/* ✅ img nativo — sem 400 do next/image */}
@@ -139,39 +156,58 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
               <img
                 src={avatarUrl}
                 alt="Avatar"
-                onError={() => setImgError(true)}  // ← TRATA 404
+                onError={() => setImgError(true)}
                 style={{
-                  width: '100%', height: '100%',
-                  objectFit: 'cover', display: 'block',
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block',
                 }}
               />
             ) : (
               <div style={{
-                width: '100%', height: '100%', backgroundColor: '#B8860B',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '28px', fontWeight: '700', color: 'white',
+                width: '100%',
+                height: '100%',
+                backgroundColor: '#B8860B',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '40px',
+                fontWeight: '700',
+                color: 'white',
               }}>
-                {displayName[0].toUpperCase()}  // ← FALLBACK: inicial
+                {displayName[0].toUpperCase()}
               </div>
             )}
 
             {/* Overlay câmera */}
             <div className="overlay" style={{
-              position: 'absolute', inset: 0,
+              position: 'absolute',
+              inset: 0,
               backgroundColor: 'rgba(0,0,0,0.55)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              opacity: 0, transition: 'opacity 0.2s', fontSize: '22px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: 0,
+              transition: 'opacity 0.2s',
+              fontSize: '32px',
               pointerEvents: 'none',
             }}>
               📷
             </div>
           </div>
 
-          <div>
-            <p style={{ color: '#CCCCCC', fontSize: '14px', marginBottom: '8px' }}>
+          {/* Info ✅ */}
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ color: '#CCCCCC', fontSize: '15px', marginBottom: '4px', fontWeight: '600' }}>
+              {displayName}
+            </p>
+            <p style={{ color: '#666666', fontSize: '12px', marginBottom: '12px' }}>
               Clique na foto para alterar
             </p>
-            <p style={{ color: '#666666', fontSize: '12px' }}>JPG, PNG, WebP — máximo 2MB</p>
+            <p style={{ color: '#666666', fontSize: '12px' }}>
+              JPG, PNG, WebP — máximo 2MB
+            </p>
             {uploadingAvatar && (
               <p style={{ marginTop: '8px', fontSize: '13px', color: '#B8860B' }}>
                 ⏳ Enviando...
@@ -179,7 +215,8 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
             )}
             {avatarMsg && !uploadingAvatar && (
               <p style={{
-                marginTop: '8px', fontSize: '13px',
+                marginTop: '8px',
+                fontSize: '13px',
                 color: avatarMsg.startsWith('✅') ? '#22C55E' : '#EF4444',
               }}>
                 {avatarMsg}
@@ -200,7 +237,7 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
       {/* ── Conta ──────────────────────────────────────────────────── */}
       <Section title="Conta">
 
-        {/* Nome */}
+        {/* Nome ✅ JÁ PREENCHIDO */}
         <div style={{ padding: '16px 0', borderBottom: '1px solid #2a2a2a' }}>
           <label style={{
             color: '#999999', fontSize: '12px', fontWeight: '700',
