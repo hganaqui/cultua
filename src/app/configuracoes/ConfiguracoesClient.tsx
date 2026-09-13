@@ -73,39 +73,48 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
   const displayName = fullName ? fullName.split(' ')[0] : email.split('@')[0] || 'Usuário'
 
   // ── Salvar nome ──────────────────────────────────────────────────────────
-  async function handleSaveName() {
-    if (!fullName.trim()) {
-      setNameMsg('❌ Digite um nome.')
+async function handleSaveName() {
+  if (!fullName.trim()) {
+    setNameMsg('❌ Digite um nome.')
+    return
+  }
+
+  setSavingName(true)
+  setNameMsg('')
+
+  try {
+    console.log('💾 Salvando nome:', fullName.trim()) // ✅ DEBUG
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ full_name: fullName.trim() })
+      .eq('id', profile.id)
+      .select() // ✅ NOVO: retorna os dados atualizados
+
+    console.log('✅ Resposta:', { data, error }) // ✅ DEBUG
+
+    if (error) {
+      console.error('❌ Erro Supabase:', error)
+      setNameMsg('❌ Erro ao salvar nome.')
       return
     }
 
-    setSavingName(true)
-    setNameMsg('')
+    // ✅ MUDE: Atualiza o state ANTES de recarregar
+    setFullName(fullName.trim())
+    setNameMsg('✅ Nome atualizado!')
 
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ full_name: fullName.trim() })
-        .eq('id', profile.id)
-
-      if (error) {
-        console.error('Erro ao salvar:', error)
-        setNameMsg('❌ Erro ao salvar nome.')
-        return
-      }
-
-      setNameMsg('✅ Nome atualizado!')
-      setTimeout(() => {
-        setNameMsg('')
-        router.refresh()
-      }, 2000)
-    } catch (err) {
-      console.error('Erro:', err)
-      setNameMsg('❌ Erro ao salvar.')
-    } finally {
-      setSavingName(false)
-    }
+    // ✅ Aguarda um pouco antes de recarregar
+    setTimeout(() => {
+      setNameMsg('')
+      router.refresh() // Recarrega dados do servidor
+    }, 1500)
+  } catch (err) {
+    console.error('❌ Erro catch:', err)
+    setNameMsg('❌ Erro ao salvar.')
+  } finally {
+    setSavingName(false)
   }
+}
 
   // ── Alterar senha ────────────────────────────────────────────────────────
   async function handleChangePwd() {
