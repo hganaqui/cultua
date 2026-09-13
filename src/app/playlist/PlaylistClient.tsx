@@ -1,4 +1,3 @@
-// src/app/playlist/PlaylistClient.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -61,7 +60,6 @@ export default function PlaylistClient() {
     setSaving(true)
 
     if (editItem) {
-      // Editar
       const { data } = await supabase
         .from('playlists')
         .update({
@@ -78,7 +76,6 @@ export default function PlaylistClient() {
         setPlaylists(prev => prev.map(p => p.id === editItem.id ? data as Playlist : p))
       }
     } else {
-      // Criar
       const { data } = await supabase
         .from('playlists')
         .insert({
@@ -107,7 +104,13 @@ export default function PlaylistClient() {
   }
 
   return (
-    <main style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 16px' }}>
+    <main style={{ 
+      maxWidth: '900px', 
+      margin: '0 auto', 
+      padding: '40px 16px',
+      minHeight: '100vh',
+      backgroundColor: '#111111'
+    }}>
 
       {/* Cabeçalho */}
       <div style={{
@@ -116,13 +119,13 @@ export default function PlaylistClient() {
         gap: '12px', marginBottom: '32px',
       }}>
         <div>
-          <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#1A1A1A', marginBottom: '4px' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#FFFFFF', marginBottom: '4px' }}>
             🎵 Minhas Playlists
           </h1>
-          <p style={{ color: '#666', fontSize: '15px' }}>Organize seu conteúdo favorito</p>
+          <p style={{ color: '#CCCCCC', fontSize: '15px' }}>Organize seu conteúdo favorito</p>
         </div>
         <button onClick={openCreate} style={{
-          backgroundColor: '#B8860B', color: 'white', border: 'none',
+          backgroundColor: '#B8860B', color: '#111111', border: 'none',
           padding: '10px 20px', borderRadius: '10px', fontSize: '14px',
           fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
           display: 'inline-flex', alignItems: 'center', gap: '6px',
@@ -140,27 +143,25 @@ export default function PlaylistClient() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '16px' }}>
           {playlists.map(pl => (
             <div key={pl.id} style={{
-              backgroundColor: 'white', borderRadius: '16px',
-              padding: '20px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+              backgroundColor: '#1a1a1a', borderRadius: '16px',
+              padding: '20px', border: '1px solid #333333',
               display: 'flex', flexDirection: 'column', gap: '12px',
             }}>
-              {/* Ícone */}
               <div style={{
                 width: '48px', height: '48px', backgroundColor: 'rgba(184,134,11,0.1)',
                 borderRadius: '12px', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', fontSize: '24px',
+                justifyContent: 'center', fontSize: '24px', border: '1px solid rgba(184,134,11,0.2)',
               }}>
                 🎵
               </div>
 
-              {/* Info */}
               <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#1A1A1A', marginBottom: '4px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#FFFFFF', marginBottom: '4px' }}>
                   {pl.title}
                 </h3>
                 {pl.description && (
                   <p style={{
-                    fontSize: '13px', color: '#666', lineHeight: 1.5,
+                    fontSize: '13px', color: '#CCCCCC', lineHeight: 1.5,
                     display: '-webkit-box', WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical', overflow: 'hidden',
                   }}>
@@ -169,15 +170,15 @@ export default function PlaylistClient() {
                 )}
                 <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
                   <span style={{
-                    fontSize: '11px', color: '#999',
-                    backgroundColor: '#F5F5F5', padding: '3px 8px', borderRadius: '9999px',
+                    fontSize: '11px', color: '#666666',
+                    backgroundColor: '#2a2a2a', padding: '3px 8px', borderRadius: '9999px',
                   }}>
                     {new Date(pl.created_at).toLocaleDateString('pt-BR')}
                   </span>
                   {pl.public && (
                     <span style={{
-                      fontSize: '11px', color: '#4CAF50',
-                      backgroundColor: 'rgba(76,175,80,0.1)', padding: '3px 8px',
+                      fontSize: '11px', color: '#22C55E',
+                      backgroundColor: 'rgba(34,197,94,0.1)', padding: '3px 8px',
                       borderRadius: '9999px', fontWeight: '600',
                     }}>
                       🌐 Pública
@@ -189,8 +190,8 @@ export default function PlaylistClient() {
               {/* Ações */}
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button onClick={() => openEdit(pl)} style={{
-                  flex: 1, backgroundColor: '#F5F5F5', color: '#1A1A1A',
-                  border: 'none', borderRadius: '8px', padding: '8px',
+                  flex: 1, backgroundColor: '#2a2a2a', color: '#CCCCCC',
+                  border: '1px solid #333333', borderRadius: '8px', padding: '8px',
                   fontSize: '13px', fontWeight: '600', cursor: 'pointer',
                 }}>
                   ✏️ Editar
@@ -199,8 +200,8 @@ export default function PlaylistClient() {
                   onClick={() => handleDelete(pl.id)}
                   disabled={deleteId === pl.id}
                   style={{
-                    backgroundColor: 'rgba(239,68,68,0.08)', color: '#EF4444',
-                    border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px',
+                    backgroundColor: 'rgba(239,68,68,0.1)', color: '#EF4444',
+                    border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px',
                     padding: '8px 12px', fontSize: '13px', cursor: 'pointer',
                   }}
                 >
@@ -216,21 +217,21 @@ export default function PlaylistClient() {
       {showModal && (
         <>
           <div
-            style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 300 }}
+            style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 300 }}
             onClick={() => setShowModal(false)}
           />
           <div style={{
             position: 'fixed', top: '50%', left: '50%',
             transform: 'translate(-50%, -50%)',
-            backgroundColor: 'white', borderRadius: '20px',
+            backgroundColor: '#1a1a1a', borderRadius: '20px',
             padding: '32px', width: '100%', maxWidth: '440px',
-            zIndex: 301, boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            zIndex: 301, boxShadow: '0 20px 60px rgba(0,0,0,0.8)',
+            border: '1px solid #333333',
           }}>
-            <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#1A1A1A', marginBottom: '20px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#FFFFFF', marginBottom: '20px' }}>
               {editItem ? '✏️ Editar Playlist' : '🎵 Nova Playlist'}
             </h2>
 
-            {/* Título */}
             <div style={{ marginBottom: '16px' }}>
               <label style={labelStyle}>Nome da playlist *</label>
               <input
@@ -241,11 +242,10 @@ export default function PlaylistClient() {
                 autoFocus
                 style={inputStyle}
                 onFocus={(e) => (e.target.style.borderColor = '#B8860B')}
-                onBlur={(e)  => (e.target.style.borderColor = '#E0E0E0')}
+                onBlur={(e)  => (e.target.style.borderColor = '#333333')}
               />
             </div>
 
-            {/* Descrição */}
             <div style={{ marginBottom: '16px' }}>
               <label style={labelStyle}>Descrição</label>
               <textarea
@@ -255,11 +255,10 @@ export default function PlaylistClient() {
                 rows={3}
                 style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }}
                 onFocus={(e) => (e.target.style.borderColor = '#B8860B')}
-                onBlur={(e)  => (e.target.style.borderColor = '#E0E0E0')}
+                onBlur={(e)  => (e.target.style.borderColor = '#333333')}
               />
             </div>
 
-            {/* Pública */}
             <label style={{
               display: 'flex', alignItems: 'center', gap: '10px',
               cursor: 'pointer', marginBottom: '24px',
@@ -270,16 +269,15 @@ export default function PlaylistClient() {
                 onChange={(e) => setFormPublic(e.target.checked)}
                 style={{ width: '16px', height: '16px', accentColor: '#B8860B' }}
               />
-              <span style={{ fontSize: '14px', color: '#333' }}>
+              <span style={{ fontSize: '14px', color: '#CCCCCC' }}>
                 🌐 Tornar pública (qualquer pessoa pode ver)
               </span>
             </label>
 
-            {/* Botões */}
             <div style={{ display: 'flex', gap: '10px' }}>
               <button onClick={() => setShowModal(false)} style={{
-                flex: 1, backgroundColor: '#F5F5F5', color: '#666',
-                border: 'none', borderRadius: '10px', padding: '12px',
+                flex: 1, backgroundColor: '#2a2a2a', color: '#CCCCCC',
+                border: '1px solid #333333', borderRadius: '10px', padding: '12px',
                 fontSize: '14px', fontWeight: '600', cursor: 'pointer',
               }}>
                 Cancelar
@@ -288,8 +286,8 @@ export default function PlaylistClient() {
                 onClick={handleSave}
                 disabled={saving || !formTitle.trim()}
                 style={{
-                  flex: 1, backgroundColor: !formTitle.trim() ? '#D4AF37' : '#B8860B',
-                  color: 'white', border: 'none', borderRadius: '10px',
+                  flex: 1, backgroundColor: !formTitle.trim() ? '#8B6F0F' : '#B8860B',
+                  color: '#111111', border: 'none', borderRadius: '10px',
                   padding: '12px', fontSize: '14px', fontWeight: '700',
                   cursor: saving || !formTitle.trim() ? 'not-allowed' : 'pointer',
                   opacity: !formTitle.trim() ? 0.6 : 1,
@@ -305,23 +303,21 @@ export default function PlaylistClient() {
   )
 }
 
-// ── Sub-componentes ──────────────────────────────────────────
-
 function Empty({ onCreate }: { onCreate: () => void }) {
   return (
     <div style={{
-      backgroundColor: 'white', borderRadius: '20px', padding: '64px 32px',
-      textAlign: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+      backgroundColor: '#1a1a1a', borderRadius: '20px', padding: '64px 32px',
+      textAlign: 'center', border: '1px solid #333333',
     }}>
       <div style={{ fontSize: '56px', marginBottom: '16px' }}>🎶</div>
-      <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#1A1A1A', marginBottom: '8px' }}>
+      <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#FFFFFF', marginBottom: '8px' }}>
         Nenhuma playlist criada ainda
       </h2>
-      <p style={{ color: '#999', fontSize: '15px', marginBottom: '28px', lineHeight: 1.6 }}>
+      <p style={{ color: '#CCCCCC', fontSize: '15px', marginBottom: '28px', lineHeight: 1.6 }}>
         Crie playlists personalizadas com pregações,<br />louvores e devocionais.
       </p>
       <button onClick={onCreate} style={{
-        backgroundColor: '#B8860B', color: 'white', border: 'none',
+        backgroundColor: '#B8860B', color: '#111111', border: 'none',
         padding: '12px 28px', borderRadius: '10px', fontSize: '15px',
         fontWeight: '700', cursor: 'pointer',
       }}>
@@ -337,12 +333,13 @@ function Skeleton() {
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }`}</style>
       {[1, 2, 3].map(i => (
         <div key={i} style={{
-          backgroundColor: 'white', borderRadius: '16px', padding: '20px',
+          backgroundColor: '#1a1a1a', borderRadius: '16px', padding: '20px',
+          border: '1px solid #333333',
           animation: 'pulse 1.5s infinite',
         }}>
-          <div style={{ width: '48px', height: '48px', backgroundColor: '#F0F0F0', borderRadius: '12px', marginBottom: '12px' }} />
-          <div style={{ height: '18px', backgroundColor: '#F0F0F0', borderRadius: '4px', width: '70%', marginBottom: '8px' }} />
-          <div style={{ height: '14px', backgroundColor: '#F0F0F0', borderRadius: '4px', width: '90%' }} />
+          <div style={{ width: '48px', height: '48px', backgroundColor: '#2a2a2a', borderRadius: '12px', marginBottom: '12px' }} />
+          <div style={{ height: '18px', backgroundColor: '#2a2a2a', borderRadius: '4px', width: '70%', marginBottom: '8px' }} />
+          <div style={{ height: '14px', backgroundColor: '#2a2a2a', borderRadius: '4px', width: '90%' }} />
         </div>
       ))}
     </div>
@@ -350,12 +347,12 @@ function Skeleton() {
 }
 
 const labelStyle: React.CSSProperties = {
-  display: 'block', color: '#333', fontSize: '13px',
+  display: 'block', color: '#CCCCCC', fontSize: '13px',
   fontWeight: '600', marginBottom: '8px',
 }
 
 const inputStyle: React.CSSProperties = {
-  width: '100%', backgroundColor: 'white', border: '1.5px solid #E0E0E0',
-  borderRadius: '10px', padding: '12px 16px', color: '#1A1A1A', fontSize: '15px',
+  width: '100%', backgroundColor: '#2a2a2a', border: '1px solid #333333',
+  borderRadius: '10px', padding: '12px 16px', color: '#FFFFFF', fontSize: '15px',
   outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s',
 }

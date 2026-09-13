@@ -10,7 +10,7 @@ export default function PerfilPage() {
   // Proteção já feita pelo proxy.ts
   // Dados do usuário lidos no Client via supabase.auth.getUser()
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#F5F5F5' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#111111' }}>
       <Header />
       <PerfilClient />
       <Footer />

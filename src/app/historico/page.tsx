@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: 'Histórico' }
 
 export default function HistoricoPage() {
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#F5F5F5' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#111111' }}>
       <Header />
       <HistoricoClient />
       <Footer />

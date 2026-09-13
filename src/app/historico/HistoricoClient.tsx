@@ -54,34 +54,39 @@ export default function HistoricoClient() {
     setHistory([])
   }
 
-  return (
-    <main style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 16px' }}>
-
-      {/* Cabeçalho */}
-      <div style={{
-        display: 'flex', justifyContent: 'space-between',
-        alignItems: 'flex-start', flexWrap: 'wrap',
-        gap: '12px', marginBottom: '32px',
-      }}>
-        <div>
-          <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#1A1A1A', marginBottom: '4px' }}>
-            📺 Histórico
-          </h1>
-          <p style={{ color: '#666', fontSize: '15px' }}>
-            Conteúdos que você assistiu recentemente
-          </p>
-        </div>
-        {history.length > 0 && (
-          <button onClick={handleClearAll} style={{
-            backgroundColor: 'transparent', color: '#EF4444',
-            border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px',
-            padding: '8px 16px', fontSize: '13px', fontWeight: '600',
-            cursor: 'pointer',
-          }}>
-            🗑️ Limpar histórico
-          </button>
-        )}
+ return (
+  <main style={{ 
+    maxWidth: '900px', 
+    margin: '0 auto', 
+    padding: '40px 16px',
+    backgroundColor: '#111111', // ✅ ADICIONAR
+    minHeight: '100vh' // ✅ ADICIONAR
+  }}>
+    {/* Cabeçalho */}
+    <div style={{
+      display: 'flex', justifyContent: 'space-between',
+      alignItems: 'flex-start', flexWrap: 'wrap',
+      gap: '12px', marginBottom: '32px',
+    }}>
+      <div>
+        <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#FFFFFF', marginBottom: '4px' }}>
+          📺 Histórico
+        </h1>
+        <p style={{ color: '#CCCCCC', fontSize: '15px' }}>
+          Conteúdos que você assistiu recentemente
+        </p>
       </div>
+      {history.length > 0 && (
+        <button onClick={handleClearAll} style={{
+          backgroundColor: 'transparent', color: '#EF4444',
+          border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px',
+          padding: '8px 16px', fontSize: '13px', fontWeight: '600',
+          cursor: 'pointer',
+        }}>
+          🗑️ Limpar histórico
+        </button>
+      )}
+    </div>
 
       {/* Conteúdo */}
       {loading ? (

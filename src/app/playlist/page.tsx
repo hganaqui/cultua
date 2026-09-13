@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: 'Minhas Playlists' }
 
 export default function PlaylistPage() {
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#F5F5F5' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#111111' }}>
       <Header />
       <PlaylistClient />
       <Footer />

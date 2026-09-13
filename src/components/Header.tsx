@@ -6,7 +6,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { signOut } from '@/lib/auth'
-import BuscaGlobalClient from './BuscaGlobalClient'  // ✅ ADICIONAR AQUI
+import BuscaGlobalClient from './BuscaGlobalClient'
+import BuscaGlobalClientMobile from './BuscaGlobalClientMobile' // ✅ ADICIONAR AQUI
 import type { User } from '@supabase/supabase-js'
 import type { UserRole } from '@/types'
 
@@ -19,32 +20,31 @@ interface ProfileState {
 
 // ── Nav links ─────────────────────────────────────────────────────────────────
 const NAV_LINKS = [
-  { href: '/',                       label: 'Início' },
-  { href: '/categoria/louvor',       label: '🎵 Louvor' },
-  { href: '/categoria/pregacao',     label: '📖 Pregação' },
-  { href: '/categoria/crescimento',  label: '🌱 Crescimento' },
-  { href: '/categoria/testemunhos',  label: '🙏 Testemunhos' },
-  { href: '/explorar',               label: '🔍 Explorar' },
+  { href: '/', label: 'Início' },
+  { href: '/categoria/louvor', label: '🎵 Louvor' },
+  { href: '/categoria/pregacao', label: '📖 Pregação' },
+  { href: '/categoria/crescimento', label: '🌱 Crescimento' },
+  { href: '/categoria/testemunhos', label: '🙏 Testemunhos' },
 ]
 
 const USER_LINKS = [
-  { href: '/perfil',        label: '👤 Meu Perfil' },
-  { href: '/historico',     label: '📺 Histórico' },
-  { href: '/playlist',      label: '🎵 Minhas Playlists' },
-  { href: '/meus-uploads',  label: '📤 Meus Uploads' },
+  { href: '/perfil', label: '👤 Meu Perfil' },
+  { href: '/historico', label: '📺 Histórico' },
+  { href: '/playlist', label: '🎵 Minhas Playlists' },
+  { href: '/meus-uploads', label: '📤 Meus Uploads' },
   { href: '/configuracoes', label: '⚙️ Configurações' },
 ]
 
 export default function Header() {
-  const router  = useRouter()
+  const router = useRouter()
   const dropRef = useRef<HTMLDivElement>(null)
 
-  const [user, setUser]         = useState<User | null>(null)
-  const [profile, setProfile]   = useState<ProfileState | null>(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<ProfileState | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [userMenu, setUserMenu] = useState(false)
-  const [loading, setLoading]   = useState(true)
-  const [unread, setUnread]     = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [unread, setUnread] = useState(0)
 
   // ── Busca profile completo ────────────────────────────────────────────────
   async function fetchProfile(userId: string) {
@@ -63,7 +63,7 @@ export default function Header() {
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId)
       .eq('read', false)
-    
+
     if (!error) {
       setUnread(count ?? 0)
     }
@@ -134,8 +134,8 @@ export default function Header() {
   }, [])
 
   // ── Computed ──────────────────────────────────────────────────────────────
-  const role         = profile?.role ?? 'user'
-  const isAdmin      = role === 'admin' || role === 'superadmin'
+  const role = profile?.role ?? 'user'
+  const isAdmin = role === 'admin' || role === 'superadmin'
   const isSuperadmin = role === 'superadmin'
 
   const displayName = profile?.full_name?.split(' ')[0]
@@ -144,7 +144,7 @@ export default function Header() {
     ?? 'Usuário'
 
   const ROLE_BADGE = {
-    admin:      { label: '⭐ Admin',      color: '#B8860B', bg: 'rgba(184,134,11,0.15)', border: 'rgba(184,134,11,0.3)' },
+    admin: { label: '⭐ Admin', color: '#B8860B', bg: 'rgba(184,134,11,0.15)', border: 'rgba(184,134,11,0.3)' },
     superadmin: { label: '⚡ Superadmin', color: '#A855F7', bg: 'rgba(168,85,247,0.15)', border: 'rgba(168,85,247,0.3)' },
   }
   const badge = isAdmin ? ROLE_BADGE[role as 'admin' | 'superadmin'] : null
@@ -272,7 +272,7 @@ export default function Header() {
               {item.label}
             </Link>
           ))}
-          
+
           {/* ✅ BUSCA GLOBAL - ADICIONAR AQUI */}
           <BuscaGlobalClient />
           {/* ✅ FIM BUSCA */}
@@ -506,8 +506,8 @@ export default function Header() {
                       transition: 'background-color 0.15s',
                     }}
                     onMouseEnter={(e) =>
-                      (e.currentTarget.style.backgroundColor =
-                        'rgba(239,68,68,0.1)')
+                    (e.currentTarget.style.backgroundColor =
+                      'rgba(239,68,68,0.1)')
                     }
                     onMouseLeave={(e) =>
                       (e.currentTarget.style.backgroundColor = 'transparent')
@@ -624,6 +624,15 @@ export default function Header() {
               {item.label}
             </Link>
           ))}
+
+          {/* ✅ BUSCA MOBILE - ADICIONAR AQUI */}
+          <div style={{ borderBottom: '1px solid #333333', margin: '12px 0', paddingBottom: '12px' }}>
+            <p style={{ color: '#CCCCCC', fontSize: '12px', margin: '0 0 8px 0', fontWeight: '600' }}>
+              🔍 Buscar
+            </p>
+            <BuscaGlobalClientMobile />
+          </div>
+          {/* ✅ FIM BUSCA MOBILE */}
 
           <div style={{ marginTop: '16px' }}>
             {user ? (
@@ -859,9 +868,9 @@ function DropItem({
         transition: 'background-color 0.15s',
       }}
       onMouseEnter={(e) =>
-        (e.currentTarget.style.backgroundColor = highlight
-          ? `${color}22`
-          : '#333333')
+      (e.currentTarget.style.backgroundColor = highlight
+        ? `${color}22`
+        : '#333333')
       }
       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
     >
