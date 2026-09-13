@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { signOut } from '@/lib/auth'
+import BuscaGlobalClient from './BuscaGlobalClient'  // ✅ ADICIONAR AQUI
 import type { User } from '@supabase/supabase-js'
 import type { UserRole } from '@/types'
 
@@ -271,6 +272,10 @@ export default function Header() {
               {item.label}
             </Link>
           ))}
+          
+          {/* ✅ BUSCA GLOBAL - ADICIONAR AQUI */}
+          <BuscaGlobalClient />
+          {/* ✅ FIM BUSCA */}
         </nav>
 
         {/* ── Auth desktop ─────────────────────────────────────────────── */}
