@@ -1,3 +1,4 @@
+// src/app/admin/AdminClient.tsx
 'use client'
 
 import { useEffect, useState, useMemo, useCallback } from 'react'
@@ -44,7 +45,6 @@ export default function AdminClient() {
         .eq('status', status)
         .order('created_at', { ascending: false })
 
-
       setContents(prev => {
         const outros = prev.filter(c => c.status !== status)
         const novos = (data as Content[]) ?? []
@@ -56,7 +56,6 @@ export default function AdminClient() {
       setLoading(false)
     }
   }, [])
-
 
   useEffect(() => {
     async function checkAuth() {
@@ -80,7 +79,6 @@ export default function AdminClient() {
 
         setAuthorized(true)
 
-        // ✅ NOVO: Carrega TODOS os status em paralelo
         setLoading(true)
         try {
           const [pendingRes, approvedRes, rejectedRes] = await Promise.all([
@@ -101,8 +99,6 @@ export default function AdminClient() {
               .order('created_at', { ascending: false }),
           ])
 
-
-          // Armazena todos os dados
           const allContents = [
             ...(pendingRes.data ?? []).map(c => ({ ...c, status: 'pending' as const })),
             ...(approvedRes.data ?? []).map(c => ({ ...c, status: 'approved' as const })),
@@ -110,7 +106,7 @@ export default function AdminClient() {
           ]
 
           setContents(allContents)
-          setTab('pending') // Mostra pending por padrão
+          setTab('pending')
         } finally {
           setLoading(false)
         }
@@ -123,7 +119,6 @@ export default function AdminClient() {
   }, [router])
 
   const filteredContents = useMemo(() => {
-    // ✅ NOVO: Filtra por status/aba PRIMEIRO
     let result = contents.filter(c => c.status === tab)
 
     if (filters.searchTerm) {
@@ -157,23 +152,24 @@ export default function AdminClient() {
     return result
   }, [contents, filters, tab])
 
-const categoriesList = useMemo(
-  () => [...new Set(contents
-    .filter(c => c.status === tab) // ✅ NOVO
-    .map(c => (c.category as any)?.name)
-    .filter((x): x is string => !!x)
-  )].sort(),
-  [contents, tab] // ✅ ADICIONOU tab
-)
+  const categoriesList = useMemo(
+    () => [...new Set(contents
+      .filter(c => c.status === tab)
+      .map(c => (c.category as any)?.name)
+      .filter((x): x is string => !!x)
+    )].sort(),
+    [contents, tab]
+  )
 
-const authorsList = useMemo(
-  () => [...new Set(contents
-    .filter(c => c.status === tab) // ✅ NOVO
-    .map(c => (c.creator as any)?.full_name)
-    .filter((x): x is string => !!x)
-  )].sort(),
-  [contents, tab] // ✅ ADICIONOU tab
-)
+  const authorsList = useMemo(
+    () => [...new Set(contents
+      .filter(c => c.status === tab)
+      .map(c => (c.creator as any)?.full_name)
+      .filter((x): x is string => !!x)
+    )].sort(),
+    [contents, tab]
+  )
+
   async function handleAction(id: string, action: 'approved' | 'rejected') {
     setActionId(id)
     await supabase.from('contents').update({ status: action }).eq('id', id)
@@ -439,17 +435,25 @@ const authorsList = useMemo(
           <p>{filters.searchTerm || filters.category || filters.author ? 'Nenhum resultado com esses filtros.' : `Nenhum conteúdo ${tab === 'pending' ? 'aguardando aprovação' : tab === 'approved' ? 'aprovado' : 'rejeitado'}.`}</p>
         </div>
       ) : (
-   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {filteredContents.map(item => (
-            <div key={item.id} style={{
-              backgroundColor: '#222', borderRadius: '14px', padding: '20px',
-              display: 'grid',
-              gridTemplateColumns: 'auto 1fr',
-              gap: '16px',
-              border: '1px solid #2D2D2D',
-              transition: 'all 0.2s',
-              overflow: 'hidden', // ✅ Garante sem canto branco
-            }}
+            <div 
+              key={item.id} 
+              className="card-admin"
+              style={{
+                backgroundColor: '#222', 
+                borderRadius: '14px', 
+                padding: '20px',
+                display: 'grid',
+                gridTemplateColumns: 'auto 1fr',
+                gap: '16px',
+                border: '1px solid #2D2D2D',
+                transition: 'all 0.2s',
+                overflow: 'hidden',
+                WebkitBackfaceVisibility: 'hidden',
+                perspective: 1000,
+                transform: 'translateZ(0)',
+              }}
               onMouseEnter={e => (e.currentTarget.style.borderColor = '#3D3D3D')}
               onMouseLeave={e => (e.currentTarget.style.borderColor = '#2D2D2D')}
             >
@@ -518,7 +522,7 @@ const authorsList = useMemo(
                 {/* Botões - Responsivo */}
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: tab === 'pending' ? '1fr 1fr' : '1fr 1fr',
+                  gridTemplateColumns: '1fr 1fr',
                   gap: '8px',
                   marginTop: '8px',
                 }}>
@@ -530,12 +534,13 @@ const authorsList = useMemo(
                         style={{
                           backgroundColor: '#4CAF50', color: 'white', border: 'none',
                           borderRadius: '8px', padding: '8px 12px', fontSize: '12px',
-                          fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
+                          fontWeight: '700', cursor: actionId === item.id ? 'not-allowed' : 'pointer', 
+                          whiteSpace: 'nowrap',
                           opacity: actionId === item.id ? 0.6 : 1,
                           transition: 'all 0.2s',
                         }}
                       >
-                        ✅ Aprovar
+                        {actionId === item.id ? '⏳...' : '✅ Aprovar'}
                       </button>
                       <button
                         onClick={() => handleAction(item.id, 'rejected')}
@@ -544,12 +549,13 @@ const authorsList = useMemo(
                           backgroundColor: 'rgba(239,68,68,0.15)', color: '#EF4444',
                           border: '1px solid rgba(239,68,68,0.3)',
                           borderRadius: '8px', padding: '8px 12px', fontSize: '12px',
-                          fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
+                          fontWeight: '700', cursor: actionId === item.id ? 'not-allowed' : 'pointer', 
+                          whiteSpace: 'nowrap',
                           opacity: actionId === item.id ? 0.6 : 1,
                           transition: 'all 0.2s',
                         }}
                       >
-                        ❌ Rejeitar
+                        {actionId === item.id ? '⏳...' : '❌ Rejeitar'}
                       </button>
                     </>
                   )}
@@ -576,12 +582,13 @@ const authorsList = useMemo(
                           backgroundColor: 'rgba(239,68,68,0.15)', color: '#EF4444',
                           border: '1px solid rgba(239,68,68,0.3)',
                           borderRadius: '8px', padding: '8px 12px', fontSize: '12px',
-                          fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
+                          fontWeight: '700', cursor: deleteId === item.id && deleting ? 'not-allowed' : 'pointer', 
+                          whiteSpace: 'nowrap',
                           opacity: deleteId === item.id && deleting ? 0.6 : 1,
                           transition: 'all 0.2s',
                         }}
                       >
-                        🗑️ Remover
+                        {deleteId === item.id && deleting ? '⏳...' : '🗑️ Remover'}
                       </button>
                     </>
                   )}
@@ -606,12 +613,13 @@ const authorsList = useMemo(
                           backgroundColor: 'rgba(239,68,68,0.15)', color: '#EF4444',
                           border: '1px solid rgba(239,68,68,0.3)',
                           borderRadius: '8px', padding: '8px 12px', fontSize: '12px',
-                          fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
+                          fontWeight: '700', cursor: deleteId === item.id && deleting ? 'not-allowed' : 'pointer', 
+                          whiteSpace: 'nowrap',
                           opacity: deleteId === item.id && deleting ? 0.6 : 1,
                           transition: 'all 0.2s',
                         }}
                       >
-                        🗑️ Remover
+                        {deleteId === item.id && deleting ? '⏳...' : '🗑️ Remover'}
                       </button>
                     </>
                   )}
@@ -621,6 +629,23 @@ const authorsList = useMemo(
           ))}
         </div>
       )}
+
+      <style>{`
+        .card-admin {
+          -webkit-mask-image: radial-gradient(circle at top-left, black 99%, transparent 100%);
+          -webkit-mask-size: 100% 100%;
+          -webkit-mask-position: 0 0;
+          -webkit-mask-repeat: no-repeat;
+        }
+
+        @media (max-width: 768px) {
+          .card-admin {
+            -webkit-backface-visibility: hidden;
+            -webkit-perspective: 1000;
+            transform: translateZ(0);
+          }
+        }
+      `}</style>
     </main>
   )
 }
