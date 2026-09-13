@@ -1,494 +1,394 @@
-# CULTUA — Contexto para novo chat
+CULTUA — Contexto Completo para Novo Chat
+📋 Overview
+CULTUA é uma plataforma de conteúdo cristão com Sistema de Curadoria, Upload, Perfil e Gerenciamento de Usuários.
 
-## Repositório
-https://github.com/hganaqui/cultua
+Stack:
 
-## Produção
-https://plataforma-crista.vercel.app
+Frontend: Next.js 16.3.4 + React + TypeScript
+Backend: Supabase (PostgreSQL + Auth + Storage RLS)
+UI: Inline CSS (sem Tailwind)
+Storage: Cloudflare R2 + Supabase Storage
+Deploy: Vercel
+Theme: Dark mode (#111111 bg)
+🔗 Links Importantes
+Recurso	URL
+Produção	https://plataforma-crista.vercel.app
+Repositório	https://github.com/hganaqui/cultua
+Supabase	https://app.supabase.com
+Cloudflare	https://dash.cloudflare.com
+🎨 Color Palette (OBRIGATÓRIO)
+PÁGINA:      backgroundColor: '#111111'
+CARD:        backgroundColor: '#1a1a1a'
+INPUT:       backgroundColor: '#111111', border: '1px solid #333333'
+HOVER/SEL:   backgroundColor: '#2a2a2a'
+SKELETON:    backgroundColor: '#2a2a2a'
 
-## Stack
-Next.js 16.3.4 + TypeScript + Supabase + Cloudflare R2 + Vercel + Tailwind CSS
+PRIMÁRIA:    '#B8860B' (dourado — botões, icons)
+SECONDARY:   '#D4AF37' (dourado claro)
+DANGER:      '#EF4444' (rejeição, logout)
+SUCCESS:     '#22C55E' (aprovação)
+INFO:        '#60A5FA'
+SUPERADMIN:  '#A855F7' (roxo)
 
----
+TEXTO:
+  Título:    '#FFFFFF'
+  Corpo:     '#CCCCCC'
+  Muted:     '#555555' / '#666666'
 
-## O que já está feito
+BORDER:
+  Card:      '#2a2a2a'
+  Input:     '#333333'
+  Select:    '#444444'
+  Header:    '2px solid #B8860B'
+✅ Features Implementadas
+🔐 Auth
+Login, Signup, Esqueci Senha, Nova Senha, Callback
+Session management com Supabase SSR
+Proxy.ts para proteção de rotas
+🎯 Header & Navegação
+100% client, reativo ao login
+Avatar com <img> nativo + onError fallback emoji
+Badge de role: ⭐ Admin / ⚡ Superadmin
+Badge de notificações realtime
+Dropdown fecha ao clicar fora
+🏠 Home (/)
+Dark theme: backgroundColor: '#111111' ✅
+Hero: dark gradient
+CategorySection: dark + cards #F5F3F0 (off-white suave)
+👤 Configurações (/configuracoes) — ✅ FUNCIONAL
+Foto de perfil: <img> nativo com cache bust
+Avatar grande 100px com overlay câmera
+Nome completo precarregado do banco
+Alterar senha (mín. 6 chars)
+Encerrar sessão
+Zona de perigo: excluir conta (em breve)
+🛡️ Painel de Curadoria (/admin) — ✅ COMPLETO
+3 abas: Pendentes, Aprovados, Rejeitados
+Sync automática: Query ao trocar de aba
+Filtros: Categoria, Autor, Busca, Ordenação
+Ações: Aprovar, Rejeitar, Destacar, Deletar
+📤 Upload de Conteúdo (/admin/upload) — ✅ COMPLETO
+Tipos: Vídeo, Áudio, Texto
+Upload via presigned URLs (R2)
+Progresso: Barra de progresso
+Status: pending → fila de curadoria
+👥 Gerenciar Usuários (/admin/usuarios) — ✅ SUPERADMIN ONLY
+Gerencia roles: user/admin/superadmin
+Define escopos: categorias + criadores
+🎯 Sistema de Roles e Escopos
+user       → acesso padrão
+admin      → modera do seu escopo
+superadmin → acesso total
+📬 Sistema de Notificações
+Tabela notifications criada com RLS
+Badge realtime no Header
+Triggers SQL automáticos
+/notificacoes — a implementar
+📐 Padrões Obrigatórios
+Dark Theme Wrapper
+tsx
+Copy code
+<div style={{ minHeight: '100vh', backgroundColor: '#111111' }}>
+  <Header />
+  <MeuClient ... />
+  <Footer />
+</div>
+Avatar Nativo (OBRIGATÓRIO)
+tsx
+Copy code
+// ✅ CORRETO — sem next/image
+<img
+  src={avatarUrl}
+  alt="Avatar"
+  onError={() => setImgError(true)}
+  style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover' }}
+/>
+Supabase Clients
+typescript
+Copy code
+// Browser
+import { supabase } from '@/lib/supabase'
 
-### Fase 0 — Fundação
-- Posicionamento, copy, dados fictícios removidos
-- Estrutura do projeto limpa e escalável
+// Server
+const supabase = await createServerSupabase()
 
-### Auth
-- Login, cadastro, esqueci senha, nova senha, callback
-- Session management com Supabase SSR
+// Admin (NUNCA em client!)
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
-### Header & Navegação
-- `src/components/Header.tsx` — 100% client, reativo ao login
-- Avatar com `<img>` nativo + `onError` fallback para inicial (sem next/image — evita 400)
-- Badge de role: ⭐ Admin (dourado) / ⚡ Superadmin (roxo)
-- Badge de notificações não lidas em realtime (Supabase Realtime)
-- Dropdown com `useRef` fecha ao clicar fora
-- Menu: Início, Louvor, Pregação, Crescimento, Testemunhos, 🔍 Explorar
-- Links do usuário: Perfil, Histórico, Playlists, Meus Uploads, Configurações
-- Admin vê: 🛡️ Painel de Curadoria
-- Superadmin vê: 🛡️ Painel de Curadoria + ⚡ Gerenciar Usuários
-- Mobile: hamburger com badge de notificações
-- `proxy.ts`: proteção de rotas (Next.js 16)
-
-### Banco de Dados
-- 6 tabelas no Supabase + RLS + triggers
-- Supabase admin client em `lib/supabase-admin.ts`
-- Supabase server client em `lib/supabase-server.ts` com `createServerSupabase()`
-- Tabela `notifications` criada com RLS ✅
-- Tabela `admin_scopes` com RLS ✅
-- Constraint `profiles_role_check` atualizada: `CHECK (role IN ('user', 'admin', 'superadmin'))`
-- Triggers:
-  - `notify_admins_on_upload()` — notifica admins com escopo compatível ao upload
-  - `notify_creator_on_review()` — notifica criador quando aprovado/rejeitado
-
-### Storage — Supabase
-- Bucket `avatars` criado (público) ✅
-- Path correto: `{user_id}.{ext}` (sem subpasta — evita path duplicado)
-- URL gerada manualmente: `${SUPABASE_URL}/storage/v1/object/public/avatars/${path}`
-- Policies: leitura pública, upload/update para autenticados
-- API Route: `POST /api/upload-avatar`
-  - Valida tipo (image/*) e tamanho (max 2MB)
-  - Remove arquivo anterior antes de subir novo
-  - Salva `avatar_url` no profile
-
-### Páginas
-
-#### Públicas
-- `/` — Home dark theme ✅
-  - `page.tsx`: `backgroundColor: '#111111'`
-  - `Hero.tsx`: dark gradient (`#1A1A1A` → `#2D2D2D`)
-  - `CategorySection.tsx`: dark (`#111111`) + cards `#1a1a1a`
-  - `HomeClient.tsx`: dark (`#111111`) + skeleton dark
-- `/categoria/[slug]` — conteúdos por categoria
-- `/content/[id]` — player HTML5 nativo + sidebar relacionados
-- `/explorar` — filtros avançados por tipo, categoria, ordenação
-- `/sobre`, `/igrejas`, `/criadores`, `/privacidade`, `/suporte` — placeholders ✅
-
-#### Autenticadas
-- `/perfil` — perfil do usuário com avatar dinâmico
-- `/historico` — histórico de visualizações (CRUD completo)
-- `/playlist` — playlists do usuário (CRUD completo + modal)
-- `/configuracoes` — funcional ✅
-  - Foto de perfil: `<img>` nativo com `onError`, cache bust `?t=Date.now()`
-  - Editar nome completo
-  - Alterar senha (mín. 6 chars)
-  - Encerrar sessão
-  - Zona de perigo (excluir conta — em breve)
-- `/meus-uploads` — status dos uploads (pending/approved/rejected) dark ✅
-
-#### Admin
-- `/admin` — Painel de curadoria (Pendentes/Aprovados/Rejeitados + filtros)
-- `/admin/upload` — Upload para R2 (qualquer usuário logado pode submeter)
-- `/admin/usuarios` — SuperAdmin only, dark theme ✅
-  - Gerencia roles (user/admin/superadmin)
-  - Define escopos: categorias + criadores por admin
-
-### Sistema de Roles e Escopos
-- `user` — acesso padrão, pode submeter conteúdo
-- `admin` — modera conteúdos do seu escopo (categorias OU criadores — lógica OR)
-- `superadmin` — acesso total
-- Admin sem escopo = não vê nada
-- Tabela `admin_scopes`: `(admin_id, scope_type, scope_value)`
-- `scope_type`: `'category'` | `'creator'`
-- Função SQL: `admin_can_access_content(admin_id, content_id) RETURNS BOOLEAN`
-
-### Sistema de Notificações
-- Tabela `notifications`: `type`, `title`, `message`, `read`, `metadata`
-- Types: `pending_content` | `content_approved` | `content_rejected`
-- Badge realtime no Header (canal `header-notifications`)
-- Triggers SQL automáticos
-- `/notificacoes` — a implementar
-
-### API Routes
-- `POST /api/upload-avatar`
-- `POST /api/admin/set-role` (superadmin only)
-- `GET /api/admin/scopes?admin_id=xxx`
-- `POST /api/admin/scopes`
-- `DELETE /api/admin/scopes`
-
-### SEO
-- `layout.tsx` com `metadataBase`, title template, openGraph, twitter
-- `generateMetadata()` dinâmico em `/content/[id]` e `/categoria/[slug]`
-
-### Páginas de Erro
-- `/not-found.tsx` customizada
-
----
-
-## O que falta
-
-### Prioritário
-- `/notificacoes` — página listar + marcar como lida
-- Player Plyr.js em `/content/[id]` (substituir `<video>` nativo)
-- `<BuscaGlobal />` integrado no Header (Ctrl+K)
-
-### Médio prazo
-- Doações (Stripe / Mercado Pago)
-- Comentários moderados
-- Excluir conta (endpoint real)
-- Alterar e-mail
-
-### Futuro
-- B2B Igrejas (Fase 3) — salas exclusivas, break-even mês 9-10
-- IA + Apps (Fase 4) — Whisper transcrição, app nativo
-
----
-
-## Padrões do projeto
-
-### Regra de ouro — Dark Theme
-```
-Todas as páginas DEVEM ter fundo dark.
-Nunca usar: white, #F5F5F5, #E0E0E0, #1A1A1A claro
-
-Paleta obrigatória:
-- Página:    backgroundColor: '#111111'
-- Card:      backgroundColor: '#1a1a1a'
-- Input:     backgroundColor: '#111111', border: '1px solid #333333'
-- Hover:     backgroundColor: '#2a2a2a'
-- Skeleton:  backgroundColor: '#2a2a2a'
-- Título:    color: '#FFFFFF'
-- Corpo:     color: '#CCCCCC'
-- Muted:     color: '#555555' ou '#666666'
-- Border:    #2a2a2a (card) / #333333 (input) / #444444 (select)
-```
-
-### Wrapper padrão de página (OBRIGATÓRIO)
-```tsx
-// page.tsx (server)
-export default async function AlgumaPage() {
-  return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#111111' }}>
-      <Header />
-      <AlgumaClient ... />
-      <Footer />
-    </div>
-  )
-}
-
-// AlgumaClient.tsx (client)
-<main style={{
-  minHeight: 'calc(100vh - 60px)',
-  backgroundColor: '#111111',
-  padding: '40px 16px',
-}}>
-  <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-    {/* conteúdo */}
-  </div>
-</main>
-```
-
-### Arquitetura
-- Server Components por padrão
-- `'use client'` só quando tem `useState`/`useEffect`
-- Header é 100% client (`supabase.auth.onAuthStateChange`)
-- Inline styles predominam (não Tailwind classes)
-
-### Next.js 16
-- `params` e `searchParams` são Promise — usar `await`
-- Middleware virou `proxy.ts` — export `proxy()`
-- `generateMetadata()` retorna `Promise<Metadata>`
-
-### Supabase
-- Browser: `supabase` de `lib/supabase.ts`
-- Server: `createServerSupabase()` de `lib/supabase-server.ts`
-- Admin: `supabaseAdmin` de `lib/supabase-admin.ts` (nunca em client)
-- Joins retornam **array** mesmo em `*-to-one` — SEMPRE usar `getCategory()`
-
-### Imagens
-- Avatar: `<img>` nativo com `onError` — NUNCA `next/image` para avatars do Supabase
-- Thumbnails: `next/image` com `remotePatterns` configurado em `next.config.ts`
-- `next.config.ts` deve ter: `{ protocol: 'https', hostname: '**.supabase.co' }`
-
-### Typing — OBRIGATÓRIO
-```tsx
-import { getCategory, getCategoryName, getCreatorName } from '@/types'
-
-// ✅ CORRETO
-const cat   = getCategory(item.category)
-const color = cat?.color
-const name  = cat?.name
-
-// ❌ ERRADO — TS2339
-const color = item.category?.color
-```
-
----
-
-## Estrutura de Pastas
-
-```
+📁 Project Structure
 src/
 ├── app/
-│   ├── layout.tsx
-│   ├── not-found.tsx
-│   ├── page.tsx                      ← bg #111111
-│   ├── HomeClient.tsx                ← bg #111111, skeleton dark
-│   ├── api/
-│   │   ├── upload-avatar/route.ts
-│   │   └── admin/
-│   │       ├── set-role/route.ts
-│   │       └── scopes/route.ts
-│   ├── content/[id]/
-│   │   ├── page.tsx
-│   │   └── ContentPlayer.tsx
-│   ├── categoria/[slug]/
-│   │   ├── page.tsx
-│   │   └── CategoriaClient.tsx
-│   ├── explorar/
-│   ├── perfil/
-│   ├── historico/
-│   ├── playlist/
+│   ├── admin/
+│   │   ├── AdminClient.tsx          ✅ Painel de Curadoria (pending/approved/rejected)
+│   │   └── page.tsx
+│   ├── admin/upload/
+│   │   ├── UploadClient.tsx         ✅ Upload de conteúdo
+│   │   └── page.tsx
 │   ├── configuracoes/
-│   │   ├── page.tsx                  ← Server: busca profile, passa props
-│   │   └── ConfiguracoesClient.tsx   ← Client: <img> nativo, sem next/image
+│   │   ├── ConfiguracoesClient.tsx  ✅ Perfil do usuário (avatar, nome, senha)
+│   │   └── page.tsx
+│   ├── perfil/
+│   │   └── page.tsx                 🔍 Perfil público (visualização apenas)
 │   ├── meus-uploads/
-│   │   ├── page.tsx
-│   │   └── MeusUploadsClient.tsx
-│   ├── sobre/page.tsx
-│   ├── igrejas/page.tsx
-│   ├── criadores/page.tsx
-│   ├── privacidade/page.tsx
-│   ├── suporte/page.tsx
-│   ├── auth/
-│   └── admin/
-│       ├── page.tsx
-│       ├── AdminClient.tsx
-│       ├── upload/
-│       └── usuarios/
-│           ├── page.tsx
-│           └── UsuariosClient.tsx
+│   │   ├── MeusUploadsClient.tsx    ✅ Uploads do usuário
+│   │   └── page.tsx
+│   ├── layout.tsx
+│   └── page.tsx                      ✅ Home com CategorySection
 ├── components/
-│   ├── Header.tsx                    ← 100% client, <img> nativo para avatar
-│   ├── Footer.tsx                    ← já dark (#1A1A1A) ✅
-│   ├── Hero.tsx                      ← já dark (gradient #1A1A1A) ✅
-│   ├── CategorySection.tsx           ← dark (#111111) + cards #1a1a1a ✅
-│   ├── VideoCard.tsx
-│   ├── ProfileAvatar.tsx
-│   └── BuscaGlobal.tsx
-├── hooks/
-│   └── useBuscaGlobal.ts
+│   ├── Header.tsx
+│   ├── Footer.tsx
+│   ├── CategorySection.tsx           ✅ Categorias (Louvor, Pregação, etc)
+│   ├── VideoCard.tsx                 ✅ Card de vídeo
+│   └── ...
 ├── lib/
-│   ├── supabase.ts
-│   ├── supabase-server.ts
-│   ├── supabase-admin.ts
-│   ├── cultua-config.ts
-│   ├── r2.ts
-│   ├── db.ts
-│   └── proxy.ts
-├── styles/
-│   ├── globals.css
-│   └── cultua.css
-└── types/
-    └── index.ts
-```
+│   ├── supabase.ts                  Client Supabase
+│   ├── supabase-server.ts           Server Supabase
+│   ├── auth.ts                      Funções de auth
+│   ├── r2.ts                        Upload limits config
+│   ├── cultua-config.ts             Config colors & constants
+│   └── ...
+├── types/
+│   └── index.ts                     Type definitions
+└── api/
+    ├── upload-avatar/route.ts        ✅ Upload avatar (Configurações)
+    ├── upload/presigned/route.ts     ✅ Presigned URLs (UploadClient)
+    ├── init-profile/route.ts         ✅ Init profile com nome do email
+    └── ...
+🔑 Key Features Implemented
+✅ 1. Painel de Curadoria (/admin)
+3 abas: Pendentes, Aprovados, Rejeitados
+Carregamento: Todos 3 status em paralelo ao abrir
+Filtros: Por categoria, autor, busca, ordenação
+Ações: Aprovar, Rejeitar, Destacar, Deletar
+Sync: Query automática ao trocar de aba (sempre atualizado)
+Arquivo: src/app/admin/AdminClient.tsx
 
----
+loadContents(status) → busca do banco sempre que muda aba
+filteredContents → filtra por tab + busca/categoria/autor
+Counts mostram dados em tempo real do array
+✅ 2. Upload de Conteúdo (/admin/upload)
+Tipos: Vídeo, Áudio, Texto
+Upload: Via presigned URLs (R2/Cloudflare)
+Progresso: Barra de progresso para vídeo e thumb
+Validação: Tipo de arquivo, tamanho máximo
+Status: Pendente → Fila de curadoria
+Arquivo: src/app/admin/upload/UploadClient.tsx
 
-## Types principais (`src/types/index.ts`)
+Validação de arquivo antes de upload
+Progress tracking com XMLHttpRequest
+Salva no Supabase com status: 'pending'
+✅ 3. Configurações de Perfil (/configuracoes)
+Avatar: Upload com preview, cache bust, emoji fallback
+Nome Completo: Preenchido com dados do banco, editável
+Senha: Alteração segura
+Logout: Encerrar sessão
+Deletar Conta: Confirmação (em breve)
+Arquivo: src/app/configuracoes/ConfiguracoesClient.tsx
 
-```typescript
-export type UserRole = 'user' | 'admin' | 'superadmin'
+Avatar grande 100px com overlay câmera
+Nome precarregado do profile
+Upload avatar → atualiza estado + banco
+router.refresh() → recarrega do servidor
+Arquivo: src/app/configuracoes/page.tsx
 
-export type Profile = {
-  id: string
-  full_name: string | null
-  avatar_url: string | null
-  role: UserRole
-  managed_categories: string[] | null
-  managed_creators: string[] | null
-  created_at: string
+revalidate = 0 → nunca cachear
+dynamic = 'force-dynamic' → sempre buscar do banco
+Busca profile sem filtro de role
+Init profile com nome do email se vazio
+✅ 4. Home com Categorias (/)
+4 Categorias: Louvor, Pregação, Crescimento, Testemunhos
+Cards: Quadrados 1:1, hover effect
+Cores: Off-white #F5F3F0 (suave, não forte)
+Destaques: Seção com conteúdo em destaque
+Arquivo: src/components/CategorySection.tsx
+
+Cards com aspect-ratio: 1/1
+Hover com translateY(-4px) e border dourada
+Background: #F5F3F0 + border #E8E3DE
+✅ 5. Video Cards
+Layout: Thumbnail 16:9 + info
+Badges: Categoria, Tipo, Destaque
+Info: Título, Criador, Data, Duração
+Cores: Off-white #F5F3F0
+Arquivo: src/components/VideoCard.tsx
+
+Background: #F5F3F0
+Título: #222222 (não preto puro)
+Criador: #666666
+Play button overlay com hover
+🔐 Authentication & Permissions
+typescript
+Copy code
+// Roles disponíveis
+'user'      → Usuário comum (pode fazer upload)
+'admin'     → Admin (pode aprovar/rejeitar)
+'superadmin' → Superadmin (controle total)
+
+// Verificação nos componentes
+const { data: profile } = await supabase
+  .from('profiles')
+  .select('role')
+  .eq('id', user.id)
+  .single()
+
+if (!['user', 'admin', 'superadmin'].includes(profile.role)) {
+  router.push('/') // acesso negado
 }
+📊 Database Schema
+profiles table
+sql
+Copy code
+id (uuid, pk)
+full_name (text, nullable) -- Preenchido com nome do email no init
+avatar_url (text, nullable) -- URL do storage
+role (text) -- 'user' | 'admin' | 'superadmin'
+managed_categories (jsonb, nullable)
+managed_creators (jsonb, nullable)
+created_at (timestamp)
+updated_at (timestamp)
+contents table
+sql
+Copy code
+id (uuid, pk)
+title (text, required)
+description (text, nullable)
+type (text) -- 'video' | 'audio' | 'text'
+status (text) -- 'pending' | 'approved' | 'rejected'
+url_media (text, nullable) -- URL do vídeo/áudio
+url_thumb (text, nullable) -- URL da thumbnail
+duration (text, nullable) -- Ex: "45:30"
+category_id (uuid, fk)
+creator_id (uuid, fk → profiles)
+is_featured (boolean)
+created_at (timestamp)
+updated_at (timestamp)
+categories table
+sql
+Copy code
+id (uuid, pk)
+name (text) -- 'Louvor', 'Pregação', etc
+slug (text) -- 'louvor', 'pregacao'
+color (text) -- '#B8860B'
+icon (text) -- '🎵'
+description (text, nullable)
+🔧 API Endpoints
+POST /api/upload-avatar
+Upload de avatar para o usuário
 
-export type Category = { id, name, slug, description, icon, color, created_at }
+typescript
+Copy code
+// Request
+{ file: File }
 
-export type ContentStatus = 'pending' | 'approved' | 'rejected'
-export type ContentType   = 'video' | 'audio' | 'text'
+// Response
+{ url: string }
 
-export type Content = {
-  // campos base...
-  category?: Category | Category[] | null   // join — sempre array no Supabase
-  creator?: Pick<User, 'id'|'full_name'|'avatar_url'> | null
-}
+// Salva em: storage/avatars/{user.id}.jpg
+POST /api/upload/presigned
+Gera presigned URL para upload no R2
 
-export type ContentWithStatus = {
-  id, title, status, creator_id, created_at, url_thumb,
-  category: Category | Category[] | null
-}
+typescript
+Copy code
+// Request
+{ fileName: string, fileType: string, uploadType: 'video' | 'thumb' }
 
-export type Notification = {
-  id, user_id,
-  type: 'pending_content' | 'content_approved' | 'content_rejected',
-  title, message, read, metadata, created_at
-}
+// Response
+{ presignedUrl: string, publicUrl: string }
+POST /api/init-profile
+Inicializa profile com dados do email
 
-export type AdminScope      = { id, admin_id, scope_type, scope_value, granted_by, created_at }
-export type AdminWithScopes = { id, full_name, email, role, created_at, scopes: { categories: string[], creators: string[] } }
+typescript
+Copy code
+// Request
+{ full_name?: string, avatar_url?: string }
 
-// Helpers OBRIGATÓRIOS
-export function getCategory(category): Category | null
-export function getCategoryName(category): string
-export function getCreatorName(creator): string
-export function translateAuthError(message): string
-```
+// Response
+{ data: Profile }
+🎯 User Flow
+1. Novo Usuário
+Signup → cria auth.users
+Trigger cria profile com full_name = email.split('@')[0]
+User vai em /configuracoes
+Nome já vem preenchido ✅
+Pode editar e salvar
+Avatar falback é emoji com inicial
+2. Upload de Conteúdo
+User vai em /admin/upload
+Seleciona tipo: Vídeo, Áudio, Texto
+Preenche: título, descrição, categoria, duração
+Upload vídeo + thumbnail (opcional)
+Status: pending → fila de curadoria
+3. Curadoria (Admin)
+Admin vai em /admin
+Vê 3 abas: Pendentes (0), Aprovados (7), Rejeitados (0)
+Clica em aba → query busca dados atualizados
+Filtra por categoria/autor/busca
+Aprova ou Rejeita
+Item sai da aba e vai pro destino
+4. Visualização (Público)
+Home mostra categorias
+Clica em categoria → lista vídeos aprovados
+Clica em vídeo → player
+Vê info: criador, data, duração
+🚀 Deploy Checklist
+ Variáveis de ambiente (.env.local)
+ Supabase database schema (SQL migrations)
+ Storage buckets criados (avatars, videos, thumbs)
+ RLS policies configuradas
+ Trigger de profile creation ativo
+ Presigned URLs working
+ Avatar upload endpoint funcionando
+ Upload de conteúdo working
+🐛 Common Issues & Fixes
+Problema: Avatar não carrega
+Causa: Cache, URL quebrada Fix: Cache bust com ?t=${Date.now()}
 
----
+Problema: Nome não precarrega
+Causa: full_name null no banco Fix: Init profile via /api/init-profile ou trigger
 
-## Proxy — `src/proxy.ts`
+Problema: Aprovados zera ao clicar
+Causa: Query não filtra por tab Fix: filteredContents deve filtrar por tab === status
 
-```typescript
-const PROTECTED_ROUTES = [
-  '/perfil', '/playlist', '/historico', '/configuracoes',
-  '/admin', '/meus-uploads'
-]
-const AUTH_ROUTES  = ['/auth/login', '/auth/signup']
-const ROLE_ROUTES  = [{ path: '/admin/usuarios', role: 'superadmin' }]
-```
+Problema: Branco muito forte nos cards
+Causa: #FFFFFF puro Fix: Trocar para #F5F3F0 (off-white suave)
 
----
+📝 Notes
+Usar router.refresh() para recarregar dados do servidor
+Usar revalidate = 0 + dynamic = 'force-dynamic' em páginas dinâmicas
+Avatar fallback: emoji com primeira letra do nome
+Category colors: Louvor #B8860B, Pregação #D4AF37, Crescimento #4CAF50, Testemunhos #7C3AED
+Sempre que mudar de aba no painel, faz query nova (nunca fica desincronizado)
+Off-white cards: #F5F3F0 com border #E8E3DE (mais suave que branco puro)
+🔄 Last Updated
+2026-09-13 01:50 UTC
 
-## Banco de dados — SQL importante
+✅ Painel de Curadoria funcionando (3 abas, sync automática)
+✅ Upload de Conteúdo funcionando
+✅ Configurações com Avatar Grande (100px) + Nome Precarregado
+✅ Cards com off-white suave #F5F3F0
+✅ Profile Init via email automático
 
-```sql
--- Constraint atualizada (rodar se der erro de role)
-ALTER TABLE profiles DROP CONSTRAINT profiles_role_check;
-ALTER TABLE profiles ADD CONSTRAINT profiles_role_check
-  CHECK (role IN ('user', 'admin', 'superadmin'));
+oadmap
 
--- Setar superadmin
-UPDATE profiles SET role = 'superadmin'
-WHERE id = (SELECT id FROM auth.users WHERE email = 'seu@email.com');
+Sprint Atual
 
--- Corrigir URL de avatar duplicada (avatars/avatars/)
-UPDATE profiles
-SET avatar_url = REPLACE(avatar_url, '/avatars/avatars/', '/avatars/')
-WHERE avatar_url LIKE '%/avatars/avatars/%';
+ /notificacoes — página (listar + marcar como lida)
+ Player Plyr.js em /content/[id]
+ <BuscaGlobal /> no Header (Ctrl+K)
 
--- Limpar avatar inválido
-UPDATE profiles SET avatar_url = NULL
-WHERE id = 'uuid-do-usuario';
-```
+Q2
 
----
+ Doações (Stripe / Mercado Pago)
+ Comentários moderados
+ Excluir conta + alterar e-mail
 
-## Storage — path correto do avatar
+Q3 — B2B Igrejas
 
-```typescript
-// ✅ CORRETO — sem subpasta
-const path = `${user.id}.${ext}`
-// URL: ${SUPABASE_URL}/storage/v1/object/public/avatars/${user.id}.jpg
+ Salas exclusivas
+ Assinatura recorrente (break-even mês 9-10)
 
-// ❌ ERRADO — gera path duplicado
-const path = `avatars/${user.id}.${ext}`
-// URL quebrada: .../public/avatars/avatars/uuid.jpg
-```
+Q4 — IA + Apps
 
----
-
-## next.config.ts
-
-```typescript
-const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      { protocol: 'https', hostname: '**.supabase.co' },
-      { protocol: 'https', hostname: '**.supabase.in' },
-    ],
-  },
-}
-```
-
----
-
-## Variáveis de Ambiente (.env.local)
-
-```
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_R2_BUCKET=
-R2_ACCESS_KEY_ID=
-R2_SECRET_ACCESS_KEY=
-STRIPE_SECRET_KEY=
-STRIPE_PUBLISHABLE_KEY=
-```
-
----
-
-## URLs Importantes
-
-| Recurso    | URL |
-|------------|-----|
-| Produção   | https://plataforma-crista.vercel.app |
-| Repositório | https://github.com/hganaqui/cultua |
-| Supabase   | https://app.supabase.com |
-| Cloudflare | https://dash.cloudflare.com |
-
----
-
-## Branding CULTUA
-
-| Token | Valor |
-|-------|-------|
-| Primária | `#B8860B` (dourado) |
-| Página bg | `#111111` |
-| Card bg | `#1a1a1a` |
-| Hover/input | `#2a2a2a` |
-| Border card | `#2a2a2a` |
-| Border input | `#333333` |
-| Border select | `#444444` |
-| Texto título | `#FFFFFF` |
-| Texto corpo | `#CCCCCC` |
-| Texto muted | `#555555` / `#666666` |
-| Danger | `#EF4444` |
-| Success | `#22C55E` |
-| Info | `#60A5FA` |
-| Superadmin | `#A855F7` |
-| Header border | `2px solid #B8860B` |
-
----
-
-## Commits Recentes
-
-- Home dark theme: page.tsx, CategorySection, HomeClient, Hero
-- Fix avatar: <img> nativo com onError em Header e Configurações
-- Fix avatar path: sem subpasta (evita avatars/avatars/ duplicado)
-- Fix avatar URL: UPDATE SQL para corrigir URLs já salvas
-- Fix constraint: profiles_role_check inclui 'superadmin'
-- Fix build: getCategory exportada em types/index.ts
-- Fix build: categoria/[slug]/page.tsx prop corrigida (slug vs contentId)
-- next.config.ts: remotePatterns para *.supabase.co
-- Bucket avatars criado com policies corretas
-- Tabela notifications + admin_scopes criadas
-- Dark theme: meus-uploads, admin/usuarios, configuracoes
-- Páginas placeholder: /sobre, /igrejas, /criadores, /privacidade, /suporte
-- Sistema de roles e escopos completo
-- Notificações realtime no Header
-- Configurações funcionais: nome, senha, foto, sessão
-
----
-
-## Roadmap
-
-### Sprint Atual
-- [ ] `/notificacoes` — página (listar + marcar como lida)
-- [ ] Player Plyr.js em `/content/[id]`
-- [ ] `<BuscaGlobal />` no Header (Ctrl+K)
-
-### Q2
-- [ ] Doações (Stripe / Mercado Pago)
-- [ ] Comentários moderados
-- [ ] Excluir conta + alterar e-mail
-
-### Q3 — B2B Igrejas
-- [ ] Salas exclusivas
-- [ ] Assinatura recorrente (break-even mês 9-10)
-
-### Q4 — IA + Apps
-- [ ] Whisper transcrição
-- [ ] App nativo
-- [ ] Busca semântica
+ Whisper transcrição
+ App nativo
+ Busca semântica

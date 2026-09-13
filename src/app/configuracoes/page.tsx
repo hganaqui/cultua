@@ -21,7 +21,6 @@ export default async function ConfiguracoesPage() {
     .eq('id', user.id)
     .single()
 
-  console.log('📊 Profile do servidor:', profile, 'Erro:', error)
 
   const safeProfile: Profile = profile ?? {
     id: user.id,

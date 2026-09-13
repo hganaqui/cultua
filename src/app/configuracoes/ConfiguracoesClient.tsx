@@ -39,20 +39,15 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
   const [loggingOut, setLoggingOut] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  // ✅ NOVO: Carregar dados do profile ao montar
   useEffect(() => {
-    console.log('Profile recebido:', profile)
-
     if (profile) {
       setFullName(profile.full_name ?? '')
       setAvatarUrl(profile.avatar_url ?? '')
 
-      // ✅ Se não tem full_name no banco, populate com email
       if (!profile.full_name && email) {
         const defaultName = email.split('@')[0]
         setFullName(defaultName)
 
-        // Chama o endpoint para salvar
         fetch('/api/init-profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -62,7 +57,6 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
           }),
         })
           .then(res => res.json())
-          .then(data => console.log('✅ Perfil inicializado:', data))
           .catch(err => console.error('❌ Erro:', err))
       }
     }
@@ -83,7 +77,6 @@ async function handleSaveName() {
   setNameMsg('')
 
   try {
-    console.log('💾 Salvando nome:', fullName.trim()) // ✅ DEBUG
 
     const { data, error } = await supabase
       .from('profiles')
@@ -91,7 +84,6 @@ async function handleSaveName() {
       .eq('id', profile.id)
       .select() // ✅ NOVO: retorna os dados atualizados
 
-    console.log('✅ Resposta:', { data, error }) // ✅ DEBUG
 
     if (error) {
       console.error('❌ Erro Supabase:', error)
@@ -268,7 +260,6 @@ async function handleSaveName() {
                 src={avatarUrl}
                 alt="Avatar"
                 onError={() => {
-                  console.log('Erro ao carregar imagem:', avatarUrl)
                   setImgError(true)
                 }}
                 style={{

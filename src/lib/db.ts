@@ -136,3 +136,53 @@ export async function getWatchHistory(userId: string) {
 
   return { data, error }
 }
+
+// ── Notificações ─────────────────────────────────────────────
+
+export async function getNotifications(userId: string) {
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+
+  return { data, error }
+}
+
+export async function getUnreadNotificationsCount(userId: string) {
+  const { count, error } = await supabase
+    .from('notifications')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('read', false)
+
+  return { count: count ?? 0, error }
+}
+
+export async function markNotificationAsRead(notificationId: string) {
+  const { error } = await supabase
+    .from('notifications')
+    .update({ read: true })
+    .eq('id', notificationId)
+
+  return { error }
+}
+
+export async function markAllNotificationsAsRead(userId: string) {
+  const { error } = await supabase
+    .from('notifications')
+    .update({ read: true })
+    .eq('user_id', userId)
+    .eq('read', false)
+
+  return { error }
+}
+
+export async function deleteNotification(notificationId: string) {
+  const { error } = await supabase
+    .from('notifications')
+    .delete()
+    .eq('id', notificationId)
+
+  return { error }
+}
