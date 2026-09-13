@@ -7,35 +7,51 @@ import type { Metadata } from 'next'
 import type { Profile } from '@/types'
 
 export const metadata: Metadata = { title: 'Configurações — CULTUA' }
+export const revalidate = 0
 
 export default async function ConfiguracoesPage() {
   const supabase = await createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login?redirect=/configuracoes')
 
-  // ✅ NOVO: Log completo da query
-  const { data: profile, error } = await supabase
+  // ✅ Tenta buscar o perfil
+  let profile = await supabase
     .from('profiles')
     .select('id, full_name, avatar_url, role, managed_categories, managed_creators, created_at')
     .eq('id', user.id)
     .single()
 
-  console.log('🔍 Query do Supabase:')
-  console.log('User ID:', user.id)
-  console.log('Profile retornado:', profile)
-  console.log('Erro (se houver):', error)
-  console.log('full_name:', profile?.full_name)
-  console.log('avatar_url:', profile?.avatar_url)
+  // ✅ Se não encontrar, cria um novo
+  if (!profile.data) {
+    console.log('Criando novo perfil para:', user.id)
+    const { data: newProfile } = await supabase
+      .from('profiles')
+      .insert({
+        id: user.id,
+        full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário',
+        avatar_url: user.user_metadata?.avatar_url || null,
+        role: 'user',
+        managed_categories: null,
+        managed_creators: null,
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single()
 
-  const safeProfile: Profile = profile ?? {
+    profile.data = newProfile
+  }
+
+  const safeProfile: Profile = profile.data ?? {
     id: user.id,
-    full_name: null,
+    full_name: user.email?.split('@')[0] || 'Usuário',
     avatar_url: null,
     role: 'user',
     managed_categories: null,
     managed_creators: null,
     created_at: new Date().toISOString(),
   }
+
+  console.log('✅ Profile carregado:', safeProfile)
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#111111' }}>

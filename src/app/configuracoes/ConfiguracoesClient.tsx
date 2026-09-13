@@ -42,14 +42,33 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
   // ✅ NOVO: Carregar dados do profile ao montar
   useEffect(() => {
     console.log('Profile recebido:', profile)
-    
+
     if (profile) {
       setFullName(profile.full_name ?? '')
       setAvatarUrl(profile.avatar_url ?? '')
+
+      // ✅ Se não tem full_name no banco, populate com email
+      if (!profile.full_name && email) {
+        const defaultName = email.split('@')[0]
+        setFullName(defaultName)
+
+        // Chama o endpoint para salvar
+        fetch('/api/init-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            full_name: defaultName,
+            avatar_url: null,
+          }),
+        })
+          .then(res => res.json())
+          .then(data => console.log('✅ Perfil inicializado:', data))
+          .catch(err => console.error('❌ Erro:', err))
+      }
     }
-    
+
     setDataLoaded(true)
-  }, [profile])
+  }, [profile, email])
 
   const displayName = fullName ? fullName.split(' ')[0] : email.split('@')[0] || 'Usuário'
 
@@ -154,7 +173,7 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
       setImgError(false)
       const newUrl = data.url + `?t=${Date.now()}`
       setAvatarUrl(newUrl)
-      
+
       setAvatarMsg('✅ Foto atualizada!')
       setTimeout(() => {
         setAvatarMsg('')
