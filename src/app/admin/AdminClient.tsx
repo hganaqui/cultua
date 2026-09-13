@@ -439,19 +439,21 @@ const authorsList = useMemo(
           <p>{filters.searchTerm || filters.category || filters.author ? 'Nenhum resultado com esses filtros.' : `Nenhum conteúdo ${tab === 'pending' ? 'aguardando aprovação' : tab === 'approved' ? 'aprovado' : 'rejeitado'}.`}</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {filteredContents.map(item => (
             <div key={item.id} style={{
               backgroundColor: '#222', borderRadius: '14px', padding: '20px',
-              display: 'flex', gap: '16px', alignItems: 'flex-start',
+              display: 'grid',
+              gridTemplateColumns: 'auto 1fr',
+              gap: '16px',
               border: '1px solid #2D2D2D',
               transition: 'all 0.2s',
-              overflow: 'hidden', // ✅ ADICIONAR ISTO
-              flexWrap: 'wrap', // ✅ ADICIONAR ISTO
+              overflow: 'hidden', // ✅ Garante sem canto branco
             }}
               onMouseEnter={e => (e.currentTarget.style.borderColor = '#3D3D3D')}
               onMouseLeave={e => (e.currentTarget.style.borderColor = '#2D2D2D')}
             >
+              {/* Thumbnail */}
               <div style={{
                 width: '100px', height: '64px', flexShrink: 0,
                 backgroundColor: '#1A1A1A', borderRadius: '8px',
@@ -464,8 +466,14 @@ const authorsList = useMemo(
                 {!item.url_thumb && ((item.category as any)?.icon ?? '🎵')}
               </div>
 
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+              {/* Conteúdo */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                minWidth: 0,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <span style={{
                     fontSize: '11px', fontWeight: '600',
                     color: (item.category as any)?.color ?? '#B8860B',
@@ -488,13 +496,13 @@ const authorsList = useMemo(
                   )}
                 </div>
 
-                <h3 style={{ color: '#FFF', fontSize: '15px', fontWeight: '700', marginBottom: '4px', lineHeight: 1.3 }}>
+                <h3 style={{ color: '#FFF', fontSize: '15px', fontWeight: '700', margin: '0', lineHeight: 1.3 }}>
                   {item.title}
                 </h3>
 
                 {item.description && (
                   <p style={{
-                    color: '#666', fontSize: '13px', lineHeight: 1.5,
+                    color: '#666', fontSize: '13px', lineHeight: 1.5, margin: '0',
                     display: '-webkit-box', WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical', overflow: 'hidden',
                   }}>
@@ -502,106 +510,112 @@ const authorsList = useMemo(
                   </p>
                 )}
 
-                <div style={{ color: '#555', fontSize: '12px', marginTop: '6px' }}>
+                <div style={{ color: '#555', fontSize: '12px' }}>
                   👤 {(item.creator as any)?.full_name ?? 'Desconhecido'} · 📅 {new Date(item.created_at).toLocaleDateString('pt-BR')}
                   {item.duration && ` · ⏱️ ${item.duration}`}
                 </div>
-              </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}>
-                {tab === 'pending' && (
-                  <>
-                    <button
-                      onClick={() => handleAction(item.id, 'approved')}
-                      disabled={actionId === item.id}
-                      style={{
-                        backgroundColor: '#4CAF50', color: 'white', border: 'none',
-                        borderRadius: '8px', padding: '8px 14px', fontSize: '13px',
-                        fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
-                        opacity: actionId === item.id ? 0.6 : 1,
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      ✅ Aprovar
-                    </button>
-                    <button
-                      onClick={() => handleAction(item.id, 'rejected')}
-                      disabled={actionId === item.id}
-                      style={{
-                        backgroundColor: 'rgba(239,68,68,0.15)', color: '#EF4444',
-                        border: '1px solid rgba(239,68,68,0.3)',
-                        borderRadius: '8px', padding: '8px 14px', fontSize: '13px',
-                        fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
-                        opacity: actionId === item.id ? 0.6 : 1,
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      ❌ Rejeitar
-                    </button>
-                  </>
-                )}
+                {/* Botões - Responsivo */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: tab === 'pending' ? '1fr 1fr' : '1fr 1fr',
+                  gap: '8px',
+                  marginTop: '8px',
+                }}>
+                  {tab === 'pending' && (
+                    <>
+                      <button
+                        onClick={() => handleAction(item.id, 'approved')}
+                        disabled={actionId === item.id}
+                        style={{
+                          backgroundColor: '#4CAF50', color: 'white', border: 'none',
+                          borderRadius: '8px', padding: '8px 12px', fontSize: '12px',
+                          fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
+                          opacity: actionId === item.id ? 0.6 : 1,
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        ✅ Aprovar
+                      </button>
+                      <button
+                        onClick={() => handleAction(item.id, 'rejected')}
+                        disabled={actionId === item.id}
+                        style={{
+                          backgroundColor: 'rgba(239,68,68,0.15)', color: '#EF4444',
+                          border: '1px solid rgba(239,68,68,0.3)',
+                          borderRadius: '8px', padding: '8px 12px', fontSize: '12px',
+                          fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
+                          opacity: actionId === item.id ? 0.6 : 1,
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        ❌ Rejeitar
+                      </button>
+                    </>
+                  )}
 
-                {tab === 'approved' && (
-                  <>
-                    <button
-                      onClick={() => handleToggleFeatured(item.id, item.is_featured)}
-                      style={{
-                        backgroundColor: item.is_featured ? 'rgba(184,134,11,0.2)' : '#2D2D2D',
-                        color: item.is_featured ? '#B8860B' : '#999',
-                        border: `1px solid ${item.is_featured ? 'rgba(184,134,11,0.4)' : '#3D3D3D'}`,
-                        borderRadius: '8px', padding: '8px 14px', fontSize: '13px',
-                        fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      {item.is_featured ? '✨ Destaque' : '☆ Destacar'}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      disabled={deleteId === item.id && deleting}
-                      style={{
-                        backgroundColor: 'rgba(239,68,68,0.15)', color: '#EF4444',
-                        border: '1px solid rgba(239,68,68,0.3)',
-                        borderRadius: '8px', padding: '8px 14px', fontSize: '13px',
-                        fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
-                        opacity: deleteId === item.id && deleting ? 0.6 : 1,
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      🗑️ Remover
-                    </button>
-                  </>
-                )}
+                  {tab === 'approved' && (
+                    <>
+                      <button
+                        onClick={() => handleToggleFeatured(item.id, item.is_featured)}
+                        style={{
+                          backgroundColor: item.is_featured ? 'rgba(184,134,11,0.2)' : '#2D2D2D',
+                          color: item.is_featured ? '#B8860B' : '#999',
+                          border: `1px solid ${item.is_featured ? 'rgba(184,134,11,0.4)' : '#3D3D3D'}`,
+                          borderRadius: '8px', padding: '8px 12px', fontSize: '12px',
+                          fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        {item.is_featured ? '✨ Destaque' : '☆ Destacar'}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        disabled={deleteId === item.id && deleting}
+                        style={{
+                          backgroundColor: 'rgba(239,68,68,0.15)', color: '#EF4444',
+                          border: '1px solid rgba(239,68,68,0.3)',
+                          borderRadius: '8px', padding: '8px 12px', fontSize: '12px',
+                          fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
+                          opacity: deleteId === item.id && deleting ? 0.6 : 1,
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        🗑️ Remover
+                      </button>
+                    </>
+                  )}
 
-                {tab === 'rejected' && (
-                  <>
-                    <button
-                      onClick={() => handleAction(item.id, 'approved')}
-                      style={{
-                        backgroundColor: '#2D2D2D', color: '#999', border: '1px solid #3D3D3D',
-                        borderRadius: '8px', padding: '8px 14px', fontSize: '13px',
-                        fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      ↩️ Restaurar
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      disabled={deleteId === item.id && deleting}
-                      style={{
-                        backgroundColor: 'rgba(239,68,68,0.15)', color: '#EF4444',
-                        border: '1px solid rgba(239,68,68,0.3)',
-                        borderRadius: '8px', padding: '8px 14px', fontSize: '13px',
-                        fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
-                        opacity: deleteId === item.id && deleting ? 0.6 : 1,
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      🗑️ Remover
-                    </button>
-                  </>
-                )}
+                  {tab === 'rejected' && (
+                    <>
+                      <button
+                        onClick={() => handleAction(item.id, 'approved')}
+                        style={{
+                          backgroundColor: '#2D2D2D', color: '#999', border: '1px solid #3D3D3D',
+                          borderRadius: '8px', padding: '8px 12px', fontSize: '12px',
+                          fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        ↩️ Restaurar
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        disabled={deleteId === item.id && deleting}
+                        style={{
+                          backgroundColor: 'rgba(239,68,68,0.15)', color: '#EF4444',
+                          border: '1px solid rgba(239,68,68,0.3)',
+                          borderRadius: '8px', padding: '8px 12px', fontSize: '12px',
+                          fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
+                          opacity: deleteId === item.id && deleting ? 0.6 : 1,
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        🗑️ Remover
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           ))}
