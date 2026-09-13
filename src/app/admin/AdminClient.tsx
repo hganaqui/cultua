@@ -1,7 +1,6 @@
-// src/app/admin/AdminClient.tsx
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import type { Content } from '@/types'
@@ -33,6 +32,22 @@ export default function AdminClient() {
     sortBy: 'date',
   })
 
+  // ✅ MELHORADO: useCallback para persistir dados
+  const loadContents = useCallback(async (status: Tab) => {
+    setLoading(true)
+    setFilters({ searchTerm: '', category: '', author: '', sortBy: 'date' })
+    setTab(status) // ✅ NOVO: atualiza a aba
+
+    const { data } = await supabase
+      .from('contents')
+      .select(`*, category:categories(name, slug, color, icon), creator:profiles(full_name)`)
+      .eq('status', status)
+      .order('created_at', { ascending: false })
+
+    setContents((data as Content[]) ?? [])
+    setLoading(false)
+  }, [])
+
   useEffect(() => {
     async function checkAuth() {
       const { data: { user } } = await supabase.auth.getUser()
@@ -52,21 +67,7 @@ export default function AdminClient() {
       loadContents('pending')
     }
     checkAuth()
-  }, [router])
-
-  async function loadContents(status: Tab) {
-    setLoading(true)
-    setFilters({ searchTerm: '', category: '', author: '', sortBy: 'date' })
-
-    const { data } = await supabase
-      .from('contents')
-      .select(`*, category:categories(name, slug, color, icon), creator:profiles(full_name)`)
-      .eq('status', status)
-      .order('created_at', { ascending: false })
-
-    setContents((data as Content[]) ?? [])
-    setLoading(false)
-  }
+  }, [router, loadContents])
 
   const filteredContents = useMemo(() => {
     let result = [...contents]
@@ -80,7 +81,6 @@ export default function AdminClient() {
     }
 
     if (filters.category) {
-      // ✅ FIX: category não categoria
       result = result.filter(c => (c.category as any)?.name === filters.category)
     }
 
@@ -208,7 +208,7 @@ export default function AdminClient() {
         ] as { key: Tab; label: string; count: number }[]).map(t => (
           <button
             key={t.key}
-            onClick={() => { setTab(t.key); loadContents(t.key) }}
+            onClick={() => loadContents(t.key)}
             style={{
               padding: '8px 16px', borderRadius: '8px', border: 'none',
               fontSize: '13px', fontWeight: '600', cursor: 'pointer',
@@ -280,7 +280,6 @@ export default function AdminClient() {
             onBlur={e => (e.target.style.borderColor = '#3D3D3D')}
           >
             <option value="">📁 Todas as categorias</option>
-            {/* ✅ FIX: value deve ser string */}
             {categoriesList.map(cat => (
               <option key={cat} value={cat ?? ''}>
                 {cat}
@@ -305,7 +304,6 @@ export default function AdminClient() {
             onBlur={e => (e.target.style.borderColor = '#3D3D3D')}
           >
             <option value="">👤 Todos os autores</option>
-            {/* ✅ FIX: value deve ser string */}
             {authorsList.map(author => (
               <option key={author} value={author ?? ''}>
                 {author}

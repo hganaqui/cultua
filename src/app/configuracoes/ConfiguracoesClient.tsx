@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { signOut } from '@/lib/auth'
 import { createBrowserClient } from '@supabase/ssr'
@@ -19,7 +19,11 @@ interface Props {
 export default function ConfiguracoesClient({ profile, email }: Props) {
   const router = useRouter()
 
+  // ✅ CORRIGIDO: Estados inicializados com dados do profile
   const [fullName, setFullName] = useState(profile.full_name ?? '')
+  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '')
+  const [imgError, setImgError] = useState(false)
+
   const [savingName, setSavingName] = useState(false)
   const [nameMsg, setNameMsg] = useState('')
 
@@ -27,14 +31,19 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
   const [savingPwd, setSavingPwd] = useState(false)
   const [pwdMsg, setPwdMsg] = useState('')
 
-  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '')
-  const [imgError, setImgError] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [avatarMsg, setAvatarMsg] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [loggingOut, setLoggingOut] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+
+  // ✅ NOVO: Log para debug
+  useEffect(() => {
+    console.log('Profile recebido no Client:', profile)
+    console.log('Avatar URL:', profile.avatar_url)
+    console.log('Full Name:', profile.full_name)
+  }, [profile])
 
   const displayName = fullName.split(' ')[0] || email.split('@')[0] || 'Usuário'
 
@@ -151,12 +160,15 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
               }
             }}
           >
-            {/* ✅ img nativo com cache bust */}
+            {/* ✅ img nativo com cache bust — CARREGA FOTO DO BANCO */}
             {avatarUrl && !imgError ? (
               <img
                 src={avatarUrl + `?t=${Date.now()}`}
                 alt="Avatar"
-                onError={() => setImgError(true)}
+                onError={() => {
+                  console.log('Erro ao carregar avatar:', avatarUrl)
+                  setImgError(true)
+                }}
                 style={{
                   width: '100%',
                   height: '100%',
@@ -237,7 +249,7 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
       {/* ── Conta ──────────────────────────────────────────────────── */}
       <Section title="Conta">
 
-        {/* Nome ✅ JÁ PREENCHIDO */}
+        {/* Nome ✅ JÁ PREENCHIDO DO BANCO */}
         <div style={{ padding: '16px 0', borderBottom: '1px solid #2a2a2a' }}>
           <label style={{
             color: '#999999', fontSize: '12px', fontWeight: '700',
@@ -250,7 +262,7 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
               value={fullName}
               onChange={e => setFullName(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSaveName()}
-              placeholder="Ex: Henrique Ganaqui"
+              placeholder="Ex: Seu Nome Completo"
               style={{
                 flex: 1, backgroundColor: '#111111', border: '1px solid #333333',
                 borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF',

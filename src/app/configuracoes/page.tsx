@@ -13,11 +13,15 @@ export default async function ConfiguracoesPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login?redirect=/configuracoes')
 
-  const { data: profile } = await supabase
+  // ✅ CORRIGIDO: Busca completa do profile
+  const { data: profile, error } = await supabase
     .from('profiles')
     .select('id, full_name, avatar_url, role, managed_categories, managed_creators, created_at')
     .eq('id', user.id)
     .single()
+
+  console.log('Profile do banco:', profile)
+  console.log('Erro (se houver):', error)
 
   const safeProfile: Profile = profile ?? {
     id: user.id,
