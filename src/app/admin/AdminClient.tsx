@@ -630,6 +630,25 @@ export default function AdminClient() {
           ))}
         </div>
       )}
+      <style>{`
+        .admin-card {
+          border-radius: 14px;
+          overflow: hidden;
+          isolation: isolate;
+        }
+        
+        @media (max-width: 768px) {
+          .admin-card {
+            display: flex;
+            flex-direction: column;
+            border-radius: 14px;
+            overflow: hidden;
+            -webkit-backface-visibility: hidden;
+            -webkit-perspective: 1000;
+            will-change: transform;
+          }
+        }
+      `}</style>
     </main>
   )
 }
