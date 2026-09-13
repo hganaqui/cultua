@@ -32,39 +32,56 @@ export default function AdminClient() {
     sortBy: 'date',
   })
 
-  // ✅ MELHORADO: useCallback para persistir dados
+  // ✅ CORRIGIDO: Define loadContents ANTES de usá-la
   const loadContents = useCallback(async (status: Tab) => {
     setLoading(true)
     setFilters({ searchTerm: '', category: '', author: '', sortBy: 'date' })
-    setTab(status) // ✅ NOVO: atualiza a aba
+    setTab(status) // ✅ Atualiza a aba AQUI
 
-    const { data } = await supabase
-      .from('contents')
-      .select(`*, category:categories(name, slug, color, icon), creator:profiles(full_name)`)
-      .eq('status', status)
-      .order('created_at', { ascending: false })
+    try {
+      const { data } = await supabase
+        .from('contents')
+        .select(`*, category:categories(name, slug, color, icon), creator:profiles(full_name)`)
+        .eq('status', status)
+        .order('created_at', { ascending: false })
 
-    setContents((data as Content[]) ?? [])
-    setLoading(false)
+      setContents((data as Content[]) ?? [])
+    } catch (err) {
+      console.error('Erro ao carregar conteúdos:', err)
+      setContents([])
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
+  // ✅ AGORA pode usar loadContents aqui
   useEffect(() => {
     async function checkAuth() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/auth/login'); return }
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          router.push('/auth/login')
+          return
+        }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single()
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
 
-      if (!profile || !['user', 'admin', 'superadmin'].includes(profile.role)) {
+        if (!profile || !['user', 'admin', 'superadmin'].includes(profile.role)) {
+          router.push('/')
+          return
+        }
+
+        setAuthorized(true)
+        // ✅ Chama loadContents DEPOIS de estar definida
+        loadContents('pending')
+      } catch (err) {
+        console.error('Erro na autenticação:', err)
         router.push('/')
-        return
       }
-      setAuthorized(true)
-      loadContents('pending')
     }
     checkAuth()
   }, [router, loadContents])
