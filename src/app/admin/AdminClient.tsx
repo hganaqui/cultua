@@ -36,18 +36,28 @@ export default function AdminClient() {
   const loadContents = useCallback(async (status: Tab) => {
     setLoading(true)
     setFilters({ searchTerm: '', category: '', author: '', sortBy: 'date' })
-    setTab(status) // ✅ Atualiza a aba AQUI
+    setTab(status)
 
     try {
-      const { data } = await supabase
+      console.log('🔄 Carregando conteúdos com status:', status) // ✅ LOG
+
+      const { data, error } = await supabase
         .from('contents')
         .select(`*, category:categories(name, slug, color, icon), creator:profiles(full_name)`)
         .eq('status', status)
         .order('created_at', { ascending: false })
 
-      setContents((data as Content[]) ?? [])
+      console.log('✅ Resposta:', { data, error }) // ✅ LOG
+      console.log('📊 Total de itens:', data?.length ?? 0) // ✅ LOG
+
+      if (error) {
+        console.error('❌ Erro na query:', error)
+        setContents([])
+      } else {
+        setContents((data as Content[]) ?? [])
+      }
     } catch (err) {
-      console.error('Erro ao carregar conteúdos:', err)
+      console.error('❌ Erro ao carregar conteúdos:', err)
       setContents([])
     } finally {
       setLoading(false)

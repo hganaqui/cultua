@@ -19,10 +19,11 @@ interface Props {
 export default function ConfiguracoesClient({ profile, email }: Props) {
   const router = useRouter()
 
-  // ✅ CORRIGIDO: Estados inicializados com dados do profile
-  const [fullName, setFullName] = useState(profile.full_name ?? '')
-  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '')
+  // ✅ NOVO: States melhorados com validação
+  const [fullName, setFullName] = useState<string>('')
+  const [avatarUrl, setAvatarUrl] = useState<string>('')
   const [imgError, setImgError] = useState(false)
+  const [dataLoaded, setDataLoaded] = useState(false)
 
   const [savingName, setSavingName] = useState(false)
   const [nameMsg, setNameMsg] = useState('')
@@ -38,70 +39,133 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
   const [loggingOut, setLoggingOut] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  // ✅ NOVO: Log para debug
+  // ✅ NOVO: Carregar dados do profile ao montar
   useEffect(() => {
-    console.log('Profile recebido no Client:', profile)
-    console.log('Avatar URL:', profile.avatar_url)
-    console.log('Full Name:', profile.full_name)
+    console.log('Profile recebido:', profile)
+    
+    if (profile) {
+      setFullName(profile.full_name ?? '')
+      setAvatarUrl(profile.avatar_url ?? '')
+    }
+    
+    setDataLoaded(true)
   }, [profile])
 
-  const displayName = fullName.split(' ')[0] || email.split('@')[0] || 'Usuário'
+  const displayName = fullName ? fullName.split(' ')[0] : email.split('@')[0] || 'Usuário'
 
   // ── Salvar nome ──────────────────────────────────────────────────────────
   async function handleSaveName() {
-    if (!fullName.trim()) return
+    if (!fullName.trim()) {
+      setNameMsg('❌ Digite um nome.')
+      return
+    }
+
     setSavingName(true)
     setNameMsg('')
-    const { error } = await supabase
-      .from('profiles')
-      .update({ full_name: fullName.trim() })
-      .eq('id', profile.id)
-    setSavingName(false)
-    if (error) { setNameMsg('❌ Erro ao salvar nome.'); return }
-    setNameMsg('✅ Nome atualizado!')
-    router.refresh()
-    setTimeout(() => setNameMsg(''), 3000)
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ full_name: fullName.trim() })
+        .eq('id', profile.id)
+
+      if (error) {
+        console.error('Erro ao salvar:', error)
+        setNameMsg('❌ Erro ao salvar nome.')
+        return
+      }
+
+      setNameMsg('✅ Nome atualizado!')
+      setTimeout(() => {
+        setNameMsg('')
+        router.refresh()
+      }, 2000)
+    } catch (err) {
+      console.error('Erro:', err)
+      setNameMsg('❌ Erro ao salvar.')
+    } finally {
+      setSavingName(false)
+    }
   }
 
   // ── Alterar senha ────────────────────────────────────────────────────────
   async function handleChangePwd() {
-    if (newPwd.length < 6) { setPwdMsg('❌ Mínimo 6 caracteres.'); return }
+    if (newPwd.length < 6) {
+      setPwdMsg('❌ Mínimo 6 caracteres.')
+      return
+    }
+
     setSavingPwd(true)
     setPwdMsg('')
-    const { error } = await supabase.auth.updateUser({ password: newPwd })
-    setSavingPwd(false)
-    if (error) { setPwdMsg('❌ ' + error.message); return }
-    setPwdMsg('✅ Senha alterada com sucesso!')
-    setNewPwd('')
-    setTimeout(() => setPwdMsg(''), 4000)
+
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPwd })
+
+      if (error) {
+        setPwdMsg('❌ ' + error.message)
+        return
+      }
+
+      setPwdMsg('✅ Senha alterada com sucesso!')
+      setNewPwd('')
+      setTimeout(() => setPwdMsg(''), 4000)
+    } catch (err) {
+      setPwdMsg('❌ Erro ao alterar senha.')
+    } finally {
+      setSavingPwd(false)
+    }
   }
 
   // ── Upload avatar ────────────────────────────────────────────────────────
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    if (!file.type.startsWith('image/')) { setAvatarMsg('❌ Selecione uma imagem.'); return }
-    if (file.size > 2 * 1024 * 1024) { setAvatarMsg('❌ Máximo 2MB.'); return }
+
+    if (!file.type.startsWith('image/')) {
+      setAvatarMsg('❌ Selecione uma imagem.')
+      return
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarMsg('❌ Máximo 2MB.')
+      return
+    }
 
     setUploadingAvatar(true)
     setAvatarMsg('')
-    const formData = new FormData()
-    formData.append('avatar', file)
 
-    const res = await fetch('/api/upload-avatar', { method: 'POST', body: formData })
-    const data = await res.json()
-    setUploadingAvatar(false)
+    try {
+      const formData = new FormData()
+      formData.append('avatar', file)
 
-    if (!res.ok) { setAvatarMsg('❌ ' + (data.error ?? 'Erro ao enviar.')); return }
+      const res = await fetch('/api/upload-avatar', {
+        method: 'POST',
+        body: formData,
+      })
 
-    // ✅ reset imgError + cache bust
-    setImgError(false)
-    setAvatarUrl(data.url + '?t=' + Date.now())
-    setAvatarMsg('✅ Foto atualizada!')
-    setTimeout(() => {
-      setAvatarMsg('')
-      router.refresh()
-    }, 1500)
+      const data = await res.json()
+
+      if (!res.ok) {
+        setAvatarMsg('❌ ' + (data.error ?? 'Erro ao enviar.'))
+        return
+      }
+
+      // ✅ Atualiza o estado com a URL
+      setImgError(false)
+      const newUrl = data.url + `?t=${Date.now()}`
+      setAvatarUrl(newUrl)
+      
+      setAvatarMsg('✅ Foto atualizada!')
+      setTimeout(() => {
+        setAvatarMsg('')
+        router.refresh()
+      }, 1500)
+    } catch (err) {
+      console.error('Erro:', err)
+      setAvatarMsg('❌ Erro ao enviar imagem.')
+    } finally {
+      setUploadingAvatar(false)
+    }
   }
 
   async function handleSignOut() {
@@ -109,6 +173,16 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
     await signOut()
     router.push('/')
     router.refresh()
+  }
+
+  if (!dataLoaded) {
+    return (
+      <main style={{ maxWidth: '700px', margin: '0 auto', padding: '40px 16px', backgroundColor: '#111111', minHeight: '100vh' }}>
+        <div style={{ color: '#666', textAlign: 'center', marginTop: '40px' }}>
+          ⏳ Carregando...
+        </div>
+      </main>
+    )
   }
 
   return (
@@ -130,7 +204,7 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
           padding: '24px 0',
         }}>
 
-          {/* Avatar grande ✅ */}
+          {/* Avatar grande */}
           <div
             onClick={() => fileRef.current?.click()}
             style={{
@@ -160,13 +234,13 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
               }
             }}
           >
-            {/* ✅ img nativo com cache bust — CARREGA FOTO DO BANCO */}
+            {/* ✅ CORRIGIDO: Carrega a imagem se existir */}
             {avatarUrl && !imgError ? (
               <img
-                src={avatarUrl + `?t=${Date.now()}`}
+                src={avatarUrl}
                 alt="Avatar"
                 onError={() => {
-                  console.log('Erro ao carregar avatar:', avatarUrl)
+                  console.log('Erro ao carregar imagem:', avatarUrl)
                   setImgError(true)
                 }}
                 style={{
@@ -209,7 +283,7 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
             </div>
           </div>
 
-          {/* Info ✅ */}
+          {/* Info */}
           <div style={{ textAlign: 'center' }}>
             <p style={{ color: '#CCCCCC', fontSize: '15px', marginBottom: '4px', fontWeight: '600' }}>
               {displayName}
@@ -249,7 +323,7 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
       {/* ── Conta ──────────────────────────────────────────────────── */}
       <Section title="Conta">
 
-        {/* Nome ✅ JÁ PREENCHIDO DO BANCO */}
+        {/* Nome */}
         <div style={{ padding: '16px 0', borderBottom: '1px solid #2a2a2a' }}>
           <label style={{
             color: '#999999', fontSize: '12px', fontWeight: '700',
@@ -273,13 +347,13 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
             />
             <button
               onClick={handleSaveName}
-              disabled={savingName || !fullName.trim() || fullName === profile.full_name}
+              disabled={savingName || !fullName.trim()}
               style={{
-                backgroundColor: (fullName.trim() && fullName !== profile.full_name) ? '#B8860B' : '#333333',
+                backgroundColor: (fullName.trim()) ? '#B8860B' : '#333333',
                 color: 'white', border: 'none', borderRadius: '8px',
                 padding: '10px 18px', fontSize: '14px', fontWeight: '600',
-                cursor: (savingName || !fullName.trim()) ? 'not-allowed' : 'pointer',
-                opacity: (savingName || !fullName.trim()) ? 0.7 : 1,
+                cursor: savingName || !fullName.trim() ? 'not-allowed' : 'pointer',
+                opacity: savingName || !fullName.trim() ? 0.7 : 1,
                 transition: 'all 0.15s',
               }}
             >
@@ -350,8 +424,8 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
                 backgroundColor: newPwd.length >= 6 ? '#B8860B' : '#333333',
                 color: 'white', border: 'none', borderRadius: '8px',
                 padding: '10px 18px', fontSize: '14px', fontWeight: '600',
-                cursor: (savingPwd || newPwd.length < 6) ? 'not-allowed' : 'pointer',
-                opacity: (savingPwd || newPwd.length < 6) ? 0.6 : 1,
+                cursor: savingPwd || newPwd.length < 6 ? 'not-allowed' : 'pointer',
+                opacity: savingPwd || newPwd.length < 6 ? 0.6 : 1,
                 transition: 'all 0.15s',
               }}
             >
@@ -448,7 +522,6 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
   )
 }
 
-// ── Section ───────────────────────────────────────────────────────────────────
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{
