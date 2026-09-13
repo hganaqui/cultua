@@ -1,4 +1,3 @@
-// src/app/configuracoes/page.tsx
 import { createServerSupabase } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import Header from '@/components/Header'

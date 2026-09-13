@@ -151,10 +151,10 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
               }
             }}
           >
-            {/* ✅ img nativo — sem 400 do next/image */}
+            {/* ✅ img nativo com cache bust */}
             {avatarUrl && !imgError ? (
               <img
-                src={avatarUrl + `?t=${Date.now()}`}  // ✅ ADICIONE ISTO
+                src={avatarUrl + `?t=${Date.now()}`}
                 alt="Avatar"
                 onError={() => setImgError(true)}
                 style={{
@@ -250,7 +250,7 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
               value={fullName}
               onChange={e => setFullName(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSaveName()}
-              placeholder="Seu nome"
+              placeholder="Ex: Henrique Ganaqui"
               style={{
                 flex: 1, backgroundColor: '#111111', border: '1px solid #333333',
                 borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF',
@@ -261,9 +261,9 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
             />
             <button
               onClick={handleSaveName}
-              disabled={savingName || !fullName.trim()}
+              disabled={savingName || !fullName.trim() || fullName === profile.full_name}
               style={{
-                backgroundColor: fullName.trim() ? '#B8860B' : '#333333',
+                backgroundColor: (fullName.trim() && fullName !== profile.full_name) ? '#B8860B' : '#333333',
                 color: 'white', border: 'none', borderRadius: '8px',
                 padding: '10px 18px', fontSize: '14px', fontWeight: '600',
                 cursor: (savingName || !fullName.trim()) ? 'not-allowed' : 'pointer',

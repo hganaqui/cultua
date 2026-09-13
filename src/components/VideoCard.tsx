@@ -29,13 +29,13 @@ export default function VideoCard({
     <Link href={`/content/${id}`} style={{ textDecoration: 'none' }}>
       <div
         style={{
-          backgroundColor: '#F8F8F8', /* ✅ MUDOU: branco */
+          backgroundColor: '#F5F3F0',
           borderRadius: '12px',
           overflow: 'hidden',
           boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
           transition: 'all 0.3s ease',
           cursor: 'pointer',
-          border: '1px solid #E0E0E0', /* ✅ NOVO: borda cinza claro */
+          border: '1px solid #E8E3DE',
           display: 'flex',
           flexDirection: 'column',
           height: '100%',
@@ -49,11 +49,10 @@ export default function VideoCard({
           ;(e.currentTarget as HTMLElement).style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)'
         }}
       >
-        {/* Thumbnail */}
         <div style={{
           width: '100%',
           aspectRatio: '16/9',
-          backgroundColor: thumbnail ? 'transparent' : '#F0F0F0', /* ✅ MUDOU: cinza claro */
+          backgroundColor: thumbnail ? 'transparent' : '#EFEFEB',
           backgroundImage: thumbnail ? `url(${thumbnail})` : 'none',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -66,7 +65,6 @@ export default function VideoCard({
             <div style={{ fontSize: '40px' }}>🎵</div>
           )}
 
-          {/* Duration badge */}
           <div style={{
             position: 'absolute',
             bottom: '8px',
@@ -112,7 +110,6 @@ export default function VideoCard({
             </div>
           )}
 
-          {/* Play button */}
           <div style={{
             position: 'absolute',
             top: '50%',
@@ -133,7 +130,6 @@ export default function VideoCard({
           </div>
         </div>
 
-        {/* Info */}
         <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
           <span style={{
             fontSize: '11px',
@@ -149,7 +145,7 @@ export default function VideoCard({
           <h3 style={{
             fontSize: '15px',
             fontWeight: '700',
-            color: '#222222', /* ✅ MUDOU: texto escuro */
+            color: '#222222',
             margin: '0 0 8px 0',
             lineHeight: 1.4,
             display: '-webkit-box',
@@ -162,7 +158,7 @@ export default function VideoCard({
 
           <span style={{
             fontSize: '13px',
-            color: '#666666', /* ✅ MUDOU: cinza */
+            color: '#666666',
             fontWeight: '500',
             marginTop: 'auto',
           }}>
