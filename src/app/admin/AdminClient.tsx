@@ -221,7 +221,14 @@ export default function AdminClient() {
   )
 
   return (
-    <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px 16px' }}>
+    <main style={{
+      maxWidth: '1200px',
+      width: '100%',
+      boxSizing: 'border-box',
+      margin: '0 auto',
+      padding: '16px',
+      overflowX: 'hidden'
+    }}>
 
       <div style={{
         display: 'flex',
@@ -257,7 +264,16 @@ export default function AdminClient() {
         </a>
       </div>
 
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '1px solid #2D2D2D', paddingBottom: '12px' }}>
+      <div style={{
+        display: 'flex',
+        gap: '8px',
+        marginBottom: '24px',
+        borderBottom: '1px solid #2D2D2D',
+        paddingBottom: '12px',
+        overflowX: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        maxWidth: '100%'
+      }}>
         {([
           { key: 'pending', label: '⏳ Pendentes', count: contents.filter(c => c.status === 'pending').length },
           { key: 'approved', label: '✅ Aprovados', count: contents.filter(c => c.status === 'approved').length },
@@ -275,6 +291,8 @@ export default function AdminClient() {
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
             {t.label}
@@ -437,11 +455,11 @@ export default function AdminClient() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {filteredContents.map(item => (
-            <div 
-              key={item.id} 
+            <div
+              key={item.id}
               style={{
-                backgroundColor: '#222', 
-                borderRadius: '14px', 
+                backgroundColor: '#222',
+                borderRadius: '14px',
                 padding: '20px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -455,7 +473,10 @@ export default function AdminClient() {
               {/* Thumbnail + Conteúdo em Flex */}
               <div style={{
                 display: 'flex',
-                gap: '16px',
+                gap: '12px',
+                flexWrap: 'wrap',
+                width: '100%',
+                minWidth: 0
               }}>
                 {/* Thumbnail */}
                 <div style={{
@@ -536,7 +557,7 @@ export default function AdminClient() {
                       style={{
                         backgroundColor: '#4CAF50', color: 'white', border: 'none',
                         borderRadius: '8px', padding: '8px 12px', fontSize: '12px',
-                        fontWeight: '700', cursor: actionId === item.id ? 'not-allowed' : 'pointer', 
+                        fontWeight: '700', cursor: actionId === item.id ? 'not-allowed' : 'pointer',
                         whiteSpace: 'nowrap',
                         opacity: actionId === item.id ? 0.6 : 1,
                         transition: 'all 0.2s',
@@ -551,7 +572,7 @@ export default function AdminClient() {
                         backgroundColor: 'rgba(239,68,68,0.15)', color: '#EF4444',
                         border: '1px solid rgba(239,68,68,0.3)',
                         borderRadius: '8px', padding: '8px 12px', fontSize: '12px',
-                        fontWeight: '700', cursor: actionId === item.id ? 'not-allowed' : 'pointer', 
+                        fontWeight: '700', cursor: actionId === item.id ? 'not-allowed' : 'pointer',
                         whiteSpace: 'nowrap',
                         opacity: actionId === item.id ? 0.6 : 1,
                         transition: 'all 0.2s',
@@ -584,7 +605,7 @@ export default function AdminClient() {
                         backgroundColor: 'rgba(239,68,68,0.15)', color: '#EF4444',
                         border: '1px solid rgba(239,68,68,0.3)',
                         borderRadius: '8px', padding: '8px 12px', fontSize: '12px',
-                        fontWeight: '700', cursor: deleteId === item.id && deleting ? 'not-allowed' : 'pointer', 
+                        fontWeight: '700', cursor: deleteId === item.id && deleting ? 'not-allowed' : 'pointer',
                         whiteSpace: 'nowrap',
                         opacity: deleteId === item.id && deleting ? 0.6 : 1,
                         transition: 'all 0.2s',
@@ -615,7 +636,7 @@ export default function AdminClient() {
                         backgroundColor: 'rgba(239,68,68,0.15)', color: '#EF4444',
                         border: '1px solid rgba(239,68,68,0.3)',
                         borderRadius: '8px', padding: '8px 12px', fontSize: '12px',
-                        fontWeight: '700', cursor: deleteId === item.id && deleting ? 'not-allowed' : 'pointer', 
+                        fontWeight: '700', cursor: deleteId === item.id && deleting ? 'not-allowed' : 'pointer',
                         whiteSpace: 'nowrap',
                         opacity: deleteId === item.id && deleting ? 0.6 : 1,
                         transition: 'all 0.2s',
