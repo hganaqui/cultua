@@ -186,3 +186,73 @@ export async function deleteNotification(notificationId: string) {
 
   return { error }
 }
+
+export async function notifyAdminsOfPendingContent(contentId: string, contentTitle: string) {
+  try {
+    // 1. Buscar todos os admins
+    const { data: admins } = await supabase
+      .from('profiles')
+      .select('id')
+      .in('role', ['admin', 'superadmin'])
+
+    if (!admins || admins.length === 0) return
+
+    // 2. Criar notificação para cada admin
+    const notifications = admins.map(admin => ({
+      user_id: admin.id,
+      type: 'pending_content',
+      title: '📋 Novo conteúdo para aprovar',
+      message: `"${contentTitle}" está aguardando revisão.`,
+      read: false,
+      metadata: { content_id: contentId },
+    }))
+
+    const { error } = await supabase
+      .from('notifications')
+      .insert(notifications)
+
+    if (error) throw error
+  } catch (err) {
+    console.error('Erro ao notificar admins:', err)
+  }
+}
+
+export async function notifyAdminsOfApprovedContent(userId: string, contentTitle: string, contentId: string) {
+  try {
+    // Notificar o criador que seu conteúdo foi aprovado
+    const { error } = await supabase
+      .from('notifications')
+      .insert({
+        user_id: userId,
+        type: 'content_approved',
+        title: '✅ Conteúdo aprovado!',
+        message: `"${contentTitle}" foi aprovado e está publicado.`,
+        read: false,
+        metadata: { content_id: contentId },
+      })
+
+    if (error) throw error
+  } catch (err) {
+    console.error('Erro ao notificar aprovação:', err)
+  }
+}
+
+export async function notifyAdminsOfRejectedContent(userId: string, contentTitle: string, contentId: string) {
+  try {
+    // Notificar o criador que seu conteúdo foi rejeitado
+    const { error } = await supabase
+      .from('notifications')
+      .insert({
+        user_id: userId,
+        type: 'content_rejected',
+        title: '❌ Conteúdo rejeitado',
+        message: `"${contentTitle}" foi rejeitado. Revise e tente novamente.`,
+        read: false,
+        metadata: { content_id: contentId },
+      })
+
+    if (error) throw error
+  } catch (err) {
+    console.error('Erro ao notificar rejeição:', err)
+  }
+}

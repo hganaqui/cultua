@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { UPLOAD_LIMITS, formatBytes } from '@/lib/r2'
 import { CULTUA_CONFIG } from '@/lib/cultua-config'
+import { notifyAdminsOfPendingContent } from '@/lib/db' 
 
 const C = CULTUA_CONFIG.colors
 
@@ -206,7 +207,7 @@ useEffect(() => {
       }
 
       // 3. Salva no Supabase como "pending" (aguarda curadoria)
-      setProgress(p => ({ ...p, current: 'saving' }))
+       setProgress(p => ({ ...p, current: 'saving' }))
 
       const { data: { user } } = await supabase.auth.getUser()
 
@@ -228,6 +229,9 @@ useEffect(() => {
         .single()
 
       if (error) throw new Error(error.message)
+
+      // ✅ ADICIONAR ISTO - Notificar admins
+      await notifyAdminsOfPendingContent(content.id, form.title.trim())
 
       setContentId(content.id)
       setProgress(p => ({ ...p, current: 'done' }))

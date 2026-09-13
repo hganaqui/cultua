@@ -707,23 +707,21 @@ export default function Header() {
                 ))}
 
                 {/* Notificações mobile */}
-                {unread > 0 && (
-                  <Link
-                    href="/notificacoes"
-                    onClick={() => setMenuOpen(false)}
-                    style={{
-                      display: 'block',
-                      color: '#EF4444',
-                      textDecoration: 'none',
-                      fontSize: '15px',
-                      padding: '10px 0',
-                      borderBottom: '1px solid #2a2a2a',
-                      fontWeight: '600',
-                    }}
-                  >
-                    🔔 Notificações ({unread})
-                  </Link>
-                )}
+                <Link
+                  href="/notificacoes"
+                  onClick={() => setMenuOpen(false)}
+                  style={{
+                    display: 'block',
+                    color: unread > 0 ? '#EF4444' : '#CCCCCC',
+                    textDecoration: 'none',
+                    fontSize: '15px',
+                    padding: '10px 0',
+                    borderBottom: '1px solid #2a2a2a',
+                    fontWeight: unread > 0 ? '600' : '500',
+                  }}
+                >
+                  🔔 Notificações {unread > 0 && `(${unread})`}
+                </Link>
 
                 {/* Admin mobile */}
                 {isAdmin && (

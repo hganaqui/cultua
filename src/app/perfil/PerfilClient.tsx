@@ -4,19 +4,34 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import type { User } from '@supabase/supabase-js'
+import type { Profile } from '@/types'
 
 export default function PerfilClient() {
   const router = useRouter()
-  const [user, setUser]       = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser]         = useState<User | null>(null)
+  const [profile, setProfile]   = useState<Profile | null>(null)
+  const [loading, setLoading]   = useState(true)
+  const [imgError, setImgError] = useState(false)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
         router.push('/auth/login?redirect=/perfil')
         return
       }
       setUser(data.user)
+
+      // ✅ NOVO: Buscar perfil do banco
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user.id)
+        .single()
+
+      if (profileData) {
+        setProfile(profileData)
+      }
+
       setLoading(false)
     })
   }, [router])
@@ -24,9 +39,10 @@ export default function PerfilClient() {
   if (loading) return <LoadingState />
   if (!user)   return null
 
-  const displayName = user.user_metadata?.full_name ?? user.email?.split('@')[0] ?? 'Usuário'
+  const displayName = profile?.full_name ?? user.user_metadata?.full_name ?? user.email?.split('@')[0] ?? 'Usuário'
   const initials    = displayName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
   const joinedAt    = new Date(user.created_at).toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' })
+  const avatarUrl   = profile?.avatar_url  // ✅ NOVO: Pega do perfil
 
   return (
     <main style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 16px' }}>
@@ -36,13 +52,30 @@ export default function PerfilClient() {
         border: '1px solid #333333', marginBottom: '24px',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
-          <div style={{
-            width: '88px', height: '88px', backgroundColor: '#B8860B',
-            borderRadius: '50%', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', fontSize: '32px', fontWeight: '900', color: '#111111', flexShrink: 0,
-          }}>
-            {initials}
-          </div>
+          {/* ✅ NOVO: Avatar com imagem ou inicial */}
+          {avatarUrl && !imgError ? (
+            <img
+              src={avatarUrl + `?t=${Date.now()}`}
+              alt={displayName}
+              onError={() => setImgError(true)}
+              style={{
+                width: '88px',
+                height: '88px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                flexShrink: 0,
+              }}
+            />
+          ) : (
+            <div style={{
+              width: '88px', height: '88px', backgroundColor: '#B8860B',
+              borderRadius: '50%', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', fontSize: '32px', fontWeight: '900', color: '#111111', flexShrink: 0,
+            }}>
+              {initials}
+            </div>
+          )}
+          
           <div>
             <h1 style={{ fontSize: '26px', fontWeight: '800', color: '#FFFFFF', marginBottom: '4px' }}>{displayName}</h1>
             <p style={{ color: '#CCCCCC', fontSize: '14px', marginBottom: '8px' }}>{user.email}</p>
