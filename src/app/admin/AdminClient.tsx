@@ -131,7 +131,8 @@ export default function AdminClient() {
   }, [router])
 
   const filteredContents = useMemo(() => {
-    let result = [...contents]
+    // ✅ NOVO: Filtra por status/aba PRIMEIRO
+    let result = contents.filter(c => c.status === tab)
 
     if (filters.searchTerm) {
       const term = filters.searchTerm.toLowerCase()
@@ -162,18 +163,25 @@ export default function AdminClient() {
     }
 
     return result
-  }, [contents, filters])
+  }, [contents, filters, tab])
 
-  const categoriesList = useMemo(
-    () => [...new Set(contents.map(c => (c.category as any)?.name).filter((x): x is string => !!x))].sort(),
-    [contents]
-  )
+const categoriesList = useMemo(
+  () => [...new Set(contents
+    .filter(c => c.status === tab) // ✅ NOVO
+    .map(c => (c.category as any)?.name)
+    .filter((x): x is string => !!x)
+  )].sort(),
+  [contents, tab] // ✅ ADICIONOU tab
+)
 
-  const authorsList = useMemo(
-    () => [...new Set(contents.map(c => (c.creator as any)?.full_name).filter((x): x is string => !!x))].sort(),
-    [contents]
-  )
-
+const authorsList = useMemo(
+  () => [...new Set(contents
+    .filter(c => c.status === tab) // ✅ NOVO
+    .map(c => (c.creator as any)?.full_name)
+    .filter((x): x is string => !!x)
+  )].sort(),
+  [contents, tab] // ✅ ADICIONOU tab
+)
   async function handleAction(id: string, action: 'approved' | 'rejected') {
     setActionId(id)
     await supabase.from('contents').update({ status: action }).eq('id', id)
