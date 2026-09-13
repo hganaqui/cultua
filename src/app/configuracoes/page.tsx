@@ -8,40 +8,22 @@ import type { Profile } from '@/types'
 
 export const metadata: Metadata = { title: 'Configurações — CULTUA' }
 export const revalidate = 0
+export const dynamic = 'force-dynamic'
 
 export default async function ConfiguracoesPage() {
   const supabase = await createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login?redirect=/configuracoes')
 
-  // ✅ Tenta buscar o perfil
-  let profile = await supabase
+  const { data: profile, error } = await supabase
     .from('profiles')
-    .select('id, full_name, avatar_url, role, managed_categories, managed_creators, created_at')
+    .select('*')
     .eq('id', user.id)
     .single()
 
-  // ✅ Se não encontrar, cria um novo
-  if (!profile.data) {
-    console.log('Criando novo perfil para:', user.id)
-    const { data: newProfile } = await supabase
-      .from('profiles')
-      .insert({
-        id: user.id,
-        full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário',
-        avatar_url: user.user_metadata?.avatar_url || null,
-        role: 'user',
-        managed_categories: null,
-        managed_creators: null,
-        created_at: new Date().toISOString(),
-      })
-      .select()
-      .single()
+  console.log('📊 Profile do servidor:', profile, 'Erro:', error)
 
-    profile.data = newProfile
-  }
-
-  const safeProfile: Profile = profile.data ?? {
+  const safeProfile: Profile = profile ?? {
     id: user.id,
     full_name: user.email?.split('@')[0] || 'Usuário',
     avatar_url: null,
@@ -50,8 +32,6 @@ export default async function ConfiguracoesPage() {
     managed_creators: null,
     created_at: new Date().toISOString(),
   }
-
-  console.log('✅ Profile carregado:', safeProfile)
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#111111' }}>
