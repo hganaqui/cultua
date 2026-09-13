@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { signOut } from '@/lib/auth'
 import BuscaGlobalClient from './BuscaGlobalClient'
-import BuscaGlobalClientMobile from './BuscaGlobalClientMobile' // ✅ ADICIONAR AQUI
+import BuscaGlobalClientMobile from './BuscaGlobalClientMobile'
 import type { User } from '@supabase/supabase-js'
 import type { UserRole } from '@/types'
 
@@ -273,9 +273,8 @@ export default function Header() {
             </Link>
           ))}
 
-          {/* ✅ BUSCA GLOBAL - ADICIONAR AQUI */}
+          {/* ✅ BUSCA GLOBAL */}
           <BuscaGlobalClient />
-          {/* ✅ FIM BUSCA */}
         </nav>
 
         {/* ── Auth desktop ─────────────────────────────────────────────── */}
@@ -287,6 +286,57 @@ export default function Header() {
             gap: '8px',
           }}
         >
+          {/* ✅ NOTIFICAÇÕES DESKTOP - SEMPRE VISÍVEL */}
+          {!loading && user && (
+            <Link
+              href="/notificacoes"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                position: 'relative',
+                backgroundColor: unread > 0 ? 'rgba(239,68,68,0.1)' : 'transparent',
+                border: `1.5px solid ${unread > 0 ? '#EF4444' : '#333333'}`,
+                borderRadius: '8px',
+                padding: '8px 12px',
+                textDecoration: 'none',
+                color: unread > 0 ? '#EF4444' : '#CCCCCC',
+                fontSize: '14px',
+                fontWeight: unread > 0 ? '600' : '400',
+                transition: 'all 0.2s',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#B8860B'
+                e.currentTarget.style.color = '#B8860B'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = unread > 0 ? '#EF4444' : '#333333'
+                e.currentTarget.style.color = unread > 0 ? '#EF4444' : '#CCCCCC'
+              }}
+            >
+              🔔
+              {unread > 0 && (
+                <span
+                  style={{
+                    backgroundColor: '#EF4444',
+                    color: 'white',
+                    fontSize: '10px',
+                    fontWeight: '700',
+                    borderRadius: '9999px',
+                    minWidth: '18px',
+                    height: '18px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {unread > 9 ? '9+' : unread}
+                </span>
+              )}
+            </Link>
+          )}
+
           {loading ? (
             <div
               style={{
@@ -304,7 +354,7 @@ export default function Header() {
                 position: 'relative',
               }}
             >
-              {/* Botão avatar com badge de notificações */}
+              {/* Botão avatar */}
               <button
                 onClick={() => setUserMenu(!userMenu)}
                 style={{
@@ -330,29 +380,6 @@ export default function Header() {
               >
                 <Avatar size={28} />
                 {displayName}
-                {unread > 0 && (
-                  <span
-                    style={{
-                      position: 'absolute',
-                      top: '-5px',
-                      right: '26px',
-                      backgroundColor: '#EF4444',
-                      color: 'white',
-                      fontSize: '10px',
-                      fontWeight: '700',
-                      borderRadius: '9999px',
-                      minWidth: '17px',
-                      height: '17px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '0 4px',
-                      border: '2px solid #1A1A1A',
-                    }}
-                  >
-                    {unread > 9 ? '9+' : unread}
-                  </span>
-                )}
                 <span style={{ fontSize: '10px', color: '#666' }}>▼</span>
               </button>
 
@@ -439,17 +466,6 @@ export default function Header() {
                     </DropItem>
                   ))}
 
-                  {/* Notificações */}
-                  {unread > 0 && (
-                    <DropItem
-                      href="/notificacoes"
-                      onClick={() => setUserMenu(false)}
-                      highlight
-                    >
-                      🔔 Notificações ({unread})
-                    </DropItem>
-                  )}
-
                   {/* Links admin */}
                   {isAdmin && (
                     <>
@@ -506,8 +522,7 @@ export default function Header() {
                       transition: 'background-color 0.15s',
                     }}
                     onMouseEnter={(e) =>
-                    (e.currentTarget.style.backgroundColor =
-                      'rgba(239,68,68,0.1)')
+                      (e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.1)')
                     }
                     onMouseLeave={(e) =>
                       (e.currentTarget.style.backgroundColor = 'transparent')
@@ -625,14 +640,13 @@ export default function Header() {
             </Link>
           ))}
 
-          {/* ✅ BUSCA MOBILE - ADICIONAR AQUI */}
+          {/* ✅ BUSCA MOBILE */}
           <div style={{ borderBottom: '1px solid #333333', margin: '12px 0', paddingBottom: '12px' }}>
             <p style={{ color: '#CCCCCC', fontSize: '12px', margin: '0 0 8px 0', fontWeight: '600' }}>
               🔍 Buscar
             </p>
             <BuscaGlobalClientMobile />
           </div>
-          {/* ✅ FIM BUSCA MOBILE */}
 
           <div style={{ marginTop: '16px' }}>
             {user ? (
@@ -706,12 +720,14 @@ export default function Header() {
                   </Link>
                 ))}
 
-                {/* Notificações mobile */}
+                {/* ✅ NOTIFICAÇÕES MOBILE - SEMPRE VISÍVEL */}
                 <Link
                   href="/notificacoes"
                   onClick={() => setMenuOpen(false)}
                   style={{
-                    display: 'block',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
                     color: unread > 0 ? '#EF4444' : '#CCCCCC',
                     textDecoration: 'none',
                     fontSize: '15px',
@@ -720,7 +736,25 @@ export default function Header() {
                     fontWeight: unread > 0 ? '600' : '500',
                   }}
                 >
-                  🔔 Notificações {unread > 0 && `(${unread})`}
+                  🔔 Notificações
+                  {unread > 0 && (
+                    <span
+                      style={{
+                        backgroundColor: '#EF4444',
+                        color: 'white',
+                        fontSize: '10px',
+                        fontWeight: '700',
+                        borderRadius: '9999px',
+                        minWidth: '16px',
+                        height: '16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {unread > 9 ? '9+' : unread}
+                    </span>
+                  )}
                 </Link>
 
                 {/* Admin mobile */}
@@ -866,9 +900,9 @@ function DropItem({
         transition: 'background-color 0.15s',
       }}
       onMouseEnter={(e) =>
-      (e.currentTarget.style.backgroundColor = highlight
-        ? `${color}22`
-        : '#333333')
+        (e.currentTarget.style.backgroundColor = highlight
+          ? `${color}22`
+          : '#333333')
       }
       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
     >
