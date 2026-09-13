@@ -34,37 +34,34 @@ export default function AdminClient() {
 
   // ✅ CORRIGIDO: Define loadContents ANTES de usá-la
   const loadContents = useCallback(async (status: Tab) => {
-    setLoading(true)
-    setFilters({ searchTerm: '', category: '', author: '', sortBy: 'date' })
+    console.log('🔄 Carregando:', status)
     setTab(status)
+    setFilters({ searchTerm: '', category: '', author: '', sortBy: 'date' })
+    setLoading(true)
 
     try {
-      console.log('🔄 Carregando conteúdos com status:', status) // ✅ LOG
-
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('contents')
         .select(`*, category:categories(name, slug, color, icon), creator:profiles(full_name)`)
         .eq('status', status)
         .order('created_at', { ascending: false })
 
-      console.log('✅ Resposta:', { data, error }) // ✅ LOG
-      console.log('📊 Total de itens:', data?.length ?? 0) // ✅ LOG
+      console.log(`📊 ${status}:`, data?.length ?? 0)
 
-      if (error) {
-        console.error('❌ Erro na query:', error)
-        setContents([])
-      } else {
-        setContents((data as Content[]) ?? [])
-      }
+      // ✅ MUDA: Atualiza SÓ o status clicado, mantém os outros
+      setContents(prev => {
+        const outros = prev.filter(c => c.status !== status)
+        const novos = (data as Content[]) ?? []
+        return [...outros, ...novos]
+      })
     } catch (err) {
-      console.error('❌ Erro ao carregar conteúdos:', err)
-      setContents([])
+      console.error('Erro:', err)
     } finally {
       setLoading(false)
     }
   }, [])
 
-  // ✅ AGORA pode usar loadContents aqui
+
   useEffect(() => {
     async function checkAuth() {
       try {
@@ -86,15 +83,52 @@ export default function AdminClient() {
         }
 
         setAuthorized(true)
-        // ✅ Chama loadContents DEPOIS de estar definida
-        loadContents('pending')
+
+        // ✅ NOVO: Carrega TODOS os status em paralelo
+        setLoading(true)
+        try {
+          const [pendingRes, approvedRes, rejectedRes] = await Promise.all([
+            supabase
+              .from('contents')
+              .select(`*, category:categories(name, slug, color, icon), creator:profiles(full_name)`)
+              .eq('status', 'pending')
+              .order('created_at', { ascending: false }),
+            supabase
+              .from('contents')
+              .select(`*, category:categories(name, slug, color, icon), creator:profiles(full_name)`)
+              .eq('status', 'approved')
+              .order('created_at', { ascending: false }),
+            supabase
+              .from('contents')
+              .select(`*, category:categories(name, slug, color, icon), creator:profiles(full_name)`)
+              .eq('status', 'rejected')
+              .order('created_at', { ascending: false }),
+          ])
+
+          console.log('📊 Carregamento inicial:')
+          console.log('⏳ Pending:', pendingRes.data?.length ?? 0)
+          console.log('✅ Approved:', approvedRes.data?.length ?? 0)
+          console.log('❌ Rejected:', rejectedRes.data?.length ?? 0)
+
+          // Armazena todos os dados
+          const allContents = [
+            ...(pendingRes.data ?? []).map(c => ({ ...c, status: 'pending' as const })),
+            ...(approvedRes.data ?? []).map(c => ({ ...c, status: 'approved' as const })),
+            ...(rejectedRes.data ?? []).map(c => ({ ...c, status: 'rejected' as const })),
+          ]
+
+          setContents(allContents)
+          setTab('pending') // Mostra pending por padrão
+        } finally {
+          setLoading(false)
+        }
       } catch (err) {
         console.error('Erro na autenticação:', err)
         router.push('/')
       }
     }
     checkAuth()
-  }, [router, loadContents])
+  }, [router])
 
   const filteredContents = useMemo(() => {
     let result = [...contents]
