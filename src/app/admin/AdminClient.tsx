@@ -32,9 +32,7 @@ export default function AdminClient() {
     sortBy: 'date',
   })
 
-  // ✅ CORRIGIDO: Define loadContents ANTES de usá-la
   const loadContents = useCallback(async (status: Tab) => {
-    console.log('🔄 Carregando:', status)
     setTab(status)
     setFilters({ searchTerm: '', category: '', author: '', sortBy: 'date' })
     setLoading(true)
@@ -46,9 +44,7 @@ export default function AdminClient() {
         .eq('status', status)
         .order('created_at', { ascending: false })
 
-      console.log(`📊 ${status}:`, data?.length ?? 0)
 
-      // ✅ MUDA: Atualiza SÓ o status clicado, mantém os outros
       setContents(prev => {
         const outros = prev.filter(c => c.status !== status)
         const novos = (data as Content[]) ?? []
@@ -105,10 +101,6 @@ export default function AdminClient() {
               .order('created_at', { ascending: false }),
           ])
 
-          console.log('📊 Carregamento inicial:')
-          console.log('⏳ Pending:', pendingRes.data?.length ?? 0)
-          console.log('✅ Approved:', approvedRes.data?.length ?? 0)
-          console.log('❌ Rejected:', rejectedRes.data?.length ?? 0)
 
           // Armazena todos os dados
           const allContents = [

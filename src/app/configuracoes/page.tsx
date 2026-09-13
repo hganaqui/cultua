@@ -13,15 +13,19 @@ export default async function ConfiguracoesPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login?redirect=/configuracoes')
 
-  // ✅ CORRIGIDO: Busca completa do profile
+  // ✅ NOVO: Log completo da query
   const { data: profile, error } = await supabase
     .from('profiles')
     .select('id, full_name, avatar_url, role, managed_categories, managed_creators, created_at')
     .eq('id', user.id)
     .single()
 
-  console.log('Profile do banco:', profile)
+  console.log('🔍 Query do Supabase:')
+  console.log('User ID:', user.id)
+  console.log('Profile retornado:', profile)
   console.log('Erro (se houver):', error)
+  console.log('full_name:', profile?.full_name)
+  console.log('avatar_url:', profile?.avatar_url)
 
   const safeProfile: Profile = profile ?? {
     id: user.id,
