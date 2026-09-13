@@ -446,6 +446,8 @@ const authorsList = useMemo(
               display: 'flex', gap: '16px', alignItems: 'flex-start',
               border: '1px solid #2D2D2D',
               transition: 'all 0.2s',
+              overflow: 'hidden', // ✅ ADICIONAR ISTO
+              flexWrap: 'wrap', // ✅ ADICIONAR ISTO
             }}
               onMouseEnter={e => (e.currentTarget.style.borderColor = '#3D3D3D')}
               onMouseLeave={e => (e.currentTarget.style.borderColor = '#2D2D2D')}
