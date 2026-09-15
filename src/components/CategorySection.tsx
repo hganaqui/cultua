@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { DESIGN_SYSTEM } from '@/lib/design-system'
@@ -9,46 +10,16 @@ import type { Tag } from '@/types'
 const DS = DESIGN_SYSTEM
 
 const CATEGORIES = [
-  {
-    id:    'louvor',
-    name:  'Louvor',
-    icon:  '🎵',
-    color: '#7C3AED',
-  },
-  {
-    id:    'pregacao',
-    name:  'Pregação',
-    icon:  '📖',
-    color: '#D4A373',
-  },
-  {
-    id:    'crescimento',
-    name:  'Crescimento',
-    icon:  '🌱',
-    color: DS.colors.primary.main,
-  },
-  {
-    id:    'testemunhos',
-    name:  'Testemunhos',
-    icon:  '🙏',
-    color: '#D97706',
-  },
-  {
-    id:    'familia',
-    name:  'Família',
-    icon:  '🏠',
-    color: DS.colors.primary.accent,
-  },
-  {
-    id:    'estudos',
-    name:  'Estudos',
-    icon:  '📚',
-    color: '#6B7F6B',
-  },
+  { id: 'louvor',      name: 'Louvor',      icon: '/icons/louvor.svg',      color: '#7C3AED' },
+  { id: 'pregacao',    name: 'Pregação',    icon: '/icons/pregacao.svg',    color: '#D4A373' },
+  { id: 'crescimento', name: 'Crescimento', icon: '/icons/crescimento.svg', color: DS.colors.primary.main },
+  { id: 'testemunhos', name: 'Testemunhos', icon: '/icons/testemunhos.svg', color: '#D97706' },
+  { id: 'familia',     name: 'Família',     icon: '/icons/familia.svg',     color: DS.colors.primary.accent },
+  { id: 'estudos',     name: 'Estudos',     icon: '/icons/estudos.svg',     color: '#6B7F6B' },
 ]
 
 export default function CategorySection() {
-  const [tags, setTags]               = useState<Tag[]>([])
+  const [tags, setTags] = useState<Tag[]>([])
   const [loadingTags, setLoadingTags] = useState(true)
 
   useEffect(() => {
@@ -68,7 +39,6 @@ export default function CategorySection() {
   return (
     <section style={{ padding: '64px 16px', backgroundColor: DS.colors.bg.primary }}>
       <style>{`
-        /* ── Categorias ── */
         .cat-grid {
           display: grid;
           grid-template-columns: repeat(6, 1fr);
@@ -79,9 +49,9 @@ export default function CategorySection() {
 
         .cat-card {
           text-decoration: none;
-          background-color: ${DS.colors.bg.secondary};
+          background-color: var(--cat-bg); /* ✅ MUDOU */
           border-radius: ${DS.borderRadius.xl};
-          border: 1px solid ${DS.colors.neutral.light};
+          border: 1px solid var(--cat-border); /* ✅ MUDOU */
           padding: 28px 12px 20px;
           display: flex;
           flex-direction: column;
@@ -99,7 +69,6 @@ export default function CategorySection() {
           border-color: rgba(15,61,46,0.2);
         }
 
-        /* ── Tags ── */
         .tags-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -129,7 +98,6 @@ export default function CategorySection() {
 
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
-        {/* ── CATEGORIAS ─────────────────────────────────────────────── */}
         <div style={{ marginBottom: '72px' }}>
           <div style={{ textAlign: 'center', marginBottom: '40px' }}>
             <h2 style={{
@@ -153,11 +121,33 @@ export default function CategorySection() {
 
           <div className="cat-grid">
             {CATEGORIES.map(cat => (
-              <Link key={cat.id} href={`/categoria/${cat.id}`} className="cat-card">
-                {/* Emoji */}
-                <span style={{ fontSize: '40px', lineHeight: 1 }}>{cat.icon}</span>
+              <Link
+                key={cat.id}
+                href={`/categoria/${cat.id}`}
+                className="cat-card"
+                style={{
+                  '--cat-bg': `${cat.color}15`,        /* ✅ MUDOU */
+                  '--cat-border': `${cat.color}40`,    /* ✅ MUDOU */
+                } as React.CSSProperties}
+              >
+                <div style={{
+                  width: '56px',
+                  height: '56px',
+                  backgroundColor: `${cat.color}15`,
+                  borderRadius: DS.borderRadius.lg,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  <Image
+                    src={cat.icon}
+                    alt={cat.name}
+                    width={28}
+                    height={28}
+                  />
+                </div>
 
-                {/* Nome */}
                 <div style={{
                   fontFamily: DS.typography.fontFamily.heading,
                   fontSize: '14px',
@@ -167,7 +157,6 @@ export default function CategorySection() {
                   {cat.name}
                 </div>
 
-                {/* Underline colorido */}
                 <div style={{
                   width: '24px',
                   height: '3px',
@@ -179,7 +168,6 @@ export default function CategorySection() {
           </div>
         </div>
 
-        {/* ── TEMAS/TAGS ──────────────────────────────────────────────── */}
         {!loadingTags && tags.length > 0 && (
           <div>
             <div style={{ textAlign: 'center', marginBottom: '32px' }}>
@@ -230,7 +218,6 @@ export default function CategorySection() {
           </div>
         )}
 
-        {/* Loading tags */}
         {loadingTags && (
           <div style={{
             textAlign: 'center',

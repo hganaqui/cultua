@@ -1,19 +1,20 @@
 import { createServerSupabase } from '@/lib/supabase-server'
 import HeaderClient from './HeaderClient'
 import BuscaGlobalClient from './BuscaGlobalClient'
+import Image from 'next/image'
 import Link from 'next/link'
 import { DESIGN_SYSTEM } from '@/lib/design-system'
 
 const DS = DESIGN_SYSTEM
 
-// ── 6 categorias na navbar ─────────────────────────────────────────
+// ── 6 categorias na navbar com SVGs ────────────────────────────────
 const NAV_CATEGORIES = [
-  { href: '/categoria/louvor',      label: 'Louvor'      },
-  { href: '/categoria/pregacao',    label: 'Pregação'    },
-  { href: '/categoria/crescimento', label: 'Crescimento' },
-  { href: '/categoria/testemunhos', label: 'Testemunhos' },
-  { href: '/categoria/familia',     label: 'Família'     },
-  { href: '/categoria/estudos',     label: 'Estudos'     },
+  { href: '/categoria/louvor',      label: 'Louvor',      icon: '/icons/louvor.svg'      },
+  { href: '/categoria/pregacao',    label: 'Pregação',    icon: '/icons/pregacao.svg'    },
+  { href: '/categoria/crescimento', label: 'Crescimento', icon: '/icons/crescimento.svg' },
+  { href: '/categoria/testemunhos', label: 'Testemunhos', icon: '/icons/testemunhos.svg' },
+  { href: '/categoria/familia',     label: 'Família',     icon: '/icons/familia.svg'     },
+  { href: '/categoria/estudos',     label: 'Estudos',     icon: '/icons/estudos.svg'     },
 ]
 
 export default async function Header() {
@@ -69,7 +70,7 @@ export default async function Header() {
           CULTUA
         </Link>
 
-        {/* Nav — 6 categorias, fonte menor para caber */}
+        {/* ✅ Nav com SVGs EXTRA GRANDES (28x28) + labels */}
         <nav className="hdr-nav" style={{
           display: 'flex',
           alignItems: 'center',
@@ -90,8 +91,18 @@ export default async function Header() {
                 borderRadius: DS.borderRadius.md,
                 fontWeight: DS.typography.fontWeight.medium,
                 whiteSpace: 'nowrap' as const,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px', // ✅ aumentado de 6px para 8px (mais espaço para ícone maior)
               }}
             >
+              {/* ✅ ÍCONE EXTRA GRANDE: 28x28 */}
+              <Image
+                src={item.icon}
+                alt={item.label}
+                width={28}
+                height={28}
+              />
               {item.label}
             </Link>
           ))}

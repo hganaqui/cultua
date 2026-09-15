@@ -1,22 +1,22 @@
 'use client'
 
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { DESIGN_SYSTEM } from '@/lib/design-system'
 import VideoCard from '@/components/VideoCard'
-import type { Content } from '@/types'
+import type { Content, Tag } from '@/types'
 import { getCategory } from '@/types'
 
 const DS = DESIGN_SYSTEM
 
 const CATEGORIES = [
-  { slug: 'louvor',      label: 'Louvor',      emoji: '🎵' },
-  { slug: 'pregacao',    label: 'Pregação',    emoji: '📖' },
-  { slug: 'crescimento', label: 'Crescimento', emoji: '🌱' },
-  { slug: 'testemunhos', label: 'Testemunhos', emoji: '🙏' },
-  { slug: 'oracao',      label: 'Oração',      emoji: '🤲' },
-  { slug: 'familia',     label: 'Família',     emoji: '🏠' },
-  { slug: 'estudos',     label: 'Estudos',     emoji: '📚' },
+  { slug: 'louvor',      label: 'Louvor',      icon: '/icons/louvor.svg' },
+  { slug: 'pregacao',    label: 'Pregação',    icon: '/icons/pregacao.svg' },
+  { slug: 'crescimento', label: 'Crescimento', icon: '/icons/crescimento.svg' },
+  { slug: 'testemunhos', label: 'Testemunhos', icon: '/icons/testemunhos.svg' },
+  { slug: 'familia',     label: 'Família',     icon: '/icons/familia.svg' },
+  { slug: 'estudos',     label: 'Estudos',     icon: '/icons/estudos.svg' },
 ]
 
 // ── Estilo base dos botões de filtro ────────────────────────────────
@@ -32,14 +32,36 @@ function filterBtnStyle(active: boolean): React.CSSProperties {
     transition: DS.transitions.fast,
     backgroundColor: active ? DS.colors.primary.main : DS.colors.bg.secondary,
     color: active ? '#FFFFFF' : DS.colors.text.secondary,
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
   }
 }
 
 export default function ExplorarClient() {
-  const [contents, setContents]     = useState<Content[]>([])
-  const [activeSlug, setActiveSlug] = useState<string | null>(null)
-  const [loading, setLoading]       = useState(true)
+  const [contents, setContents]       = useState<Content[]>([])
+  const [tags, setTags]               = useState<Tag[]>([])
+  const [activeCategory, setActiveCategory] = useState<string | null>(null)
+  const [activeTags, setActiveTags]   = useState<string[]>([])
+  const [loading, setLoading]         = useState(true)
 
+  // ── Carregar tags ao montar ────────────────────────────────────────
+  useEffect(() => {
+    async function loadTags() {
+      try {
+        const { data } = await supabase
+          .from('tags')
+          .select('*')
+          .order('name')
+        setTags(data ?? [])
+      } catch (err) {
+        console.error('[ExplorarClient] tags:', err)
+      }
+    }
+    loadTags()
+  }, [])
+
+  // ── Carregar conteúdos com filtros ─────────────────────────────────
   useEffect(() => {
     async function load() {
       setLoading(true)
@@ -49,24 +71,52 @@ export default function ExplorarClient() {
         .select(`
           *,
           category:categories(id, name, slug, color, icon, description, created_at),
-          creator:profiles(full_name)
+          creator:profiles(full_name),
+          tags:content_tags(tag:tags(*))
         `)
         .eq('status', 'approved')
         .order('created_at', { ascending: false })
         .limit(24)
 
-      if (activeSlug) {
+      // ── Filtro por categoria ────────────────────────────────────────
+      if (activeCategory) {
         const { data: cat } = await supabase
-          .from('categories').select('id').eq('slug', activeSlug).single()
+          .from('categories')
+          .select('id')
+          .eq('slug', activeCategory)
+          .single()
         if (cat?.id) query = query.eq('category_id', cat.id)
       }
 
       const { data } = await query
-      setContents((data as Content[]) ?? [])
+      let contentList = (data as Content[]) ?? []
+
+      // ── Filtro por tags (client-side — AND logic) ──────────────────
+      if (activeTags.length > 0) {
+        contentList = contentList.filter(item => {
+          const itemTagSlugs = (item.tags ?? []).map((ct: any) => {
+            const tag = ct.tag ?? ct
+            return typeof tag === 'object' ? tag.slug : tag
+          })
+          // ✅ Conteúdo PRECISA ter TODAS as tags selecionadas
+          return activeTags.every(tagSlug => itemTagSlugs.includes(tagSlug))
+        })
+      }
+
+      setContents(contentList)
       setLoading(false)
     }
     load()
-  }, [activeSlug])
+  }, [activeCategory, activeTags])
+
+  // ── Toggle tag selecionada ─────────────────────────────────────────
+  function toggleTag(slug: string) {
+    setActiveTags(prev =>
+      prev.includes(slug)
+        ? prev.filter(s => s !== slug)
+        : [...prev, slug]
+    )
+  }
 
   return (
     <main style={{
@@ -97,57 +147,118 @@ export default function ExplorarClient() {
           </p>
         </div>
 
-        {/* Filtro de categorias */}
-        <div style={{
-          display: 'flex', gap: '8px',
-          flexWrap: 'wrap' as const,
-          marginBottom: '32px',
-        }}>
-          {/* Botão "Todos" */}
-          <button
-            onClick={() => setActiveSlug(null)}
-            style={filterBtnStyle(activeSlug === null)}
-            onMouseEnter={e => {
-              if (activeSlug !== null) {
-                e.currentTarget.style.borderColor = DS.colors.primary.main
-                e.currentTarget.style.color = DS.colors.primary.main
-              }
-            }}
-            onMouseLeave={e => {
-              if (activeSlug !== null) {
-                e.currentTarget.style.borderColor = DS.colors.neutral.medium
-                e.currentTarget.style.color = DS.colors.text.secondary
-              }
-            }}
-          >
-            Todos
-          </button>
-
-          {/* Botões de categoria */}
-          {CATEGORIES.map(cat => (
+        {/* ── FILTRO DE CATEGORIAS ── */}
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{
+            fontFamily: DS.typography.fontFamily.body,
+            fontSize: '12px',
+            fontWeight: DS.typography.fontWeight.semibold,
+            color: DS.colors.text.secondary,
+            textTransform: 'uppercase' as const,
+            marginBottom: '12px',
+            letterSpacing: '0.5px',
+          }}>
+            Categorias
+          </div>
+          <div style={{
+            display: 'flex', gap: '8px',
+            flexWrap: 'wrap' as const,
+          }}>
+            {/* Botão "Todos" */}
             <button
-              key={cat.slug}
-              onClick={() => setActiveSlug(cat.slug)}
-              style={filterBtnStyle(activeSlug === cat.slug)}
+              onClick={() => setActiveCategory(null)}
+              style={filterBtnStyle(activeCategory === null)}
               onMouseEnter={e => {
-                if (activeSlug !== cat.slug) {
+                if (activeCategory !== null) {
                   e.currentTarget.style.borderColor = DS.colors.primary.main
                   e.currentTarget.style.color = DS.colors.primary.main
                 }
               }}
               onMouseLeave={e => {
-                if (activeSlug !== cat.slug) {
+                if (activeCategory !== null) {
                   e.currentTarget.style.borderColor = DS.colors.neutral.medium
                   e.currentTarget.style.color = DS.colors.text.secondary
                 }
               }}
             >
-              {cat.emoji} {cat.label}
+              Todas
             </button>
-          ))}
+
+            {/* Botões de categoria */}
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat.slug}
+                onClick={() => setActiveCategory(cat.slug)}
+                style={filterBtnStyle(activeCategory === cat.slug)}
+                onMouseEnter={e => {
+                  if (activeCategory !== cat.slug) {
+                    e.currentTarget.style.borderColor = DS.colors.primary.main
+                    e.currentTarget.style.color = DS.colors.primary.main
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (activeCategory !== cat.slug) {
+                    e.currentTarget.style.borderColor = DS.colors.neutral.medium
+                    e.currentTarget.style.color = DS.colors.text.secondary
+                  }
+                }}
+              >
+                <Image
+                  src={cat.icon}
+                  alt={cat.label}
+                  width={14}
+                  height={14}
+                />
+                {cat.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Grid */}
+        {/* ── FILTRO DE TAGS ── */}
+        {tags.length > 0 && (
+          <div style={{ marginBottom: '32px' }}>
+            <div style={{
+              fontFamily: DS.typography.fontFamily.body,
+              fontSize: '12px',
+              fontWeight: DS.typography.fontWeight.semibold,
+              color: DS.colors.text.secondary,
+              textTransform: 'uppercase' as const,
+              marginBottom: '12px',
+              letterSpacing: '0.5px',
+            }}>
+              Temas (Selecione múltiplas para filtrar)
+            </div>
+            <div style={{
+              display: 'flex', gap: '8px',
+              flexWrap: 'wrap' as const,
+            }}>
+              {tags.map(tag => (
+                <button
+                  key={tag.id}
+                  onClick={() => toggleTag(tag.slug)}
+                  style={filterBtnStyle(activeTags.includes(tag.slug))}
+                  onMouseEnter={e => {
+                    if (!activeTags.includes(tag.slug)) {
+                      e.currentTarget.style.borderColor = tag.color
+                      e.currentTarget.style.color = tag.color
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (!activeTags.includes(tag.slug)) {
+                      e.currentTarget.style.borderColor = DS.colors.neutral.medium
+                      e.currentTarget.style.color = DS.colors.text.secondary
+                    }
+                  }}
+                >
+                  {tag.icon} {tag.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── GRID ── */}
         {loading ? (
           <div style={{
             fontFamily: DS.typography.fontFamily.body,
@@ -178,7 +289,9 @@ export default function ExplorarClient() {
               fontFamily: DS.typography.fontFamily.body,
               color: DS.colors.text.secondary,
             }}>
-              Em breve teremos mais conteúdos aqui.
+              {activeTags.length > 0 || activeCategory
+                ? 'Tente outro filtro.'
+                : 'Em breve teremos mais conteúdos aqui.'}
             </p>
           </div>
         ) : (

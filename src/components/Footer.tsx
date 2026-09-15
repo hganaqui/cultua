@@ -1,17 +1,19 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { DESIGN_SYSTEM } from '@/lib/design-system'
 
 const DS = DESIGN_SYSTEM
 
+// ✅ SVGs em vez de emojis
 const CATEGORIAS = [
-  { icon: '🎵', name: 'Louvor',      href: '/categoria/louvor' },
-  { icon: '📖', name: 'Pregação',    href: '/categoria/pregacao' },
-  { icon: '🌱', name: 'Crescimento', href: '/categoria/crescimento' },
-  { icon: '🙏', name: 'Testemunhos', href: '/categoria/testemunhos' },
-  { icon: '🏠', name: 'Família',     href: '/categoria/familia' },
-  { icon: '📚', name: 'Estudos',     href: '/categoria/estudos' },
+  { icon: '/icons/louvor.svg',      name: 'Louvor',      href: '/categoria/louvor' },
+  { icon: '/icons/pregacao.svg',    name: 'Pregação',    href: '/categoria/pregacao' },
+  { icon: '/icons/crescimento.svg', name: 'Crescimento', href: '/categoria/crescimento' },
+  { icon: '/icons/testemunhos.svg', name: 'Testemunhos', href: '/categoria/testemunhos' },
+  { icon: '/icons/familia.svg',     name: 'Família',     href: '/categoria/familia' },
+  { icon: '/icons/estudos.svg',     name: 'Estudos',     href: '/categoria/estudos' },
 ]
 
 const PLATAFORMA = [
@@ -111,11 +113,27 @@ export default function Footer() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                  style={{
+                    ...linkStyle,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}
                   onMouseEnter={e => (e.currentTarget.style.color = DS.colors.primary.accent)}
                   onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
                 >
-                  {item.icon} {item.name}
+                  {/* ✅ SVG com filter para virar branco/dourado */}
+                  <Image
+                    src={item.icon}
+                    alt={item.name}
+                    width={16}
+                    height={16}
+                    style={{
+                      display: 'block',
+                      filter: 'brightness(0) invert(1)', // ✅ Inverte cores (verde → branco)
+                    }}
+                  />
+                  {item.name}
                 </Link>
               ))}
             </div>
