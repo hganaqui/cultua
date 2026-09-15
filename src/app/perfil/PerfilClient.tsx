@@ -9,6 +9,8 @@ import type { Profile } from '@/types'
 
 const DS = DESIGN_SYSTEM
 
+const SUCCESS_COLOR = '#6B7F6B'
+
 export default function PerfilClient() {
   const router = useRouter()
   const [user, setUser]         = useState<User | null>(null)
@@ -18,21 +20,12 @@ export default function PerfilClient() {
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
-      if (!data.user) {
-        router.push('/auth/login?redirect=/perfil')
-        return
-      }
+      if (!data.user) { router.push('/auth/login?redirect=/perfil'); return }
       setUser(data.user)
 
       const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', data.user.id)
-        .single()
-
-      if (profileData) {
-        setProfile(profileData)
-      }
+        .from('profiles').select('*').eq('id', data.user.id).single()
+      if (profileData) setProfile(profileData)
 
       setLoading(false)
     })
@@ -49,63 +42,62 @@ export default function PerfilClient() {
   return (
     <main style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 16px' }}>
 
+      {/* Card principal */}
       <div style={{
-        backgroundColor: DS.colors.bg.secondary, 
-        borderRadius: DS.borderRadius.xl, 
-        padding: '40px',
-        border: `1px solid ${DS.colors.neutral.light}`, 
-        marginBottom: '24px',
+        backgroundColor: DS.colors.bg.secondary,
+        borderRadius: DS.borderRadius.xl, padding: '40px',
+        border: `1px solid ${DS.colors.neutral.light}`,
+        marginBottom: '24px', boxShadow: DS.shadows.sm,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' as const }}>
+
           {/* Avatar */}
           {avatarUrl && !imgError ? (
             <img
-              src={avatarUrl + `?t=${Date.now()}`}
+              src={`${avatarUrl}?t=${Date.now()}`}
               alt={displayName}
               onError={() => setImgError(true)}
               style={{
-                width: '88px',
-                height: '88px',
-                borderRadius: '50%',
-                objectFit: 'cover',
-                flexShrink: 0,
+                width: '88px', height: '88px', borderRadius: '50%',
+                objectFit: 'cover', flexShrink: 0,
                 border: `3px solid ${DS.colors.primary.main}`,
               }}
             />
           ) : (
             <div style={{
-              width: '88px', 
-              height: '88px', 
-              backgroundColor: DS.colors.primary.main,
-              borderRadius: '50%', 
-              display: 'flex', 
-              alignItems: 'center',
-              justifyContent: 'center', 
-              fontSize: '32px', 
-              fontWeight: '900', 
-              color: 'white', 
-              flexShrink: 0,
+              width: '88px', height: '88px',
+              backgroundColor: DS.colors.primary.accent,
+              borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: DS.typography.fontFamily.heading,
+              fontSize: '32px', fontWeight: DS.typography.fontWeight.bold,
+              color: DS.colors.primary.main, flexShrink: 0,
               border: `3px solid ${DS.colors.primary.light}`,
             }}>
               {initials}
             </div>
           )}
-          
+
           <div>
-            <h1 style={{ fontSize: '26px', fontWeight: '800', color: DS.colors.text.dark, marginBottom: '4px' }}>
+            <h1 style={{
+              fontFamily: DS.typography.fontFamily.heading,
+              fontSize: '26px', fontWeight: DS.typography.fontWeight.bold,
+              color: DS.colors.text.primary, marginBottom: '4px',
+            }}>
               {displayName}
             </h1>
-            <p style={{ color: DS.colors.text.secondary, fontSize: '14px', marginBottom: '8px' }}>
+            <p style={{
+              fontFamily: DS.typography.fontFamily.body,
+              color: DS.colors.text.secondary, fontSize: '14px', marginBottom: '8px',
+            }}>
               {user.email}
             </p>
             <span style={{
-              backgroundColor: DS.colors.secondary.success + '15', 
-              color: DS.colors.secondary.success,
-              fontSize: '12px', 
-              fontWeight: '600', 
-              padding: '4px 12px',
-              borderRadius: DS.borderRadius.full, 
-              border: `1px solid ${DS.colors.secondary.success}30`,
+              fontFamily: DS.typography.fontFamily.body,
+              backgroundColor: `${SUCCESS_COLOR}15`, color: SUCCESS_COLOR,
+              fontSize: '12px', fontWeight: DS.typography.fontWeight.semibold,
+              padding: '4px 12px', borderRadius: DS.borderRadius.full,
+              border: `1px solid ${SUCCESS_COLOR}35`,
             }}>
               ✅ Conta verificada
             </span>
@@ -114,22 +106,34 @@ export default function PerfilClient() {
 
         <div style={{ borderTop: `1px solid ${DS.colors.neutral.light}`, margin: '28px 0' }} />
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+        {/* Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
           {[
             { label: 'Membro desde', value: joinedAt },
             { label: 'Plano',        value: '🎵 Gratuito' },
             { label: 'Status',       value: '✅ Ativo' },
           ].map(item => (
-            <div key={item.label} style={{ 
-              backgroundColor: DS.colors.neutral.charcoal + '40', 
-              borderRadius: DS.borderRadius.lg, 
-              padding: '16px', 
-              border: `1px solid ${DS.colors.neutral.light}` 
-            }}>
-              <div style={{ fontSize: '12px', color: DS.colors.text.secondary, fontWeight: '600', marginBottom: '4px' }}>
+            <div
+              key={item.label}
+              style={{
+                backgroundColor: DS.colors.bg.primary,
+                borderRadius: DS.borderRadius.lg, padding: '16px',
+                border: `1px solid ${DS.colors.neutral.light}`,
+              }}
+            >
+              <div style={{
+                fontFamily: DS.typography.fontFamily.body,
+                fontSize: '12px', color: DS.colors.text.secondary,
+                fontWeight: DS.typography.fontWeight.semibold, marginBottom: '4px',
+                textTransform: 'uppercase' as const, letterSpacing: '0.4px',
+              }}>
                 {item.label}
               </div>
-              <div style={{ fontSize: '15px', color: DS.colors.text.dark, fontWeight: '600' }}>
+              <div style={{
+                fontFamily: DS.typography.fontFamily.body,
+                fontSize: '15px', color: DS.colors.text.primary,
+                fontWeight: DS.typography.fontWeight.semibold,
+              }}>
                 {item.value}
               </div>
             </div>
@@ -137,40 +141,47 @@ export default function PerfilClient() {
         </div>
       </div>
 
+      {/* Links rápidos */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
         {[
           { href: '/historico',     icon: '📺', label: 'Histórico',     desc: 'O que você assistiu' },
           { href: '/playlist',      icon: '🎵', label: 'Playlists',     desc: 'Suas coleções' },
           { href: '/configuracoes', icon: '⚙️', label: 'Configurações', desc: 'Editar sua conta' },
         ].map(item => (
-          <a 
-            key={item.href} 
-            href={item.href} 
+          <a
+            key={item.href}
+            href={item.href}
             style={{
-              backgroundColor: DS.colors.bg.secondary, 
-              borderRadius: DS.borderRadius.lg, 
-              padding: '20px',
-              textDecoration: 'none', 
-              border: `1px solid ${DS.colors.neutral.light}`, 
-              display: 'block',
-              transition: DS.transitions.base,
+              backgroundColor: DS.colors.bg.secondary,
+              borderRadius: DS.borderRadius.lg, padding: '20px',
+              textDecoration: 'none',
+              border: `1px solid ${DS.colors.neutral.light}`,
+              display: 'block', transition: DS.transitions.fast,
+              boxShadow: DS.shadows.sm,
             }}
-            onMouseEnter={(e) => {
+            onMouseEnter={e => {
               e.currentTarget.style.borderColor = DS.colors.primary.main
-              e.currentTarget.style.backgroundColor = DS.colors.neutral.charcoal + '40'
+              e.currentTarget.style.boxShadow = DS.shadows.md
+              e.currentTarget.style.transform = 'translateY(-2px)'
             }}
-            onMouseLeave={(e) => {
+            onMouseLeave={e => {
               e.currentTarget.style.borderColor = DS.colors.neutral.light
-              e.currentTarget.style.backgroundColor = DS.colors.bg.secondary
+              e.currentTarget.style.boxShadow = DS.shadows.sm
+              e.currentTarget.style.transform = 'translateY(0)'
             }}
           >
-            <div style={{ fontSize: '28px', marginBottom: '8px' }}>
-              {item.icon}
-            </div>
-            <div style={{ fontSize: '15px', fontWeight: '700', color: DS.colors.text.dark }}>
+            <div style={{ fontSize: '28px', marginBottom: '8px' }}>{item.icon}</div>
+            <div style={{
+              fontFamily: DS.typography.fontFamily.heading,
+              fontSize: '15px', fontWeight: DS.typography.fontWeight.semibold,
+              color: DS.colors.text.primary,
+            }}>
               {item.label}
             </div>
-            <div style={{ fontSize: '12px', color: DS.colors.text.secondary, marginTop: '2px' }}>
+            <div style={{
+              fontFamily: DS.typography.fontFamily.body,
+              fontSize: '12px', color: DS.colors.text.secondary, marginTop: '2px',
+            }}>
               {item.desc}
             </div>
           </a>
@@ -184,11 +195,11 @@ function LoadingState() {
   return (
     <main style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 16px' }}>
       <div style={{
-        backgroundColor: DS.colors.bg.secondary, 
-        borderRadius: DS.borderRadius.xl, 
-        padding: '40px',
-        border: `1px solid ${DS.colors.neutral.light}`, 
-        textAlign: 'center', 
+        backgroundColor: DS.colors.bg.secondary,
+        borderRadius: DS.borderRadius.xl, padding: '40px',
+        border: `1px solid ${DS.colors.neutral.light}`,
+        textAlign: 'center',
+        fontFamily: DS.typography.fontFamily.body,
         color: DS.colors.text.secondary,
       }}>
         Carregando perfil...

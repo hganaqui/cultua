@@ -13,7 +13,11 @@ export async function createServerSupabase() {
     {
       cookies: {
         getAll: () => cookieStore.getAll(),
-        setAll: () => {}, // server component não precisa setar
+        setAll: () => { }, // server component não precisa setar
+      },// ← Adicionar isso
+      global: {
+        fetch: (url, options) =>
+          fetch(url, { ...options, signal: AbortSignal.timeout(8000) }),
       },
     }
   )

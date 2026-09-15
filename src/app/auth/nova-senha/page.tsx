@@ -5,15 +5,28 @@ import { DESIGN_SYSTEM } from '@/lib/design-system'
 
 const DS = DESIGN_SYSTEM
 
-export const metadata: Metadata = { title: 'Nova senha' }
+export const metadata: Metadata = { title: 'Nova senha — CULTUA' }
 
 export default function NovaSenhaPage() {
   return (
     <AuthLayout>
-      <h1 style={{ color: DS.colors.text.dark, fontSize: '22px', fontWeight: '800', marginBottom: '6px', textAlign: 'center' }}>
+      <h1 style={{
+        fontFamily: DS.typography.fontFamily.heading,
+        color: DS.colors.text.primary,
+        fontSize: '22px',
+        fontWeight: DS.typography.fontWeight.bold,
+        marginBottom: '6px',
+        textAlign: 'center',
+      }}>
         Criar nova senha 🔒
       </h1>
-      <p style={{ color: DS.colors.text.secondary, fontSize: '14px', textAlign: 'center', marginBottom: '28px' }}>
+      <p style={{
+        fontFamily: DS.typography.fontFamily.body,
+        color: DS.colors.text.secondary,
+        fontSize: '14px',
+        textAlign: 'center',
+        marginBottom: '28px',
+      }}>
         Digite sua nova senha abaixo
       </p>
       <NovaSenhaForm />

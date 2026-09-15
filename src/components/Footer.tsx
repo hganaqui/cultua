@@ -5,53 +5,87 @@ import { DESIGN_SYSTEM } from '@/lib/design-system'
 
 const DS = DESIGN_SYSTEM
 
+const CATEGORIAS = [
+  { icon: '🎵', name: 'Louvor',      href: '/categoria/louvor' },
+  { icon: '📖', name: 'Pregação',    href: '/categoria/pregacao' },
+  { icon: '🌱', name: 'Crescimento', href: '/categoria/crescimento' },
+  { icon: '🙏', name: 'Testemunhos', href: '/categoria/testemunhos' },
+  { icon: '🏠', name: 'Família',     href: '/categoria/familia' },
+  { icon: '📚', name: 'Estudos',     href: '/categoria/estudos' },
+]
+
+const PLATAFORMA = [
+  { name: 'Sobre nós',       href: '/sobre' },
+  { name: 'Para Igrejas',    href: '/igrejas' },
+  { name: 'Seja um Criador', href: '/criadores' },
+  { name: 'Suporte',         href: '/suporte' },
+  { name: 'Privacidade',     href: '/privacidade' },
+]
+
+const linkStyle = {
+  color: 'rgba(255,255,255,0.65)',
+  textDecoration: 'none',
+  fontSize: '14px',
+  fontFamily: DS.typography.fontFamily.body,
+  lineHeight: '1',
+  transition: DS.transitions.fast,
+} as const
+
 export default function Footer() {
   return (
     <footer style={{
       backgroundColor: DS.colors.primary.main,
       borderTop: `2px solid ${DS.colors.primary.accent}`,
-      padding: '48px 16px 24px',
+      padding: '56px 16px 28px',
     }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
-        {/* Top */}
+        {/* Grid principal */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '40px',
-          marginBottom: '40px',
+          gap: '48px',
+          marginBottom: '48px',
         }}>
 
-          {/* Brand */}
+          {/* Coluna Brand */}
           <div>
+            {/* Logo text */}
             <div style={{
-              fontSize: '24px',
-              fontWeight: DS.typography.fontWeight.extrabold,
+              fontFamily: DS.typography.fontFamily.heading,
+              fontSize: '22px',
+              fontWeight: DS.typography.fontWeight.bold,
               color: DS.colors.primary.accent,
-              letterSpacing: '2px',
+              letterSpacing: '3px',
               marginBottom: '12px',
             }}>
               CULTUA
             </div>
+
             <p style={{
-              color: 'rgba(255, 255, 255, 0.7)',
+              fontFamily: DS.typography.fontFamily.body,
+              color: 'rgba(255,255,255,0.65)',
               fontSize: '14px',
-              lineHeight: 1.6,
-              marginBottom: '16px',
+              lineHeight: 1.7,
+              marginBottom: '20px',
             }}>
-              Celebre sua fé sem distrações.
-              Conteúdo cristão 100% sem interrupções.
+              Conteúdo para edificar sua fé.
+              Pregações, louvores, devocionais e
+              testemunhos — curados para você.
             </p>
+
+            {/* Pilares */}
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {['🚫 Sem Interrupções', '✅ Curado', '🔒 Seguro'].map(tag => (
+              {['✅ Curado', '🔒 Seguro', '🙏 Intencional'].map(tag => (
                 <span key={tag} style={{
                   fontSize: '11px',
-                  fontWeight: '600',
+                  fontFamily: DS.typography.fontFamily.body,
+                  fontWeight: DS.typography.fontWeight.semibold,
                   color: DS.colors.primary.accent,
-                  backgroundColor: 'rgba(212, 175, 124, 0.2)',
-                  padding: '3px 10px',
+                  backgroundColor: 'rgba(212, 163, 115, 0.15)',
+                  padding: '4px 10px',
                   borderRadius: DS.borderRadius.full,
-                  border: `1px solid ${DS.colors.primary.accent}40`,
+                  border: `1px solid rgba(212, 163, 115, 0.3)`,
                 }}>
                   {tag}
                 </span>
@@ -59,89 +93,89 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Categorias */}
+          {/* Coluna Categorias */}
           <div>
-            <h4 style={{ color: DS.colors.primary.accent, fontSize: '14px', fontWeight: DS.typography.fontWeight.bold, marginBottom: '16px' }}>
+            <h4 style={{
+              fontFamily: DS.typography.fontFamily.heading,
+              fontSize: '13px',
+              fontWeight: DS.typography.fontWeight.bold,
+              color: DS.colors.primary.accent,
+              letterSpacing: '1px',
+              textTransform: 'uppercase' as const,
+              marginBottom: '20px',
+            }}>
               Categorias
             </h4>
-            {[
-              { icon: '🎵', name: 'Louvor', href: '/categoria/louvor' },
-              { icon: '📖', name: 'Pregação', href: '/categoria/pregacao' },
-              { icon: '🌱', name: 'Crescimento', href: '/categoria/crescimento' },
-              { icon: '🙏', name: 'Testemunhos', href: '/categoria/testemunhos' },
-            ].map(item => (
-              <Link key={item.name} href={item.href} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                color: 'rgba(255, 255, 255, 0.7)',
-                textDecoration: 'none',
-                fontSize: '14px',
-                marginBottom: '10px',
-                transition: DS.transitions.base,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = DS.colors.primary.accent
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)'
-              }}
-              >
-                {item.icon} {item.name}
-              </Link>
-            ))}
+            <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '12px' }}>
+              {CATEGORIAS.map(item => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = DS.colors.primary.accent)}
+                  onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
+                >
+                  {item.icon} {item.name}
+                </Link>
+              ))}
+            </div>
           </div>
 
-          {/* Links */}
+          {/* Coluna Plataforma */}
           <div>
-            <h4 style={{ color: DS.colors.primary.accent, fontSize: '14px', fontWeight: DS.typography.fontWeight.bold, marginBottom: '16px' }}>
+            <h4 style={{
+              fontFamily: DS.typography.fontFamily.heading,
+              fontSize: '13px',
+              fontWeight: DS.typography.fontWeight.bold,
+              color: DS.colors.primary.accent,
+              letterSpacing: '1px',
+              textTransform: 'uppercase' as const,
+              marginBottom: '20px',
+            }}>
               Plataforma
             </h4>
-            {[
-              { name: 'Sobre nós', href: '/sobre' },
-              { name: 'Para Igrejas', href: '/igrejas' },
-              { name: 'Seja um Criador', href: '/criadores' },
-              { name: 'Suporte', href: '/suporte' },
-              { name: 'Privacidade', href: '/privacidade' },
-            ].map(item => (
-              <Link key={item.name} href={item.href} style={{
-                display: 'block',
-                color: 'rgba(255, 255, 255, 0.7)',
-                textDecoration: 'none',
-                fontSize: '14px',
-                marginBottom: '10px',
-                transition: DS.transitions.base,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = DS.colors.primary.accent
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)'
-              }}
-              >
-                {item.name}
-              </Link>
-            ))}
+            <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '12px' }}>
+              {PLATAFORMA.map(item => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  style={linkStyle}
+                  onMouseEnter={e => (e.currentTarget.style.color = DS.colors.primary.accent)}
+                  onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Bottom */}
+        {/* Rodapé */}
         <div style={{
-          borderTop: `1px solid ${DS.colors.primary.accent}40`,
+          borderTop: `1px solid rgba(212, 163, 115, 0.25)`,
           paddingTop: '24px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '16px',
+          gap: '12px',
         }}>
-          <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '13px' }}>
-            © 2026 CULTUA. Todos os direitos reservados.
+          <span style={{
+            fontFamily: DS.typography.fontFamily.body,
+            color: 'rgba(255,255,255,0.45)',
+            fontSize: '13px',
+          }}>
+            © {new Date().getFullYear()} CULTUA. Todos os direitos reservados.
           </span>
-          <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '13px' }}>
+          <span style={{
+            fontFamily: DS.typography.fontFamily.body,
+            color: 'rgba(255,255,255,0.45)',
+            fontSize: '13px',
+          }}>
             Feito com 🙏 para a comunidade cristã
           </span>
         </div>
+
       </div>
     </footer>
   )

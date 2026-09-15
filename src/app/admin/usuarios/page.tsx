@@ -1,8 +1,6 @@
 import { createServerSupabase } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { redirect } from 'next/navigation'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 import UsuariosClient from './UsuariosClient'
 import type { AdminWithScopes, Category } from '@/types'
 import { DESIGN_SYSTEM } from '@/lib/design-system'
@@ -28,8 +26,7 @@ export default async function UsuariosPage() {
   const { data: { users: authUsers } } = await supabaseAdmin.auth.admin.listUsers()
   const emailMap = Object.fromEntries(authUsers.map(u => [u.id, u.email ?? '']))
 
-  const { data: allScopes } = await supabaseAdmin
-    .from('admin_scopes').select('*')
+  const { data: allScopes } = await supabaseAdmin.from('admin_scopes').select('*')
 
   const { data: categories } = await supabaseAdmin
     .from('categories').select('id, name, slug').order('name')
@@ -53,15 +50,14 @@ export default async function UsuariosPage() {
     },
   }))
 
+  // ✅ SEM <Header /> e SEM <Footer /> — já vêm do layout.tsx
   return (
     <div style={{ minHeight: '100vh', backgroundColor: DS.colors.bg.primary }}>
-      <Header />
       <UsuariosClient
         users={users}
         categories={(categories as Category[]) ?? []}
         allCreators={(creators ?? []).map(c => ({ id: c.id, full_name: c.full_name }))}
       />
-      <Footer />
     </div>
   )
 }

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { DESIGN_SYSTEM } from '@/lib/design-system'
 
 const DS = DESIGN_SYSTEM
+const ERROR_COLOR = '#C84C3C'
 
 export default function ErrorClient() {
   const searchParams = useSearchParams()
@@ -21,52 +22,62 @@ export default function ErrorClient() {
     }}>
       <div style={{
         backgroundColor: DS.colors.bg.secondary,
-        border: `2px solid ${DS.colors.secondary.error}`,
+        border: `2px solid ${ERROR_COLOR}`,
         borderRadius: DS.borderRadius.xl,
         padding: '40px',
         maxWidth: '500px',
+        width: '100%',
         textAlign: 'center',
+        boxShadow: DS.shadows.lg,
       }}>
         <div style={{ fontSize: '64px', marginBottom: '20px' }}>❌</div>
+
         <h1 style={{
-          color: DS.colors.text.dark,
+          fontFamily: DS.typography.fontFamily.heading,
+          color: DS.colors.text.primary,
           fontSize: '28px',
-          fontWeight: '800',
+          fontWeight: DS.typography.fontWeight.bold,
           marginBottom: '12px',
         }}>
           Erro na Confirmação
         </h1>
+
         <p style={{
-          color: DS.colors.secondary.error,
+          fontFamily: DS.typography.fontFamily.body,
+          color: ERROR_COLOR,
           fontSize: '16px',
-          marginBottom: '24px',
+          marginBottom: '28px',
           lineHeight: 1.6,
         }}>
           {message}
         </p>
-        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' as const }}>
           <Link href="/auth/signup" style={{
             display: 'inline-block',
             backgroundColor: DS.colors.primary.main,
-            color: 'white',
+            color: '#FFFFFF',
             textDecoration: 'none',
             padding: '12px 24px',
-            borderRadius: DS.borderRadius.md,
-            fontWeight: '700',
-            transition: DS.transitions.base,
+            borderRadius: DS.borderRadius.lg,
+            fontFamily: DS.typography.fontFamily.body,
+            fontWeight: DS.typography.fontWeight.semibold,
+            transition: DS.transitions.fast,
           }}>
             Tentar Novamente
           </Link>
+
           <Link href="/" style={{
             display: 'inline-block',
             backgroundColor: DS.colors.bg.primary,
-            color: DS.colors.text.dark,
+            color: DS.colors.text.primary,
             textDecoration: 'none',
             padding: '12px 24px',
-            borderRadius: DS.borderRadius.md,
-            fontWeight: '700',
-            border: `2px solid ${DS.colors.neutral.light}`,
-            transition: DS.transitions.base,
+            borderRadius: DS.borderRadius.lg,
+            fontFamily: DS.typography.fontFamily.body,
+            fontWeight: DS.typography.fontWeight.semibold,
+            border: `1.5px solid ${DS.colors.neutral.medium}`,
+            transition: DS.transitions.fast,
           }}>
             Voltar para Home
           </Link>

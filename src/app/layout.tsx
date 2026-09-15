@@ -1,65 +1,48 @@
 import type { Metadata } from 'next'
-import '@/styles/globals.css'
-import '@/styles/cultua.css'
+import { Montserrat, Inter } from 'next/font/google'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
+import './globals.css'
+
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-montserrat',
+  display: 'swap',
+})
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
+  variable: '--font-inter',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://plataforma-crista.vercel.app'),
-
-  title: {
-    default:  'CULTUA — Conteúdo para alimentar sua fé',
-    template: '%s | CULTUA',
-  },
-  description: 'Plataforma cristã com pregações, louvores, devocionais e testemunhos. Conteúdo curado para edificar sua fé.',
-  keywords: ['cristão', 'louvor', 'pregação', 'devocional', 'testemunhos', 'curadoria', 'fé'],
-  authors:  [{ name: 'CULTUA' }],
-  creator:  'CULTUA',
-
+  title: 'CULTUA — Conteúdo para edificar sua fé',
+  description: 'Mais do que vídeos, uma jornada de fé.',
   openGraph: {
-    type:        'website',
-    locale:      'pt_BR',
-    url:         'https://plataforma-crista.vercel.app',
-    siteName:    'CULTUA',
-    title:       'CULTUA — Conteúdo para alimentar sua fé',
-    description: 'Pregações, louvores, devocionais e testemunhos. Curado para edificar.',
-    images: [
-      {
-        url:    '/icon-512.png',
-        width:  512,
-        height: 512,
-        alt:    'CULTUA',
-      },
-    ],
+    title: 'CULTUA — Conteúdo para edificar sua fé',
+    description: 'Mais do que vídeos, uma jornada de fé.',
+    siteName: 'CULTUA',
+    locale: 'pt_BR',
+    type: 'website',
   },
-
-  twitter: {
-    card:        'summary_large_image',
-    title:       'CULTUA — Conteúdo para alimentar sua fé',
-    description: 'Pregações, louvores, devocionais e testemunhos. Curado para edificar.',
-    images:      ['/icon-512.png'],
-  },
-
-  icons: {
-    icon: [
-      { url: '/favicon.ico',  sizes: '32x32',   type: 'image/x-icon' },
-      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
-    ],
-    apple:    [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
-    shortcut: '/favicon.ico',
-  },
-  manifest: '/manifest.json',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR">
-      <head>
-        <meta name="theme-color"                        content="#1E3A2E" />
-        <meta name="apple-mobile-web-app-capable"       content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title"         content="CULTUA" />
-      </head>
-      <body>
+    <html lang="pt-BR" className={`${montserrat.variable} ${inter.variable}`}>
+      <body style={{
+        margin: 0, padding: 0,
+        fontFamily: 'var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif',
+        backgroundColor: '#F8F6EF',
+        color: '#1F1F1F',
+        overflowX: 'hidden',
+      }}>
+        <Header />
         {children}
+        <Footer />
       </body>
     </html>
   )

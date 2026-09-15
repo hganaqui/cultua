@@ -42,11 +42,11 @@ export default function ContentPlayer({ contentId }: { contentId: string }) {
     return () => { saveWatchHistory(user.id, content.id, 0, false) }
   }, [user, content])
 
-  if (loading)  return <PlayerSkeleton />
-  if (notFound) return <NotFound />
-  if (!content) return null
+  if (loading)   return <PlayerSkeleton />
+  if (notFound)  return <NotFound />
+  if (!content)  return null
 
-  const cat         = getCategory(content.category)
+  const cat           = getCategory(content.category)
   const categoryColor = cat?.color ?? DS.colors.primary.main
   const categoryIcon  = cat?.icon  ?? '🎵'
   const categoryName  = cat?.name  ?? ''
@@ -61,65 +61,68 @@ export default function ContentPlayer({ contentId }: { contentId: string }) {
       `}</style>
 
       <div className="player-grid">
-        {/* Player */}
+        {/* Player principal */}
         <div>
           <div style={{
-            width: '100%', 
-            aspectRatio: '16/9', 
-            backgroundColor: '#000',
-            borderRadius: DS.borderRadius.lg, 
-            overflow: 'hidden', 
-            marginBottom: '20px',
+            width: '100%', aspectRatio: '16/9', backgroundColor: '#000',
+            borderRadius: DS.borderRadius.lg, overflow: 'hidden', marginBottom: '20px',
           }}>
             {content.url_media ? (
               <video
                 src={content.url_media}
-                controls
-                autoPlay={false}
+                controls autoPlay={false}
                 controlsList="nodownload"
                 onContextMenu={e => e.preventDefault()}
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />
             ) : (
               <div style={{
-                width: '100%', 
-                height: '100%', 
-                display: 'flex',
-                flexDirection: 'column', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
+                width: '100%', height: '100%',
+                display: 'flex', flexDirection: 'column' as const,
+                alignItems: 'center', justifyContent: 'center',
                 color: DS.colors.text.secondary,
               }}>
                 <div style={{ fontSize: '64px', marginBottom: '12px' }}>{categoryIcon}</div>
-                <p style={{ fontSize: '14px' }}>Mídia em breve</p>
+                <p style={{ fontFamily: DS.typography.fontFamily.body, fontSize: '14px' }}>
+                  Mídia em breve
+                </p>
               </div>
             )}
           </div>
 
+          {/* Badge categoria */}
           <span style={{
             display: 'inline-block',
-            backgroundColor: `${categoryColor}20`, 
-            color: categoryColor,
-            fontSize: '12px', 
-            fontWeight: '700', 
-            padding: '4px 12px',
-            borderRadius: DS.borderRadius.full, 
+            backgroundColor: `${categoryColor}20`, color: categoryColor,
+            fontFamily: DS.typography.fontFamily.body,
+            fontSize: '12px', fontWeight: DS.typography.fontWeight.semibold,
+            padding: '4px 12px', borderRadius: DS.borderRadius.full,
             border: `1px solid ${categoryColor}40`,
-            marginBottom: '10px', 
-            textTransform: 'uppercase', 
-            letterSpacing: '0.5px',
+            marginBottom: '10px', textTransform: 'uppercase' as const, letterSpacing: '0.5px',
           }}>
             {categoryIcon} {categoryName}
           </span>
 
-          <h1 style={{ fontSize: '24px', fontWeight: '800', color: DS.colors.text.dark, lineHeight: 1.3, marginBottom: '12px' }}>
+          {/* Título */}
+          <h1 style={{
+            fontFamily: DS.typography.fontFamily.heading,
+            fontSize: '24px', fontWeight: DS.typography.fontWeight.bold,
+            color: DS.colors.text.primary, lineHeight: 1.3, marginBottom: '12px',
+          }}>
             {content.title}
           </h1>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', marginBottom: '20px' }}>
-            <span style={{ color: DS.colors.text.secondary, fontSize: '14px' }}>👤 {creatorName}</span>
-            {content.duration && <span style={{ color: DS.colors.text.secondary, fontSize: '14px' }}>⏱ {content.duration}</span>}
-            <span style={{ color: DS.colors.text.secondary, fontSize: '14px' }}>
+          {/* Meta */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' as const, marginBottom: '20px' }}>
+            <span style={{ fontFamily: DS.typography.fontFamily.body, color: DS.colors.text.secondary, fontSize: '14px' }}>
+              👤 {creatorName}
+            </span>
+            {content.duration && (
+              <span style={{ fontFamily: DS.typography.fontFamily.body, color: DS.colors.text.secondary, fontSize: '14px' }}>
+                ⏱ {content.duration}
+              </span>
+            )}
+            <span style={{ fontFamily: DS.typography.fontFamily.body, color: DS.colors.text.secondary, fontSize: '14px' }}>
               📅 {new Date(content.created_at).toLocaleDateString('pt-BR')}
             </span>
           </div>
@@ -127,40 +130,37 @@ export default function ContentPlayer({ contentId }: { contentId: string }) {
           <div style={{ borderTop: `1px solid ${DS.colors.neutral.light}`, marginBottom: '20px' }} />
 
           {content.description && (
-            <p style={{ color: DS.colors.text.secondary, fontSize: '15px', lineHeight: 1.7 }}>
+            <p style={{
+              fontFamily: DS.typography.fontFamily.body,
+              color: DS.colors.text.secondary, fontSize: '15px', lineHeight: 1.7,
+            }}>
               {content.description}
             </p>
           )}
 
+          {/* CTA login */}
           {!user && (
             <div style={{
-              marginTop: '24px', 
-              backgroundColor: DS.colors.primary.main + '15',
-              border: `1px solid ${DS.colors.primary.main}20`, 
-              borderRadius: DS.borderRadius.lg, 
-              padding: '20px',
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'space-between',
-              flexWrap: 'wrap', 
-              gap: '12px',
+              marginTop: '24px',
+              backgroundColor: `${DS.colors.primary.main}12`,
+              border: `1px solid ${DS.colors.primary.main}20`,
+              borderRadius: DS.borderRadius.lg, padding: '20px',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              flexWrap: 'wrap' as const, gap: '12px',
             }}>
               <div>
-                <div style={{ color: DS.colors.primary.main, fontWeight: '700', fontSize: '15px' }}>
+                <div style={{ fontFamily: DS.typography.fontFamily.heading, color: DS.colors.primary.main, fontWeight: DS.typography.fontWeight.semibold, fontSize: '15px' }}>
                   🙏 Salve no histórico
                 </div>
-                <div style={{ color: DS.colors.text.secondary, fontSize: '13px', marginTop: '2px' }}>
+                <div style={{ fontFamily: DS.typography.fontFamily.body, color: DS.colors.text.secondary, fontSize: '13px', marginTop: '2px' }}>
                   Crie uma conta gratuita para salvar o progresso
                 </div>
               </div>
               <a href="/auth/signup" style={{
-                backgroundColor: DS.colors.primary.main, 
-                color: 'white', 
-                textDecoration: 'none',
-                padding: '10px 20px', 
-                borderRadius: DS.borderRadius.md, 
-                fontSize: '14px', 
-                fontWeight: '700',
+                backgroundColor: DS.colors.primary.main, color: '#FFFFFF',
+                textDecoration: 'none', padding: '10px 20px',
+                borderRadius: DS.borderRadius.lg, fontFamily: DS.typography.fontFamily.body,
+                fontSize: '14px', fontWeight: DS.typography.fontWeight.semibold,
               }}>
                 Criar conta grátis
               </a>
@@ -174,15 +174,7 @@ export default function ContentPlayer({ contentId }: { contentId: string }) {
   )
 }
 
-// ── Sidebar ──────────────────────────────────────────────────────────────────
-
-function RelatedSidebar({
-  currentId,
-  categorySlug,
-}: {
-  currentId: string
-  categorySlug?: string
-}) {
+function RelatedSidebar({ currentId, categorySlug }: { currentId: string; categorySlug?: string }) {
   const [related, setRelated] = useState<Content[]>([])
 
   useEffect(() => {
@@ -199,7 +191,6 @@ function RelatedSidebar({
         .limit(6)
 
       if (catData?.id) query = query.eq('category_id', catData.id)
-
       const { data } = await query
       setRelated((data as unknown as Content[]) ?? [])
     }
@@ -209,73 +200,54 @@ function RelatedSidebar({
   return (
     <aside>
       <h2 style={{
-        color: DS.colors.text.secondary, 
-        fontSize: '13px', 
-        fontWeight: '700',
-        marginBottom: '16px', 
-        textTransform: 'uppercase', 
-        letterSpacing: '0.5px',
+        fontFamily: DS.typography.fontFamily.body,
+        color: DS.colors.text.secondary, fontSize: '13px',
+        fontWeight: DS.typography.fontWeight.bold,
+        marginBottom: '16px', textTransform: 'uppercase' as const, letterSpacing: '0.5px',
       }}>
         Mais conteúdo
       </h2>
 
       {related.length === 0 ? (
-        <p style={{ color: DS.colors.text.secondary, fontSize: '13px' }}>Nenhum conteúdo relacionado ainda.</p>
+        <p style={{ fontFamily: DS.typography.fontFamily.body, color: DS.colors.text.secondary, fontSize: '13px' }}>
+          Nenhum conteúdo relacionado ainda.
+        </p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '10px' }}>
           {related.map(item => {
             const cat = getCategory(item.category)
             return (
               <a key={item.id} href={`/content/${item.id}`} style={{
-                display: 'flex', 
-                gap: '10px', 
-                textDecoration: 'none',
-                backgroundColor: DS.colors.bg.secondary, 
-                borderRadius: DS.borderRadius.md, 
-                padding: '10px',
+                display: 'flex', gap: '10px', textDecoration: 'none',
+                backgroundColor: DS.colors.bg.secondary,
+                borderRadius: DS.borderRadius.md, padding: '10px',
                 border: `1px solid ${DS.colors.neutral.light}`,
-                transition: DS.transitions.base,
+                transition: DS.transitions.fast,
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = DS.colors.neutral.medium
-                e.currentTarget.style.borderColor = DS.colors.primary.main
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = DS.colors.bg.secondary
-                e.currentTarget.style.borderColor = DS.colors.neutral.light
-              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = DS.colors.primary.main; e.currentTarget.style.backgroundColor = DS.colors.neutral.light }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = DS.colors.neutral.light; e.currentTarget.style.backgroundColor = DS.colors.bg.secondary }}
               >
                 <div style={{
-                  width: '96px', 
-                  height: '60px', 
-                  flexShrink: 0,
-                  backgroundColor: DS.colors.neutral.medium, 
-                  borderRadius: DS.borderRadius.md,
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  fontSize: '24px',
+                  width: '96px', height: '60px', flexShrink: 0,
+                  backgroundColor: DS.colors.neutral.light, borderRadius: DS.borderRadius.md,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px',
                   backgroundImage: item.url_thumb ? `url(${item.url_thumb})` : 'none',
-                  backgroundSize: 'cover', 
-                  backgroundPosition: 'center',
+                  backgroundSize: 'cover', backgroundPosition: 'center',
                 }}>
                   {!item.url_thumb && (cat?.icon ?? '🎵')}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
-                    color: DS.colors.text.dark, 
-                    fontSize: '13px', 
-                    fontWeight: '600',
-                    lineHeight: 1.3, 
-                    marginBottom: '4px',
-                    display: '-webkit-box', 
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical', 
-                    overflow: 'hidden',
+                    fontFamily: DS.typography.fontFamily.heading,
+                    color: DS.colors.text.primary, fontSize: '13px',
+                    fontWeight: DS.typography.fontWeight.semibold,
+                    lineHeight: 1.3, marginBottom: '4px',
+                    display: '-webkit-box', WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical' as const, overflow: 'hidden',
                   }}>
                     {item.title}
                   </div>
-                  <div style={{ color: DS.colors.text.secondary, fontSize: '11px' }}>
+                  <div style={{ fontFamily: DS.typography.fontFamily.body, color: DS.colors.text.secondary, fontSize: '11px' }}>
                     {cat?.name}{item.duration && ` · ${item.duration}`}
                   </div>
                 </div>
@@ -287,8 +259,6 @@ function RelatedSidebar({
     </aside>
   )
 }
-
-// ── Skeletons ────────────────────────────────────────────────────────────────
 
 function PlayerSkeleton() {
   return (
@@ -305,20 +275,17 @@ function NotFound() {
   return (
     <main style={{ maxWidth: '600px', margin: '80px auto', padding: '0 16px', textAlign: 'center' }}>
       <div style={{ fontSize: '56px', marginBottom: '16px' }}>😔</div>
-      <h1 style={{ color: DS.colors.text.dark, fontSize: '24px', fontWeight: '800', marginBottom: '8px' }}>
+      <h1 style={{ fontFamily: DS.typography.fontFamily.heading, color: DS.colors.text.primary, fontSize: '24px', fontWeight: DS.typography.fontWeight.bold, marginBottom: '8px' }}>
         Conteúdo não encontrado
       </h1>
-      <p style={{ color: DS.colors.text.secondary, fontSize: '15px', marginBottom: '24px' }}>
+      <p style={{ fontFamily: DS.typography.fontFamily.body, color: DS.colors.text.secondary, fontSize: '15px', marginBottom: '24px' }}>
         Este conteúdo pode ter sido removido ou ainda não foi aprovado.
       </p>
       <a href="/" style={{
-        backgroundColor: DS.colors.primary.main, 
-        color: 'white', 
-        textDecoration: 'none',
-        padding: '12px 28px', 
-        borderRadius: DS.borderRadius.md, 
-        fontSize: '15px', 
-        fontWeight: '700',
+        backgroundColor: DS.colors.primary.main, color: '#FFFFFF',
+        textDecoration: 'none', padding: '12px 28px',
+        borderRadius: DS.borderRadius.lg, fontFamily: DS.typography.fontFamily.body,
+        fontSize: '15px', fontWeight: DS.typography.fontWeight.semibold,
       }}>
         Voltar ao início
       </a>

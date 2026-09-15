@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signOut } from '@/lib/auth'
@@ -11,9 +11,18 @@ import type { UserRole } from '@/types'
 
 const DS = DESIGN_SYSTEM
 
+// ── Constantes locais — substitui DS.colors.secondary.* inexistentes ──
+const ERROR_COLOR = '#C84C3C'
+
+// Instância única fora do componente — evita recriar a cada render
+const supabaseBrowser = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
 interface HeaderClientProps {
   user: SupabaseUser | null
-  profile?: { 
+  profile?: {
     avatar_url: string | null
     role: UserRole
     full_name: string | null
@@ -22,39 +31,51 @@ interface HeaderClientProps {
 
 export default function HeaderClient({ user, profile }: HeaderClientProps) {
   const router = useRouter()
-  const [menuOpen, setMenuOpen]         = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const [unreadCount, setUnreadCount]   = useState(0)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [imgError, setImgError] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const channelRef = useRef<ReturnType<typeof supabaseBrowser.channel> | null>(null)
 
   const displayName = profile?.full_name?.split(' ')[0]
     ?? user?.user_metadata?.full_name?.split(' ')[0]
     ?? user?.email?.split('@')[0]
     ?? 'Usuário'
 
-  const avatarUrl  = profile?.avatar_url ?? null
-  const role       = profile?.role ?? 'user'
-  const isAdmin    = role === 'admin' || role === 'superadmin'
+  const avatarUrl = profile?.avatar_url ?? null
+  const role = profile?.role ?? 'user'
+  const isAdmin = role === 'admin' || role === 'superadmin'
   const isSuperadmin = role === 'superadmin'
 
-  useEffect(() => {
+  // ── fetchUnread memoizado ────────────────────────────────────────
+  const fetchUnread = useCallback(async () => {
     if (!user) return
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-    const fetchUnread = async () => {
-      const { count } = await supabase
+    try {
+      const { count } = await supabaseBrowser
         .from('notifications')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
         .eq('read', false)
       setUnreadCount(count ?? 0)
+    } catch {
+      // silencia erros de rede
     }
+  }, [user])
+
+  // ── Realtime notifications ───────────────────────────────────────
+  useEffect(() => {
+    if (!user) return
+
     fetchUnread()
 
-    const channel = supabase
-      .channel('notifications')
+    if (channelRef.current) {
+      supabaseBrowser.removeChannel(channelRef.current)
+      channelRef.current = null
+    }
+
+    const channel = supabaseBrowser
+      .channel(`header-notifs-${user.id}`)
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
@@ -63,222 +84,284 @@ export default function HeaderClient({ user, profile }: HeaderClientProps) {
       }, () => fetchUnread())
       .subscribe()
 
-    return () => { supabase.removeChannel(channel) }
-  }, [user])
+    channelRef.current = channel
 
+    return () => {
+      if (channelRef.current) {
+        supabaseBrowser.removeChannel(channelRef.current)
+        channelRef.current = null
+      }
+    }
+  }, [user?.id, fetchUnread])
+
+  // ── Fecha dropdown ao clicar fora ───────────────────────────────
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
+    const handler = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false)
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  // ── Fecha menu mobile ao redimensionar ──────────────────────────
+  useEffect(() => {
+    const handler = () => { if (window.innerWidth > 768) setMenuOpen(false) }
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
   }, [])
 
   async function handleSignOut() {
+    if (channelRef.current) {
+      supabaseBrowser.removeChannel(channelRef.current)
+      channelRef.current = null
+    }
     await signOut()
     router.push('/')
     router.refresh()
   }
 
-  const Avatar = ({ size = 28 }: { size?: number }) => (
-    avatarUrl ? (
-      <img
-        src={avatarUrl + `?t=${Date.now()}`}
-        alt={displayName}
-        onError={(e) => {
-          (e.target as HTMLImageElement).style.display = 'none'
-        }}
-        style={{
-          width: size,
-          height: size,
-          borderRadius: '50%',
-          objectFit: 'cover',
-          flexShrink: 0,
-        }}
-      />
-    ) : (
+  // ── Avatar ───────────────────────────────────────────────────────
+  function Avatar({ size = 28 }: { size?: number }) {
+    if (avatarUrl && !imgError) {
+      return (
+        <img
+          src={`${avatarUrl}?t=${Date.now()}`}
+          alt={displayName}
+          onError={() => setImgError(true)}
+          style={{
+            width: size, height: size,
+            borderRadius: '50%', objectFit: 'cover', flexShrink: 0,
+          }}
+        />
+      )
+    }
+    return (
       <div style={{
-        width: size,
-        height: size,
-        backgroundColor: DS.colors.primary.main,
+        width: size, height: size,
+        backgroundColor: DS.colors.primary.accent,
         borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: size * 0.46,
-        fontWeight: DS.typography.fontWeight.extrabold,
-        color: 'white',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: size * 0.42,
+        fontWeight: DS.typography.fontWeight.bold,
+        color: DS.colors.primary.main,
         flexShrink: 0,
+        fontFamily: DS.typography.fontFamily.heading,
       }}>
         {displayName[0].toUpperCase()}
       </div>
     )
-  )
+  }
 
   const navLinks = [
-    { href: '/categoria/louvor',       label: '🎵 Louvor' },
-    { href: '/categoria/pregacao',     label: '📖 Pregação' },
-    { href: '/categoria/crescimento',  label: '🌱 Crescimento' },
-    { href: '/categoria/testemunhos',  label: '🙏 Testemunhos' },
+    { href: '/categoria/louvor', label: 'Louvor' },
+    { href: '/categoria/pregacao', label: 'Pregação' },
+    { href: '/categoria/crescimento', label: 'Crescimento' },
+    { href: '/categoria/testemunhos', label: 'Testemunhos' },
+    { href: '/categoria/familia', label: 'Família' }, // ✅ adicionar
+    { href: '/categoria/estudos', label: 'Estudos' },
   ]
 
   const userMenuItems = [
-    { href: '/perfil',        label: '👤 Meu Perfil' },
-    { href: '/historico',     label: '📺 Histórico' },
-    { href: '/playlist',      label: '🎵 Minhas Playlists' },
+    { href: '/perfil', label: '👤 Meu Perfil' },
+    { href: '/historico', label: '📺 Histórico' },
+    { href: '/playlist', label: '🎵 Minhas Playlists' },
+    { href: '/meus-uploads', label: '📤 Meus Uploads' },
     { href: '/configuracoes', label: '⚙️ Configurações' },
-    { href: '/meus-uploads',  label: '📤 Meus Uploads' },
   ]
 
   return (
     <>
-      <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .hdr-desktop    { display: none !important; }
+          .hdr-mobile-btn { display: flex !important; }
+        }
+        @media (min-width: 769px) {
+          .hdr-mobile-btn { display: none !important; }
+        }
+        .hdr-navlink {
+          color: ${DS.colors.text.secondary};
+          font-family: ${DS.typography.fontFamily.body};
+          font-size: 14px;
+          text-decoration: none;
+          padding: 6px 10px;
+          border-radius: ${DS.borderRadius.md};
+          transition: ${DS.transitions.fast};
+          font-weight: ${DS.typography.fontWeight.medium};
+        }
+        .hdr-navlink:hover {
+          color: ${DS.colors.primary.main};
+          background-color: rgba(15,61,46,0.06);
+        }
+        .hdr-avatar-btn {
+          display: flex; align-items: center; gap: 8px;
+          background-color: transparent;
+          border: 1.5px solid ${DS.colors.neutral.medium};
+          border-radius: ${DS.borderRadius.full};
+          padding: 4px 12px 4px 4px;
+          cursor: pointer; font-size: 14px;
+          font-family: ${DS.typography.fontFamily.body};
+          font-weight: ${DS.typography.fontWeight.medium};
+          color: ${DS.colors.text.primary};
+          transition: ${DS.transitions.fast};
+          position: relative;
+        }
+        .hdr-avatar-btn:hover {
+          border-color: ${DS.colors.primary.main};
+          background-color: rgba(15,61,46,0.04);
+        }
+        .hdr-dropdown-link {
+          display: block;
+          color: ${DS.colors.text.secondary};
+          text-decoration: none; font-size: 13px;
+          font-family: ${DS.typography.fontFamily.body};
+          padding: 8px 12px;
+          border-radius: ${DS.borderRadius.md};
+          transition: ${DS.transitions.fast};
+        }
+        .hdr-dropdown-link:hover {
+          background-color: rgba(15,61,46,0.06);
+          color: ${DS.colors.primary.main};
+        }
+        .hdr-dropdown-link--highlight:hover {
+          background-color: rgba(15,61,46,0.08);
+          color: ${DS.colors.primary.main};
+        }
+        .hdr-signout-btn {
+          display: block; width: 100%; text-align: left;
+          background-color: transparent; border: none;
+          color: ${ERROR_COLOR};
+          font-size: 13px; font-family: ${DS.typography.fontFamily.body};
+          padding: 8px 12px; border-radius: ${DS.borderRadius.md};
+          cursor: pointer; transition: ${DS.transitions.fast};
+        }
+        .hdr-signout-btn:hover { background-color: rgba(200,76,60,0.08); }
+        .hdr-mobile-link {
+          display: block;
+          color: ${DS.colors.text.secondary};
+          text-decoration: none; font-size: 16px;
+          font-family: ${DS.typography.fontFamily.body};
+          padding: 14px 0;
+          border-bottom: 1px solid ${DS.colors.neutral.light};
+          transition: ${DS.transitions.fast};
+        }
+        .hdr-mobile-link:hover { color: ${DS.colors.primary.main}; }
+      `}</style>
+
+      {/* ── Desktop Nav ── */}
+      <div className="hdr-desktop" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
         {user ? (
           <div ref={dropdownRef} style={{ position: 'relative' }}>
             <button
-              onClick={() => setUserMenuOpen(!userMenuOpen)}
-              style={{
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '8px',
-                backgroundColor: 'transparent', 
-                border: `1.5px solid ${DS.colors.primary.main}`,
-                borderRadius: DS.borderRadius.full, 
-                padding: '5px 12px 5px 5px',
-                cursor: 'pointer', 
-                color: DS.colors.text.light, 
-                fontSize: '14px',
-                transition: DS.transitions.base, 
-                position: 'relative',
-              }}
-              onMouseEnter={e => (e.currentTarget.style.backgroundColor = DS.colors.primary.main + '15')}
-              onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+              className="hdr-avatar-btn"
+              onClick={() => setUserMenuOpen(v => !v)}
+              aria-expanded={userMenuOpen}
+              aria-haspopup="true"
             >
               <Avatar size={28} />
-              {displayName}
+              <span>{displayName}</span>
+
               {unreadCount > 0 && (
                 <span style={{
-                  position: 'absolute', 
-                  top: '-4px', 
-                  right: '28px',
-                  backgroundColor: DS.colors.secondary.error, 
-                  color: 'white',
-                  fontSize: '10px', 
-                  fontWeight: DS.typography.fontWeight.extrabold, 
+                  position: 'absolute', top: '-4px', right: '26px',
+                  backgroundColor: ERROR_COLOR, color: '#FFF',
+                  fontSize: '10px', fontWeight: DS.typography.fontWeight.bold,
                   borderRadius: DS.borderRadius.full,
-                  minWidth: '16px', 
-                  height: '16px',
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
+                  minWidth: '16px', height: '16px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
                   padding: '0 4px',
                 }}>
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
-              <span style={{ fontSize: '10px', color: DS.colors.text.secondary }}>▼</span>
+
+              <span style={{ fontSize: '10px', color: DS.colors.text.muted, marginLeft: '2px' }}>▾</span>
             </button>
 
+            {/* Dropdown */}
             {userMenuOpen && (
               <div style={{
-                position: 'absolute', 
-                top: 'calc(100% + 8px)', 
-                right: 0,
-                backgroundColor: DS.colors.bg.secondary, 
+                position: 'absolute', top: 'calc(100% + 10px)', right: 0,
+                backgroundColor: DS.colors.bg.secondary,
                 border: `1px solid ${DS.colors.neutral.light}`,
-                borderRadius: DS.borderRadius.xl, 
-                padding: '8px', 
-                minWidth: '200px',
-                boxShadow: DS.shadows['2xl'], 
-                zIndex: 200,
+                borderRadius: DS.borderRadius.xl, padding: '8px',
+                minWidth: '210px', boxShadow: DS.shadows['2xl'], zIndex: 200,
               }}>
-                <div style={{
-                  padding: '8px 12px 12px',
-                  borderBottom: `1px solid ${DS.colors.neutral.light}`, 
-                  marginBottom: '4px',
-                }}>
-                  <div style={{ color: DS.colors.text.dark, fontSize: '13px', fontWeight: DS.typography.fontWeight.bold }}>
+                {/* Cabeçalho */}
+                <div style={{ padding: '8px 12px 12px', borderBottom: `1px solid ${DS.colors.neutral.light}`, marginBottom: '4px' }}>
+                  <div style={{ fontFamily: DS.typography.fontFamily.heading, fontSize: '13px', fontWeight: DS.typography.fontWeight.bold, color: DS.colors.text.primary }}>
                     {displayName}
                   </div>
-                  <div style={{ color: DS.colors.text.secondary, fontSize: '11px', marginTop: '2px' }}>
+                  <div style={{ fontFamily: DS.typography.fontFamily.body, fontSize: '11px', color: DS.colors.text.secondary, marginTop: '2px' }}>
                     {user.email}
                   </div>
                   {isAdmin && (
                     <span style={{
-                      display: 'inline-block', 
-                      marginTop: '6px',
-                      fontSize: '10px', 
-                      fontWeight: DS.typography.fontWeight.extrabold,
-                      backgroundColor: isSuperadmin ? 'rgba(168,85,247,0.15)' : DS.colors.primary.main + '15',
+                      display: 'inline-block', marginTop: '8px', fontSize: '10px',
+                      fontWeight: DS.typography.fontWeight.bold,
+                      fontFamily: DS.typography.fontFamily.body,
+                      backgroundColor: isSuperadmin ? 'rgba(168,85,247,0.12)' : 'rgba(15,61,46,0.10)',
                       color: isSuperadmin ? '#A855F7' : DS.colors.primary.main,
-                      border: `1px solid ${isSuperadmin ? '#A855F7' : DS.colors.primary.main}30`,
-                      borderRadius: DS.borderRadius.full, 
-                      padding: '2px 8px',
+                      border: `1px solid ${isSuperadmin ? 'rgba(168,85,247,0.3)' : 'rgba(15,61,46,0.2)'}`,
+                      borderRadius: DS.borderRadius.full, padding: '2px 10px', letterSpacing: '0.4px',
                     }}>
                       {isSuperadmin ? '⚡ SUPERADMIN' : '⭐ ADMIN'}
                     </span>
                   )}
                 </div>
 
+                {/* Links usuário */}
                 {userMenuItems.map(item => (
-                  <DropdownLink
-                    key={item.href}
-                    href={item.href}
-                    label={item.label}
-                    onClick={() => setUserMenuOpen(false)}
-                  />
+                  <a key={item.href} href={item.href} className="hdr-dropdown-link" onClick={() => setUserMenuOpen(false)}>
+                    {item.label}
+                  </a>
                 ))}
 
+                {/* Links admin */}
                 {isAdmin && (
                   <>
                     <div style={{ height: '1px', backgroundColor: DS.colors.neutral.light, margin: '6px 0' }} />
-                    <DropdownLink
-                      href="/admin"
-                      label="🛡️ Painel de Curadoria"
-                      onClick={() => setUserMenuOpen(false)}
-                      highlight
-                    />
+                    <a href="/admin" className="hdr-dropdown-link hdr-dropdown-link--highlight"
+                      style={{ color: DS.colors.primary.main, fontWeight: DS.typography.fontWeight.semibold }}
+                      onClick={() => setUserMenuOpen(false)}>
+                      🛡️ Painel de Curadoria
+                    </a>
+                    <a href="/admin/tags" className="hdr-dropdown-link hdr-dropdown-link--highlight"
+                      style={{ color: DS.colors.primary.main, fontWeight: DS.typography.fontWeight.semibold }}
+                      onClick={() => setUserMenuOpen(false)}>
+                      🏷️ Gerenciar Temas
+                    </a>
                     {isSuperadmin && (
-                      <DropdownLink
-                        href="/admin/usuarios"
-                        label="⚡ Gerenciar Usuários"
-                        onClick={() => setUserMenuOpen(false)}
-                        highlight
-                        color="#A855F7"
-                      />
+                      <a href="/admin/usuarios" className="hdr-dropdown-link"
+                        style={{ color: '#A855F7', fontWeight: DS.typography.fontWeight.semibold }}
+                        onClick={() => setUserMenuOpen(false)}>
+                        ⚡ Gerenciar Usuários
+                      </a>
                     )}
                   </>
                 )}
 
+                {/* Notificações */}
                 {unreadCount > 0 && (
-                  <DropdownLink
-                    href="/notificacoes"
-                    label={`🔔 Notificações (${unreadCount})`}
-                    onClick={() => setUserMenuOpen(false)}
-                  />
+                  <>
+                    <div style={{ height: '1px', backgroundColor: DS.colors.neutral.light, margin: '6px 0' }} />
+                    <a href="/notificacoes" className="hdr-dropdown-link" onClick={() => setUserMenuOpen(false)}>
+                      🔔 Notificações{' '}
+                      <span style={{
+                        backgroundColor: ERROR_COLOR, color: '#FFF',
+                        fontSize: '10px', borderRadius: DS.borderRadius.full,
+                        padding: '1px 6px', marginLeft: '4px',
+                      }}>
+                        {unreadCount}
+                      </span>
+                    </a>
+                  </>
                 )}
 
                 <div style={{ height: '1px', backgroundColor: DS.colors.neutral.light, margin: '6px 0' }} />
-                <button
-                  onClick={handleSignOut}
-                  style={{
-                    display: 'block', 
-                    width: '100%', 
-                    textAlign: 'left',
-                    backgroundColor: 'transparent', 
-                    border: 'none',
-                    color: DS.colors.secondary.error, 
-                    fontSize: '13px', 
-                    padding: '8px 12px',
-                    borderRadius: DS.borderRadius.md, 
-                    cursor: 'pointer',
-                    transition: DS.transitions.base,
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = DS.colors.secondary.error + '15')}
-                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
-                >
+                <button className="hdr-signout-btn" onClick={handleSignOut}>
                   🚪 Sair
                 </button>
               </div>
@@ -286,186 +369,110 @@ export default function HeaderClient({ user, profile }: HeaderClientProps) {
           </div>
         ) : (
           <>
-            <Link href="/auth/login" style={{
-              color: DS.colors.text.secondary, 
-              textDecoration: 'none', 
-              fontSize: '14px', 
-              padding: '8px 12px',
-            }}>Entrar</Link>
-            <Link href="/auth/signup" style={{
-              backgroundColor: DS.colors.primary.main, 
-              color: 'white', 
-              textDecoration: 'none',
-              fontSize: '14px', 
-              fontWeight: DS.typography.fontWeight.semibold, 
-              padding: '8px 16px', 
-              borderRadius: DS.borderRadius.md,
-            }}>Começar</Link>
+            <Link href="/auth/login"
+              style={{ fontFamily: DS.typography.fontFamily.body, color: DS.colors.text.secondary, textDecoration: 'none', fontSize: '14px', padding: '8px 14px', borderRadius: DS.borderRadius.md, transition: DS.transitions.fast }}
+              onMouseEnter={e => (e.currentTarget.style.color = DS.colors.primary.main)}
+              onMouseLeave={e => (e.currentTarget.style.color = DS.colors.text.secondary)}
+            >
+              Entrar
+            </Link>
+            <Link href="/auth/signup"
+              style={{ fontFamily: DS.typography.fontFamily.body, backgroundColor: DS.colors.primary.main, color: '#FFFFFF', textDecoration: 'none', fontSize: '14px', fontWeight: DS.typography.fontWeight.semibold, padding: '9px 20px', borderRadius: DS.borderRadius.lg, boxShadow: '0 2px 8px rgba(15,61,46,0.2)', transition: DS.transitions.fast }}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = DS.colors.primary.light)}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = DS.colors.primary.main)}
+            >
+              Começar
+            </Link>
           </>
         )}
       </div>
 
+      {/* ── Hamburger mobile ── */}
       <button
-        className="mobile-menu-btn"
-        onClick={() => setMenuOpen(!menuOpen)}
+        className="hdr-mobile-btn"
+        onClick={() => setMenuOpen(v => !v)}
+        aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
+        aria-expanded={menuOpen}
         style={{
-          backgroundColor: 'transparent', 
-          border: 'none', 
-          color: DS.colors.primary.main,
-          fontSize: '24px', 
-          cursor: 'pointer', 
-          padding: '4px', 
-          display: 'none',
+          backgroundColor: 'transparent', border: 'none',
+          color: DS.colors.primary.main, fontSize: '22px',
+          cursor: 'pointer', padding: '6px',
+          display: 'none', alignItems: 'center', justifyContent: 'center',
         }}
       >
         {menuOpen ? '✕' : '☰'}
       </button>
 
+      {/* ── Menu mobile ── */}
       {menuOpen && (
         <div style={{
-          position: 'fixed', 
-          top: '60px', 
-          left: 0, 
-          right: 0,
-          backgroundColor: DS.colors.bg.secondary, 
+          position: 'fixed', top: '60px', left: 0, right: 0,
+          backgroundColor: DS.colors.bg.secondary,
           borderTop: `1px solid ${DS.colors.neutral.light}`,
-          padding: '16px', 
-          zIndex: 99, 
-          maxHeight: 'calc(100vh - 60px)', 
-          overflowY: 'auto',
+          padding: '16px', zIndex: 99,
+          maxHeight: 'calc(100vh - 60px)', overflowY: 'auto',
+          boxShadow: DS.shadows.lg,
         }}>
-          {[{ href: '/', label: 'Início' }, ...navLinks].map(item => (
-            <Link key={item.href} href={item.href}
-              onClick={() => setMenuOpen(false)}
-              style={{
-                display: 'block', 
-                color: DS.colors.text.secondary, 
-                textDecoration: 'none',
-                fontSize: '16px', 
-                padding: '12px 0', 
-                borderBottom: `1px solid ${DS.colors.neutral.light}`,
-                transition: DS.transitions.base,
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = DS.colors.primary.main)}
-              onMouseLeave={(e) => (e.currentTarget.style.color = DS.colors.text.secondary)}
-            >{item.label}</Link>
+          {[{ href: '/', label: '🏠 Início' }, ...navLinks].map(item => (
+            <Link key={item.href} href={item.href} className="hdr-mobile-link" onClick={() => setMenuOpen(false)}>
+              {item.label}
+            </Link>
           ))}
 
           <div style={{ marginTop: '16px' }}>
             {user ? (
               <>
-                <div style={{
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '10px',
-                  padding: '12px 0', 
-                  borderBottom: `1px solid ${DS.colors.neutral.light}`, 
-                  marginBottom: '12px',
-                }}>
-                  <Avatar size={36} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 0', borderBottom: `1px solid ${DS.colors.neutral.light}`, marginBottom: '8px' }}>
+                  <Avatar size={40} />
                   <div>
-                    <div style={{ color: DS.colors.text.dark, fontSize: '14px', fontWeight: DS.typography.fontWeight.bold }}>
+                    <div style={{ fontFamily: DS.typography.fontFamily.heading, fontSize: '15px', fontWeight: DS.typography.fontWeight.bold, color: DS.colors.text.primary }}>
                       {displayName}
                     </div>
-                    <div style={{ color: DS.colors.text.secondary, fontSize: '11px' }}>{user.email}</div>
+                    <div style={{ fontFamily: DS.typography.fontFamily.body, fontSize: '12px', color: DS.colors.text.secondary }}>
+                      {user.email}
+                    </div>
                   </div>
                 </div>
-                {[...userMenuItems, ...(isAdmin ? [{ href: '/admin', label: '🛡️ Painel de Curadoria' }] : [])].map(item => (
-                  <Link key={item.href} href={item.href}
-                    onClick={() => setMenuOpen(false)}
-                    style={{
-                      display: 'block', 
-                      color: DS.colors.text.secondary, 
-                      textDecoration: 'none',
-                      fontSize: '15px', 
-                      padding: '10px 0', 
-                      borderBottom: `1px solid ${DS.colors.neutral.light}`,
-                      transition: DS.transitions.base,
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = DS.colors.primary.main)}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = DS.colors.text.secondary)}
-                  >{item.label}</Link>
+
+                {[
+                  ...userMenuItems,
+                  ...(isAdmin ? [{ href: '/admin', label: '🛡️ Painel de Curadoria' }] : []),
+                  ...(isSuperadmin ? [{ href: '/admin/usuarios', label: '⚡ Gerenciar Usuários' }] : []),
+                ].map(item => (
+                  <Link key={item.href} href={item.href} className="hdr-mobile-link" onClick={() => setMenuOpen(false)}>
+                    {item.label}
+                  </Link>
                 ))}
-                <button onClick={handleSignOut} style={{
-                  marginTop: '12px', 
-                  width: '100%',
-                  backgroundColor: DS.colors.secondary.error + '15',
-                  color: DS.colors.secondary.error, 
-                  border: `1px solid ${DS.colors.secondary.error}30`,
-                  borderRadius: DS.borderRadius.md, 
-                  padding: '12px', 
-                  fontSize: '15px',
-                  fontWeight: DS.typography.fontWeight.semibold, 
-                  cursor: 'pointer',
-                  transition: DS.transitions.base,
-                }}>🚪 Sair</button>
+
+                <button
+                  onClick={handleSignOut}
+                  style={{
+                    marginTop: '12px', width: '100%',
+                    backgroundColor: `${ERROR_COLOR}10`,
+                    color: ERROR_COLOR,
+                    border: `1px solid ${ERROR_COLOR}30`,
+                    borderRadius: DS.borderRadius.lg, padding: '13px',
+                    fontFamily: DS.typography.fontFamily.body,
+                    fontSize: '15px', fontWeight: DS.typography.fontWeight.semibold,
+                    cursor: 'pointer', transition: DS.transitions.fast,
+                  }}
+                >
+                  🚪 Sair da conta
+                </button>
               </>
             ) : (
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <Link href="/auth/login" onClick={() => setMenuOpen(false)} style={{
-                  flex: 1, 
-                  textAlign: 'center', 
-                  color: DS.colors.text.secondary, 
-                  textDecoration: 'none',
-                  padding: '12px', 
-                  border: `1px solid ${DS.colors.neutral.light}`, 
-                  borderRadius: DS.borderRadius.md, 
-                  fontSize: '15px',
-                }}>Entrar</Link>
-                <Link href="/auth/signup" onClick={() => setMenuOpen(false)} style={{
-                  flex: 1, 
-                  textAlign: 'center', 
-                  backgroundColor: DS.colors.primary.main, 
-                  color: 'white',
-                  textDecoration: 'none', 
-                  padding: '12px', 
-                  borderRadius: DS.borderRadius.md,
-                  fontSize: '15px', 
-                  fontWeight: DS.typography.fontWeight.semibold,
-                }}>Começar</Link>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '4px' }}>
+                <Link href="/auth/login" onClick={() => setMenuOpen(false)} style={{ flex: 1, textAlign: 'center', fontFamily: DS.typography.fontFamily.body, color: DS.colors.text.secondary, textDecoration: 'none', padding: '13px', border: `1.5px solid ${DS.colors.neutral.medium}`, borderRadius: DS.borderRadius.lg, fontSize: '15px', fontWeight: DS.typography.fontWeight.medium }}>
+                  Entrar
+                </Link>
+                <Link href="/auth/signup" onClick={() => setMenuOpen(false)} style={{ flex: 1, textAlign: 'center', fontFamily: DS.typography.fontFamily.body, backgroundColor: DS.colors.primary.main, color: '#FFFFFF', textDecoration: 'none', padding: '13px', borderRadius: DS.borderRadius.lg, fontSize: '15px', fontWeight: DS.typography.fontWeight.semibold }}>
+                  Começar
+                </Link>
               </div>
             )}
           </div>
         </div>
       )}
-
-      <style>{`
-        @media (max-width: 768px) {
-          .desktop-nav { display: none !important; }
-          .mobile-menu-btn { display: block !important; }
-        }
-      `}</style>
     </>
-  )
-}
-
-function DropdownLink({ 
-  href, label, onClick, highlight = false, color = DS.colors.primary.main
-}: { 
-  href: string; 
-  label: string; 
-  onClick: () => void
-  highlight?: boolean; 
-  color?: string 
-}) {
-  return (
-    <Link
-      href={href}
-      onClick={onClick}
-      style={{
-        display: 'block', 
-        color: highlight ? color : DS.colors.text.secondary,
-        textDecoration: 'none', 
-        fontSize: '13px',
-        padding: '8px 12px', 
-        borderRadius: DS.borderRadius.md, 
-        transition: DS.transitions.base,
-      }}
-      onMouseEnter={e => (e.currentTarget.style.backgroundColor = highlight 
-        ? `${color}22` : DS.colors.neutral.charcoal)}
-      onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
-    >
-      {label}
-    </Link>
   )
 }

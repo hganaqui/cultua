@@ -5,7 +5,7 @@ import { DESIGN_SYSTEM } from '@/lib/design-system'
 
 const DS = DESIGN_SYSTEM
 
-export const metadata: Metadata = { title: 'Entrar' }
+export const metadata: Metadata = { title: 'Entrar — CULTUA' }
 
 export default async function LoginPage({
   searchParams,
@@ -18,14 +18,21 @@ export default async function LoginPage({
   return (
     <AuthLayout>
       <h1 style={{
-        color: DS.colors.text.dark, fontSize: '22px', fontWeight: '800',
-        marginBottom: '6px', textAlign: 'center',
+        fontFamily: DS.typography.fontFamily.heading,
+        color: DS.colors.text.primary,
+        fontSize: '22px',
+        fontWeight: DS.typography.fontWeight.bold,
+        marginBottom: '6px',
+        textAlign: 'center',
       }}>
         Bem-vindo 🙏
       </h1>
       <p style={{
-        color: DS.colors.text.secondary, fontSize: '14px',
-        textAlign: 'center', marginBottom: '28px',
+        fontFamily: DS.typography.fontFamily.body,
+        color: DS.colors.text.secondary,
+        fontSize: '14px',
+        textAlign: 'center',
+        marginBottom: '28px',
       }}>
         Entre para acessar seu conteúdo
       </p>

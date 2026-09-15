@@ -1,0 +1,101 @@
+/* ═══════════════════════════════════════════════════════════════════ */
+/* CULTUA — globals.css                                                */
+/* Design System importado via cultua.css                              */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+/* 1. Design System — DEVE vir antes do Tailwind */
+@import './cultua.css';
+
+/* 2. Tailwind layers */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* TAILWIND BASE OVERRIDES                                             */
+/* Evita que o Preflight do Tailwind quebre o cultua.css               */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  /* Herda tipografia do cultua.css — não redefinir aqui */
+  body {
+    @apply antialiased;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* TAILWIND COMPONENTS — aliases do cultua.css para uso com @apply     */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+@layer components {
+
+  /* Layout */
+  .container-cultua {
+    @apply max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Inputs Tailwind-friendly */
+  .input-cultua {
+    @apply w-full px-4 py-3 rounded-lg text-sm
+           border border-gray-300
+           focus:outline-none
+           disabled:opacity-60 disabled:cursor-not-allowed;
+    border-color: var(--color-gray-medium);
+    font-family: var(--font-body);
+    background-color: var(--color-white);
+    color: var(--color-text-primary);
+    transition: var(--transition-fast);
+  }
+
+  .input-cultua:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(15, 61, 46, 0.1);
+  }
+
+  /* Headings com fonte correta */
+  .heading-cultua {
+    @apply font-bold;
+    font-family: var(--font-heading);
+    color: var(--color-text-primary);
+  }
+
+  .subheading-cultua {
+    font-family: var(--font-body);
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+
+  /* Section padrão */
+  .section-cultua {
+    @apply py-16 sm:py-20 px-4 sm:px-6;
+  }
+
+  /* HR */
+  .hr-cultua {
+    @apply my-6 sm:my-8;
+    border-color: var(--color-gray-light);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* TAILWIND UTILITIES EXTRAS                                           */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+@layer utilities {
+
+  /* Scrollbar */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Focus ring usando cor do design system */
+  .focus-ring-cultua:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+  }
+}

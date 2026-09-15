@@ -18,6 +18,8 @@ function ErrorLoading() {
         borderRadius: DS.borderRadius.xl,
         padding: '40px',
         textAlign: 'center',
+        fontFamily: DS.typography.fontFamily.body,
+        color: DS.colors.text.secondary,
       }}>
         Carregando...
       </div>

@@ -8,15 +8,15 @@ import type { Notification } from '@/types'
 
 const DS = DESIGN_SYSTEM
 
-interface NotificacoesClientProps {
-  userId: string
-}
+const ERROR_COLOR = '#C84C3C'
 
-export default function NotificacoesClient({ userId }: NotificacoesClientProps) {
+interface Props { userId: string }
+
+export default function NotificacoesClient({ userId }: Props) {
   const router = useRouter()
   const [notifications, setNotifications] = useState<Notification[]>([])
-  const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<'all' | 'unread'>('all')
+  const [loading, setLoading]             = useState(true)
+  const [filter, setFilter]               = useState<'all' | 'unread'>('all')
 
   async function loadNotifications() {
     try {
@@ -25,149 +25,90 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
-
       if (error) throw error
-      setNotifications(data || [])
+      setNotifications(data ?? [])
     } catch (err) {
-      console.error('Erro ao carregar notificacoes:', err)
+      console.error('[Notificacoes] load:', err)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => {
-    loadNotifications()
-  }, [userId])
+  useEffect(() => { loadNotifications() }, [userId])
 
+  // Realtime
   useEffect(() => {
     const channel = supabase
-      .channel(`notifications:${userId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          setNotifications((prev) => [payload.new as Notification, ...prev])
-        }
-      )
+      .channel(`notificacoes-page-${userId}`)
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'notifications',
+        filter: `user_id=eq.${userId}`,
+      }, payload => {
+        setNotifications(prev => [payload.new as Notification, ...prev])
+      })
       .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
+    return () => { supabase.removeChannel(channel) }
   }, [userId])
 
-  async function markAsRead(notificationId: string) {
-    try {
-      await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('id', notificationId)
-
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
-      )
-    } catch (err) {
-      console.error('Erro ao marcar como lida:', err)
-    }
+  async function markAsRead(id: string) {
+    await supabase.from('notifications').update({ read: true }).eq('id', id)
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
   }
 
   async function markAllAsRead() {
-    try {
-      await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('user_id', userId)
-        .eq('read', false)
-
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-    } catch (err) {
-      console.error('Erro ao marcar tudo como lido:', err)
-    }
+    await supabase.from('notifications').update({ read: true }).eq('user_id', userId).eq('read', false)
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })))
   }
 
-  async function deleteNotification(notificationId: string) {
-    try {
-      // ✅ IMPORTANTE: Deletar do banco PRIMEIRO
-      const { error } = await supabase
-        .from('notifications')
-        .delete()
-        .eq('id', notificationId)
-
-      if (error) {
-        console.error('Erro ao deletar:', error)
-        return
-      }
-
-      // ✅ Depois remover do estado local
-      setNotifications((prev) => prev.filter((n) => n.id !== notificationId))
-    } catch (err) {
-      console.error('Erro:', err)
-    }
+  async function deleteNotification(id: string) {
+    const { error } = await supabase.from('notifications').delete().eq('id', id)
+    if (error) { console.error('[Notificacoes] delete:', error); return }
+    setNotifications(prev => prev.filter(n => n.id !== id))
   }
 
-
-  function getNotificationIcon(type: string): string {
-    switch (type) {
-      case 'content_approved':
-        return '✅'
-      case 'content_rejected':
-        return '❌'
-      case 'pending_content':
-        return '⏳'
-      default:
-        return '🔔'
+  function getIcon(type: string) {
+    const map: Record<string, string> = {
+      content_approved: '✅',
+      content_rejected: '❌',
+      pending_content:  '⏳',
     }
+    return map[type] ?? '🔔'
   }
 
-  function handleNotificationClick(notification: Notification) {
-    if (!notification.read) {
-      markAsRead(notification.id)
-    }
-
-    if (notification.metadata?.content_id) {
-      router.push(`/content/${notification.metadata.content_id}`)
-    } else if (notification.type === 'pending_content') {
-      router.push('/admin')
-    }
+  function handleClick(n: Notification) {
+    if (!n.read) markAsRead(n.id)
+    if (n.metadata?.content_id) router.push(`/content/${n.metadata.content_id}`)
+    else if (n.type === 'pending_content') router.push('/admin')
   }
 
-  const filteredNotifications =
-    filter === 'unread'
-      ? notifications.filter((n) => !n.read)
-      : notifications
-
-  const unreadCount = notifications.filter((n) => !n.read).length
+  const filtered   = filter === 'unread' ? notifications.filter(n => !n.read) : notifications
+  const unreadCount = notifications.filter(n => !n.read).length
 
   return (
     <main style={{
-      minHeight: 'calc(100vh - 120px)',
+      minHeight: 'calc(100vh - 60px)',
       backgroundColor: DS.colors.bg.primary,
       padding: '40px 16px',
     }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+
+        {/* Cabeçalho */}
         <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '30px',
+          display: 'flex', justifyContent: 'space-between',
+          alignItems: 'center', marginBottom: '30px',
           paddingBottom: '20px',
           borderBottom: `2px solid ${DS.colors.primary.accent}`,
         }}>
           <div>
             <h1 style={{
-              color: DS.colors.text.dark,
+              fontFamily: DS.typography.fontFamily.heading,
+              color: DS.colors.text.primary,
               margin: '0 0 5px 0',
-              fontSize: '28px',
-              fontWeight: '800',
+              fontSize: '28px', fontWeight: DS.typography.fontWeight.bold,
             }}>
               🔔 Notificações
             </h1>
-            <p style={{ color: DS.colors.text.secondary, margin: 0, fontSize: '14px' }}>
+            <p style={{ fontFamily: DS.typography.fontFamily.body, color: DS.colors.text.secondary, margin: 0, fontSize: '14px' }}>
               {unreadCount > 0
                 ? `${unreadCount} não lida${unreadCount > 1 ? 's' : ''}`
                 : 'Todas as notificações lidas'}
@@ -179,47 +120,36 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
               style={{
                 padding: '10px 16px',
                 backgroundColor: DS.colors.primary.accent,
-                color: DS.colors.text.dark,
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                fontSize: '13px',
-                transition: DS.transitions.base,
+                color: DS.colors.primary.main,
+                border: 'none', borderRadius: DS.borderRadius.lg,
+                fontFamily: DS.typography.fontFamily.body,
+                cursor: 'pointer', fontWeight: DS.typography.fontWeight.semibold,
+                fontSize: '13px', transition: DS.transitions.fast,
               }}
-              onMouseOver={(e) =>
-                (e.currentTarget.style.backgroundColor = '#E8C895')
-              }
-              onMouseOut={(e) =>
-                (e.currentTarget.style.backgroundColor = DS.colors.primary.accent)
-              }
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = DS.colors.primary.accentLight)}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = DS.colors.primary.accent)}
             >
               ✓ Marcar tudo como lido
             </button>
           )}
         </div>
 
+        {/* Filtros */}
         <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-          {(['all', 'unread'] as const).map((f) => (
+          {(['all', 'unread'] as const).map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
               style={{
                 padding: '8px 16px',
                 backgroundColor: filter === f ? DS.colors.primary.main : DS.colors.bg.secondary,
-                color: filter === f ? 'white' : DS.colors.text.secondary,
-                border: `1px solid ${filter === f ? DS.colors.primary.main : DS.colors.neutral.light}`,
-                borderRadius: '6px',
+                color: filter === f ? '#FFFFFF' : DS.colors.text.secondary,
+                border: `1.5px solid ${filter === f ? DS.colors.primary.main : DS.colors.neutral.medium}`,
+                borderRadius: DS.borderRadius.md,
+                fontFamily: DS.typography.fontFamily.body,
                 cursor: 'pointer',
-                fontWeight: filter === f ? 'bold' : 'normal',
-                fontSize: '13px',
-                transition: DS.transitions.base,
-              }}
-              onMouseOver={(e) => {
-                if (filter !== f) e.currentTarget.style.backgroundColor = DS.colors.bg.secondary
-              }}
-              onMouseOut={(e) => {
-                if (filter !== f) e.currentTarget.style.backgroundColor = DS.colors.bg.secondary
+                fontWeight: filter === f ? DS.typography.fontWeight.semibold : DS.typography.fontWeight.normal,
+                fontSize: '13px', transition: DS.transitions.fast,
               }}
             >
               {f === 'all' ? 'Todas' : 'Não Lidas'}
@@ -227,141 +157,114 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
           ))}
         </div>
 
+        {/* Loading */}
         {loading && (
-          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-            <p style={{ color: DS.colors.text.secondary }}>Carregando notificações...</p>
-          </div>
-        )}
-
-        {!loading && filteredNotifications.length === 0 && (
-          <div style={{
-            textAlign: 'center',
-            padding: '60px 20px',
-            backgroundColor: DS.colors.bg.secondary,
-            borderRadius: '8px',
-            border: `1px solid ${DS.colors.neutral.light}`,
-          }}>
-            <p style={{ fontSize: '48px', margin: '0 0 10px 0' }}>📭</p>
-            <p style={{ color: DS.colors.text.secondary, margin: 0, fontSize: '14px' }}>
-              {filter === 'unread'
-                ? 'Nenhuma notificação não lida'
-                : 'Nenhuma notificação'}
+          <div style={{ textAlign: 'center', padding: '40px' }}>
+            <p style={{ fontFamily: DS.typography.fontFamily.body, color: DS.colors.text.secondary }}>
+              Carregando notificações...
             </p>
           </div>
         )}
 
-        {!loading && filteredNotifications.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {filteredNotifications.map((notification) => (
+        {/* Empty */}
+        {!loading && filtered.length === 0 && (
+          <div style={{
+            textAlign: 'center', padding: '60px 20px',
+            backgroundColor: DS.colors.bg.secondary,
+            borderRadius: DS.borderRadius.xl,
+            border: `1px solid ${DS.colors.neutral.light}`,
+          }}>
+            <p style={{ fontSize: '48px', margin: '0 0 10px 0' }}>📭</p>
+            <p style={{ fontFamily: DS.typography.fontFamily.body, color: DS.colors.text.secondary, margin: 0, fontSize: '14px' }}>
+              {filter === 'unread' ? 'Nenhuma notificação não lida' : 'Nenhuma notificação'}
+            </p>
+          </div>
+        )}
+
+        {/* Lista */}
+        {!loading && filtered.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '12px' }}>
+            {filtered.map(n => (
               <div
-                key={notification.id}
+                key={n.id}
                 style={{
-                  backgroundColor: notification.read ? DS.colors.bg.secondary : DS.colors.primary.accent + '15',
-                  border: `1px solid ${notification.read
-                      ? DS.colors.neutral.light
-                      : DS.colors.primary.accent
-                    }`,
-                  borderRadius: '8px',
-                  padding: '16px',
-                  display: 'flex',
-                  gap: '16px',
-                  alignItems: 'flex-start',
-                  transition: DS.transitions.base,
-                  cursor: 'pointer',
+                  backgroundColor: n.read ? DS.colors.bg.secondary : `${DS.colors.primary.accent}15`,
+                  border: `1px solid ${n.read ? DS.colors.neutral.light : DS.colors.primary.accent}`,
+                  borderRadius: DS.borderRadius.lg, padding: '16px',
+                  display: 'flex', gap: '16px', alignItems: 'flex-start',
+                  transition: DS.transitions.fast, cursor: 'pointer',
                 }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = DS.colors.primary.accent + '25'
-                  e.currentTarget.style.borderColor = DS.colors.primary.accent
+                onMouseEnter={e => {
+                  const el = e.currentTarget as HTMLElement
+                  el.style.backgroundColor = `${DS.colors.primary.accent}22`
+                  el.style.borderColor = DS.colors.primary.accent
                 }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = notification.read
-                    ? DS.colors.bg.secondary
-                    : DS.colors.primary.accent + '15'
-                  e.currentTarget.style.borderColor = notification.read
-                    ? DS.colors.neutral.light
-                    : DS.colors.primary.accent
+                onMouseLeave={e => {
+                  const el = e.currentTarget as HTMLElement
+                  el.style.backgroundColor = n.read ? DS.colors.bg.secondary : `${DS.colors.primary.accent}15`
+                  el.style.borderColor = n.read ? DS.colors.neutral.light : DS.colors.primary.accent
                 }}
-                onClick={() => handleNotificationClick(notification)}
+                onClick={() => handleClick(n)}
               >
-                <div style={{
-                  fontSize: '24px',
-                  minWidth: '40px',
-                  textAlign: 'center',
-                }}>
-                  {getNotificationIcon(notification.type)}
+                {/* Ícone */}
+                <div style={{ fontSize: '24px', minWidth: '40px', textAlign: 'center' }}>
+                  {getIcon(n.type)}
                 </div>
 
+                {/* Texto */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <h3 style={{
-                    color: DS.colors.text.dark,
-                    margin: '0 0 4px 0',
-                    fontSize: '16px',
-                    fontWeight: 'bold',
+                    fontFamily: DS.typography.fontFamily.heading,
+                    color: DS.colors.text.primary,
+                    margin: '0 0 4px 0', fontSize: '16px',
+                    fontWeight: DS.typography.fontWeight.semibold,
                   }}>
-                    {notification.title}
+                    {n.title}
                   </h3>
-                  {notification.message && (
+                  {n.message && (
                     <p style={{
+                      fontFamily: DS.typography.fontFamily.body,
                       color: DS.colors.text.secondary,
-                      margin: '0 0 8px 0',
-                      fontSize: '14px',
+                      margin: '0 0 8px 0', fontSize: '14px',
                     }}>
-                      {notification.message}
+                      {n.message}
                     </p>
                   )}
-                  <p style={{ color: DS.colors.text.muted, margin: 0, fontSize: '12px' }}>
-                    {new Date(notification.created_at).toLocaleDateString(
-                      'pt-BR',
-                      {
-                        day: 'numeric',
-                        month: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      }
-                    )}
+                  <p style={{
+                    fontFamily: DS.typography.fontFamily.body,
+                    color: DS.colors.text.muted, margin: 0, fontSize: '12px',
+                  }}>
+                    {new Date(n.created_at).toLocaleDateString('pt-BR', {
+                      day: 'numeric', month: 'short',
+                      hour: '2-digit', minute: '2-digit',
+                    })}
                   </p>
                 </div>
 
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                  alignItems: 'flex-end',
-                }}>
-                  {!notification.read && (
+                {/* Ações */}
+                <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px', alignItems: 'flex-end' }}>
+                  {!n.read && (
                     <span style={{
+                      fontFamily: DS.typography.fontFamily.body,
                       backgroundColor: DS.colors.primary.accent,
-                      color: DS.colors.text.dark,
-                      padding: '4px 10px',
-                      borderRadius: '4px',
-                      fontSize: '11px',
-                      fontWeight: 'bold',
+                      color: DS.colors.primary.main,
+                      padding: '4px 10px', borderRadius: DS.borderRadius.sm,
+                      fontSize: '11px', fontWeight: DS.typography.fontWeight.bold,
                     }}>
                       Nova
                     </span>
                   )}
-
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      deleteNotification(notification.id)
-                    }}
+                    onClick={e => { e.stopPropagation(); deleteNotification(n.id) }}
                     style={{
-                      backgroundColor: 'transparent',
-                      color: DS.colors.secondary.error,
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '13px',
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      transition: DS.transitions.base,
+                      backgroundColor: 'transparent', color: ERROR_COLOR,
+                      border: 'none', cursor: 'pointer', fontSize: '13px',
+                      fontFamily: DS.typography.fontFamily.body,
+                      padding: '4px 8px', borderRadius: DS.borderRadius.sm,
+                      transition: DS.transitions.fast,
                     }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.backgroundColor = DS.colors.secondary.error + '15'
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }}
+                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = `${ERROR_COLOR}15`)}
+                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
                     ✕ Deletar
                   </button>

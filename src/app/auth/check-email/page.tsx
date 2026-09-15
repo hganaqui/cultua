@@ -3,11 +3,9 @@
 import AuthLayout from '@/components/auth/AuthLayout'
 import { DESIGN_SYSTEM } from '@/lib/design-system'
 import Link from 'next/link'
-import type { Metadata } from 'next'
 
 const DS = DESIGN_SYSTEM
 
-// Não pode usar metadata em client component, então crie uma versão server se precisar
 export default function CheckEmailPage() {
   return (
     <AuthLayout>
@@ -15,29 +13,33 @@ export default function CheckEmailPage() {
         <div style={{ fontSize: '64px', marginBottom: '20px' }}>📧</div>
 
         <h1 style={{
-          color: DS.colors.text.dark,
+          fontFamily: DS.typography.fontFamily.heading,
+          color: DS.colors.text.primary,
           fontSize: '22px',
-          fontWeight: '800',
+          fontWeight: DS.typography.fontWeight.bold,
           marginBottom: '8px',
         }}>
           Verifique seu Email!
         </h1>
 
         <p style={{
+          fontFamily: DS.typography.fontFamily.body,
           color: DS.colors.text.secondary,
           fontSize: '14px',
           lineHeight: '1.6',
           marginBottom: '24px',
         }}>
-          Enviamos um link de confirmação para seu email. Clique nele para ativar sua conta.
+          Enviamos um link de confirmação para seu email.
+          Clique nele para ativar sua conta.
         </p>
 
         <div style={{
-          backgroundColor: DS.colors.primary.accent + '15',
+          backgroundColor: `${DS.colors.primary.accent}15`,
           border: `1px solid ${DS.colors.primary.accent}30`,
           borderRadius: DS.borderRadius.md,
           padding: '12px 14px',
           marginBottom: '24px',
+          fontFamily: DS.typography.fontFamily.body,
           fontSize: '12px',
           color: DS.colors.text.secondary,
           lineHeight: '1.5',
@@ -46,6 +48,7 @@ export default function CheckEmailPage() {
         </div>
 
         <p style={{
+          fontFamily: DS.typography.fontFamily.body,
           color: DS.colors.text.secondary,
           fontSize: '13px',
           marginTop: '16px',
@@ -53,7 +56,7 @@ export default function CheckEmailPage() {
           Não recebeu?{' '}
           <Link href="/auth/signup" style={{
             color: DS.colors.primary.main,
-            fontWeight: '700',
+            fontWeight: DS.typography.fontWeight.bold,
             textDecoration: 'none',
           }}>
             Tentar novamente

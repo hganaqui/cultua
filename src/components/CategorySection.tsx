@@ -8,60 +8,56 @@ import type { Tag } from '@/types'
 
 const DS = DESIGN_SYSTEM
 
-const categories = [
+const CATEGORIES = [
   {
-    id: 'louvor',
-    name: 'Louvor',
-    icon: '🎵',
-    description: 'Músicas de louvor e adoração',
-    color: DS.colors.primary.main,
-    bg: DS.colors.primary.main + '12',
-    count: 'Explorar',
-  },
-  {
-    id: 'pregacao',
-    name: 'Pregação',
-    icon: '📖',
-    description: 'Mensagens e ensinamentos bíblicos',
-    color: '#D4AF37',
-    bg: 'rgba(212,175,55,0.12)',
-    count: 'Explorar',
-  },
-  {
-    id: 'crescimento',
-    name: 'Crescimento',
-    icon: '🌱',
-    description: 'Devocionais e estudos bíblicos',
-    color: DS.colors.secondary.success,
-    bg: DS.colors.secondary.success + '12',
-    count: 'Explorar',
-  },
-  {
-    id: 'testemunhos',
-    name: 'Testemunhos',
-    icon: '🙏',
-    description: 'Histórias reais de fé e transformação',
+    id:    'louvor',
+    name:  'Louvor',
+    icon:  '🎵',
     color: '#7C3AED',
-    bg: 'rgba(124,58,237,0.12)',
-    count: 'Explorar',
+  },
+  {
+    id:    'pregacao',
+    name:  'Pregação',
+    icon:  '📖',
+    color: '#D4A373',
+  },
+  {
+    id:    'crescimento',
+    name:  'Crescimento',
+    icon:  '🌱',
+    color: DS.colors.primary.main,
+  },
+  {
+    id:    'testemunhos',
+    name:  'Testemunhos',
+    icon:  '🙏',
+    color: '#D97706',
+  },
+  {
+    id:    'familia',
+    name:  'Família',
+    icon:  '🏠',
+    color: DS.colors.primary.accent,
+  },
+  {
+    id:    'estudos',
+    name:  'Estudos',
+    icon:  '📚',
+    color: '#6B7F6B',
   },
 ]
 
 export default function CategorySection() {
-  const [tags, setTags] = useState<Tag[]>([])
+  const [tags, setTags]               = useState<Tag[]>([])
   const [loadingTags, setLoadingTags] = useState(true)
 
   useEffect(() => {
     async function loadTags() {
       try {
-        const { data } = await supabase
-          .from('tags')
-          .select('*')
-          .order('name')
-
+        const { data } = await supabase.from('tags').select('*').order('name')
         setTags(data ?? [])
       } catch (err) {
-        console.error('Erro ao carregar tags:', err)
+        console.error('[CategorySection] tags:', err)
       } finally {
         setLoadingTags(false)
       }
@@ -72,66 +68,52 @@ export default function CategorySection() {
   return (
     <section style={{ padding: '64px 16px', backgroundColor: DS.colors.bg.primary }}>
       <style>{`
-        .category-grid {
+        /* ── Categorias ── */
+        .cat-grid {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 24px;
+          grid-template-columns: repeat(6, 1fr);
+          gap: 16px;
         }
-        @media (max-width: 1024px) {
-          .category-grid { grid-template-columns: repeat(2, 1fr) !important; }
-        }
-        @media (max-width: 480px) {
-          .category-grid { grid-template-columns: 1fr !important; }
-        }
-        .category-card {
+        @media (max-width: 1024px) { .cat-grid { grid-template-columns: repeat(3, 1fr) !important; } }
+        @media (max-width: 640px)  { .cat-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+
+        .cat-card {
           text-decoration: none;
           background-color: ${DS.colors.bg.secondary};
-          border-radius: ${DS.borderRadius.lg}px;
-          padding: 0;
+          border-radius: ${DS.borderRadius.xl};
           border: 1px solid ${DS.colors.neutral.light};
-          transition: all 0.3s ease;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          aspect-ratio: 1 / 1;
-          cursor: pointer;
-          position: relative;
-          overflow: hidden;
-        }
-        .category-card:hover {
-          transform: translateY(-4px);
-          box-shadow: ${DS.shadows.md};
-          border-color: ${DS.colors.primary.main};
-        }
-        .category-card-content {
+          padding: 28px 12px 20px;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           text-align: center;
-          padding: 24px;
-          width: 100%;
-          height: 100%;
+          gap: 10px;
+          cursor: pointer;
+          transition: all 0.25s ease;
+          box-shadow: ${DS.shadows.sm};
         }
+        .cat-card:hover {
+          transform: translateY(-4px);
+          box-shadow: ${DS.shadows.lg};
+          border-color: rgba(15,61,46,0.2);
+        }
+
+        /* ── Tags ── */
         .tags-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
           gap: 12px;
         }
-        @media (max-width: 768px) {
-          .tags-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 480px) {
-          .tags-grid { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 640px) { .tags-grid { grid-template-columns: repeat(2, 1fr); } }
+
         .tag-card {
           text-decoration: none;
-          border-radius: ${DS.borderRadius.lg}px;
+          border-radius: ${DS.borderRadius.lg};
           padding: 20px;
           text-align: center;
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: all 0.25s ease;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -147,82 +129,79 @@ export default function CategorySection() {
 
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
-        {/* ── CATEGORIAS ── */}
-        <div style={{ marginBottom: '80px' }}>
-          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+        {/* ── CATEGORIAS ─────────────────────────────────────────────── */}
+        <div style={{ marginBottom: '72px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
             <h2 style={{
-              fontSize: '32px', 
-              fontWeight: DS.typography.fontWeight.extrabold,
-              color: DS.colors.text.dark,
-              marginBottom: '12px',
+              fontFamily: DS.typography.fontFamily.heading,
+              fontSize: '28px',
+              fontWeight: DS.typography.fontWeight.bold,
+              color: DS.colors.text.primary,
+              marginBottom: '8px',
+              letterSpacing: '-0.3px',
             }}>
               O que você quer explorar hoje?
             </h2>
-            <p style={{ color: DS.colors.text.secondary, fontSize: '16px' }}>
+            <p style={{
+              fontFamily: DS.typography.fontFamily.body,
+              color: DS.colors.text.secondary,
+              fontSize: '15px',
+            }}>
               Cada categoria curada para edificar e aproximar você de Deus
             </p>
           </div>
 
-          <div className="category-grid">
-            {categories.map((cat) => (
-              <Link
-                key={cat.id}
-                href={`/categoria/${cat.id}`}
-                className="category-card"
-              >
-                <div className="category-card-content">
-                  <div style={{ fontSize: '48px', marginBottom: '12px' }}>
-                    {cat.icon}
-                  </div>
+          <div className="cat-grid">
+            {CATEGORIES.map(cat => (
+              <Link key={cat.id} href={`/categoria/${cat.id}`} className="cat-card">
+                {/* Emoji */}
+                <span style={{ fontSize: '40px', lineHeight: 1 }}>{cat.icon}</span>
 
-                  <h3 style={{
-                    fontSize: '18px', 
-                    fontWeight: DS.typography.fontWeight.bold,
-                    color: DS.colors.text.dark,
-                    marginBottom: '8px',
-                    margin: 0,
-                  }}>
-                    {cat.name}
-                  </h3>
-
-                  <div style={{
-                    width: '32px',
-                    height: '3px',
-                    backgroundColor: cat.color,
-                    borderRadius: '2px',
-                    marginTop: '12px',
-                  }} />
+                {/* Nome */}
+                <div style={{
+                  fontFamily: DS.typography.fontFamily.heading,
+                  fontSize: '14px',
+                  fontWeight: DS.typography.fontWeight.semibold,
+                  color: DS.colors.text.primary,
+                }}>
+                  {cat.name}
                 </div>
+
+                {/* Underline colorido */}
+                <div style={{
+                  width: '24px',
+                  height: '3px',
+                  backgroundColor: cat.color,
+                  borderRadius: '2px',
+                }} />
               </Link>
             ))}
           </div>
         </div>
 
-        {/* ✅ SEÇÃO DE TEMAS/TAGS */}
-        <div>
-          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-            <h2 style={{
-              fontSize: '32px', 
-              fontWeight: DS.typography.fontWeight.extrabold,
-              color: DS.colors.text.dark,
-              marginBottom: '12px',
-            }}>
-              Buscar por Tema
-            </h2>
-            <p style={{ color: DS.colors.text.secondary, fontSize: '16px' }}>
-              Encontre conteúdo específico por tema de interesse
-            </p>
-          </div>
+        {/* ── TEMAS/TAGS ──────────────────────────────────────────────── */}
+        {!loadingTags && tags.length > 0 && (
+          <div>
+            <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+              <h2 style={{
+                fontFamily: DS.typography.fontFamily.heading,
+                fontSize: '28px',
+                fontWeight: DS.typography.fontWeight.bold,
+                color: DS.colors.text.primary,
+                marginBottom: '8px',
+                letterSpacing: '-0.3px',
+              }}>
+                Buscar por Tema
+              </h2>
+              <p style={{
+                fontFamily: DS.typography.fontFamily.body,
+                color: DS.colors.text.secondary,
+                fontSize: '15px',
+              }}>
+                Encontre conteúdo específico por tema de interesse
+              </p>
+            </div>
 
-          {loadingTags ? (
-            <div style={{ textAlign: 'center', color: DS.colors.text.secondary }}>
-              Carregando temas...
-            </div>
-          ) : tags.length === 0 ? (
-            <div style={{ textAlign: 'center', color: DS.colors.text.secondary }}>
-              Nenhum tema disponível
-            </div>
-          ) : (
             <div className="tags-grid">
               {tags.map(tag => (
                 <Link
@@ -230,30 +209,39 @@ export default function CategorySection() {
                   href={`/tags/${tag.slug}`}
                   className="tag-card"
                   style={{
-                    backgroundColor: tag.color + '20',
+                    backgroundColor: `${tag.color}20`,
                     borderColor: tag.color,
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = tag.color + '40'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = tag.color + '20'
-                  }}
+                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = `${tag.color}38`)}
+                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = `${tag.color}20`)}
                 >
                   <div style={{ fontSize: '32px' }}>{tag.icon}</div>
                   <div style={{
+                    fontFamily: DS.typography.fontFamily.body,
                     color: tag.color,
                     fontSize: '14px',
-                    fontWeight: DS.typography.fontWeight.bold,
+                    fontWeight: DS.typography.fontWeight.semibold,
                   }}>
                     {tag.name}
                   </div>
                 </Link>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
+        {/* Loading tags */}
+        {loadingTags && (
+          <div style={{
+            textAlign: 'center',
+            fontFamily: DS.typography.fontFamily.body,
+            color: DS.colors.text.muted,
+            fontSize: '14px',
+            padding: '24px 0',
+          }}>
+            Carregando temas...
+          </div>
+        )}
       </div>
     </section>
   )
