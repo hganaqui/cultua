@@ -1,6 +1,3 @@
-// src/components/StyledComponents.tsx
-// 🎨 COMPONENTES ESTILIZADOS REUTILIZÁVEIS (CORES CORRETAS)
-
 import { ReactNode, CSSProperties } from 'react'
 import { DESIGN_SYSTEM } from '@/lib/design-system'
 
@@ -18,7 +15,7 @@ export function PageContainer({ children, darkMode = false }: { children: ReactN
       boxSizing: 'border-box',
       margin: '0 auto',
       padding: DS.spacing.lg,
-      backgroundColor: darkMode ? DS.colors.bg.dark : DS.colors.bg.primary,
+      backgroundColor: darkMode ? DS.colors.primary.dark : DS.colors.bg.primary,
     }}>
       {children}
     </main>
@@ -28,10 +25,10 @@ export function PageContainer({ children, darkMode = false }: { children: ReactN
 export function Card({ children, style, darkMode = false }: { children: ReactNode; style?: CSSProperties; darkMode?: boolean }) {
   return (
     <div style={{
-      backgroundColor: darkMode ? DS.colors.bg.darkCard : DS.colors.bg.secondary,
+      backgroundColor: darkMode ? DS.colors.primary.dark : DS.colors.bg.secondary,
       borderRadius: DS.borderRadius.lg,
       padding: DS.spacing['2xl'],
-      border: `1px solid ${darkMode ? '#333333' : DS.colors.neutral.light}`,
+      border: `1px solid ${darkMode ? DS.colors.primary.accent + '30' : DS.colors.neutral.light}`,
       boxShadow: DS.shadows.sm,
       transition: DS.transitions.base,
       ...style,
@@ -155,9 +152,9 @@ export function DangerButton({
       onClick={onClick}
       disabled={disabled}
       style={{
-        backgroundColor: 'rgba(239,68,68,0.1)',
-        color: DS.colors.secondary.error,
-        border: `2px solid ${DS.colors.secondary.error}40`,
+        backgroundColor: 'rgba(200, 76, 60, 0.1)',
+        color: '#C84C3C',
+        border: `2px solid #C84C3C40`,
         borderRadius: DS.borderRadius.md,
         padding: `${DS.spacing.md} ${DS.spacing.lg}`,
         fontSize: DS.typography.fontSize.lg,
@@ -170,13 +167,13 @@ export function DangerButton({
       onMouseEnter={(e) => {
         if (!disabled) {
           const btn = e.currentTarget as HTMLButtonElement
-          btn.style.backgroundColor = 'rgba(239,68,68,0.15)'
+          btn.style.backgroundColor = 'rgba(200, 76, 60, 0.15)'
         }
       }}
       onMouseLeave={(e) => {
         if (!disabled) {
           const btn = e.currentTarget as HTMLButtonElement
-          btn.style.backgroundColor = 'rgba(239,68,68,0.1)'
+          btn.style.backgroundColor = 'rgba(200, 76, 60, 0.1)'
         }
       }}
     >
@@ -327,7 +324,7 @@ export function Badge({
   const variantColors = {
     default: { bg: DS.colors.neutral.light + '20', text: DS.colors.text.secondary },
     success: { bg: `${DS.colors.secondary.success}20`, text: DS.colors.secondary.success },
-    error: { bg: `${DS.colors.secondary.error}20`, text: DS.colors.secondary.error },
+    error: { bg: `#C84C3C20`, text: '#C84C3C' },
     warning: { bg: `${DS.colors.secondary.warning}20`, text: DS.colors.secondary.warning },
     primary: { bg: `${DS.colors.primary.main}20`, text: DS.colors.primary.main },
   }
@@ -397,9 +394,9 @@ export function Alert({
       text: DS.colors.secondary.success,
     },
     error: {
-      bg: `${DS.colors.secondary.error}15`,
-      border: `2px solid ${DS.colors.secondary.error}40`,
-      text: DS.colors.secondary.error,
+      bg: `#C84C3C15`,
+      border: `2px solid #C84C3C40`,
+      text: '#C84C3C',
     },
     warning: {
       bg: `${DS.colors.secondary.warning}15`,
