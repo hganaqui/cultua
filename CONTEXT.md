@@ -1,4 +1,6 @@
 📋 CULTUA — Contexto Completo Atualizado
+Última atualização: 2026-09-14 23:17 UTC
+
 📋 Overview
 CULTUA é uma plataforma de conteúdo cristão com Sistema de Curadoria, Upload, Perfil e Gerenciamento de Usuários.
 
@@ -6,80 +8,70 @@ Stack:
 
 Frontend: Next.js 16.3.4 + React + TypeScript
 Backend: Supabase (PostgreSQL + Auth + Storage RLS)
-UI: Inline CSS (sem Tailwind)
+UI: Inline CSS (sem Tailwind) + Design System Global
 Storage: Cloudflare R2 + Supabase Storage
 Deploy: Vercel
-Theme: Dark mode (#111111 bg)
+Theme: Marfim (#F8F6EF) + Verde (#1E3A2E) + Dourado (#D4AF7C)
 🔗 Links Importantes
 Recurso	URL
 Produção	https://plataforma-crista.vercel.app
 Repositório	https://github.com/hganaqui/cultua
 Supabase	https://app.supabase.com
 Cloudflare	https://dash.cloudflare.com
-🎨 Color Palette (OBRIGATÓRIO)
-PÁGINA:
-
-backgroundColor: '#111111'
-CARDS:
-
-backgroundColor: '#1a1a1a'
-border: '1px solid #2a2a2a'
-INPUTS:
-
-backgroundColor: '#111111'
-border: '1px solid #333333'
-focus: borderColor: '#B8860B'
-HOVER/SELECTED:
-
-backgroundColor: '#2a2a2a'
-SKELETON:
-
-backgroundColor: '#2a2a2a'
-CORES:
-
-PRIMÁRIA: #B8860B (dourado — botões, icons, hover)
-SECONDARY: #D4AF37 (dourado claro)
-DANGER: #EF4444 (rejeição, logout, erro)
-SUCCESS: #22C55E (aprovação, check)
-INFO: #60A5FA (info, dados)
-SUPERADMIN: #A855F7 (roxo)
-TEXTO:
-
-Título: #FFFFFF
-Corpo: #CCCCCC
-Muted: #555555 / #666666
-BORDERS:
-
-Card: #2a2a2a
-Input: #333333
-Select: #444444
-Header: 2px solid #B8860B
+🎨 Color Palette (DESIGN SYSTEM)
+Principal
+Verde Profundo: #1E3A2E (primária, botões, nav)
+Dourado Suave: #D4AF7C (destaque, hover, accent)
+Marfim: #F8F6EF (background principal, limpo)
+Verde Natural: #6B7F68 (sucesso, aprovação)
+Neutras
+Grafite: #1F1F1F (texto principal)
+Cinza Escuro: #6B6B6B (texto secundário)
+Cinza Médio: #C9C4BE (borders, muted)
+Branco Puro: #FFFFFF (text em dark mode)
+Status
+Sucesso: #4CAF50 (aprovação, check)
+Aviso: #F59E0B (pending, análise)
+Erro: #EF4444 (rejeição, logout)
+Info: #3B82F6 (informações)
+Superadmin: #A855F7 (roxo)
+Backgrounds
+Primário: #F8F6EF (página principal)
+Secundário: #FFFFFF (cards, inputs)
+Dark: #1A1A1A (dark mode alternativo)
 ✅ Features Implementadas
-🔐 Auth
+🔐 Auth ✅ COMPLETO
 ✅ Login, Signup, Esqueci Senha, Nova Senha, Callback
 ✅ Session management com Supabase SSR
 ✅ Proxy.ts para proteção de rotas
 ✅ Logout seguro com router.push + refresh
-🎯 Header & Navegação
+✅ OAuth ready (estrutura pronta para Google/GitHub)
+🎯 Header & Navegação ✅ COMPLETO
 ✅ 100% client, reativo ao login
 ✅ Avatar com <img> nativo + onError fallback emoji
 ✅ Badge de role: ⭐ Admin / ⚡ Superadmin
 ✅ Badge de notificações realtime no avatar
-✅ NOVO: Botão 🔔 Notificações sempre visível (desktop + mobile)
+✅ Botão 🔔 Notificações sempre visível (desktop + mobile)
 ✅ Dropdown fecha ao clicar fora
-✅ NOVO: BuscaGlobalClient (Ctrl+K para abrir)
-✅ NOVO: BuscaGlobalClientMobile (🔍 no menu mobile)
-🔍 Busca Global (Ctrl+K)
-✅ Desktop: Botão 🔍 no nav
+✅ BuscaGlobalClient (Ctrl+K para abrir)
+✅ BuscaGlobalClientMobile (🔍 no menu)
+✅ Logo com cor dourada + gradiente
+✅ Cores tema verde/marfim
+✅ Responsive mobile sem overflow
+🔍 Busca Global (Ctrl+K) ✅ COMPLETO
+✅ Desktop: Botão 🔍 no nav + Ctrl+K
 ✅ Mobile: Botão 🔍 no menu mobile
-✅ Realtime search em contents
+✅ Realtime search em contents aprovados
 ✅ Navegação com setas (↑ ↓)
 ✅ Enter para abrir resultado
 ✅ Escape para fechar
 ✅ Badge de quantidade de resultados
 ✅ Preview com thumbnail + categoria + duração
 ✅ Arquivo: src/components/BuscaGlobalClient.tsx
-📬 Notificações
+✅ Arquivo: src/components/BuscaGlobalClientMobile.tsx
+✅ Removido: /explorar (substituído por busca)
+📬 Notificações ✅ PARCIALMENTE COMPLETO
+✅ Tabela notifications no Supabase com RLS
 ✅ Badge realtime no Header
 ✅ Notificações sempre visíveis (não só quando unread > 0)
 ✅ Desktop: Botão 🔔 entre busca e avatar
@@ -88,86 +80,150 @@ Header: 2px solid #B8860B
 ✅ Triggers SQL automáticos para novos uploads
 ✅ notifyAdminsOfPendingContent() ao fazer upload
 ✅ Realtime listener no Header
-✅ Página /notificacoes — a implementar
-🏠 Home (/)
-✅ Dark theme: backgroundColor: '#111111'
-✅ Hero: dark gradient
-✅ CategorySection: dark + cards
+✅ Página /notificacoes com filtros (todas/não lidas)
+✅ Marcar como lida
+✅ Deletar notificação
+✅ Emojis por tipo (✅ aprovado, ❌ rejeitado, ⏳ pendente)
+❌ Notificação ao aprovar/rejeitar (a implementar)
+🏠 Home (/) ✅ COMPLETO
+✅ Design System integrado (verde + dourado + marfim)
+✅ Hero com gradient limpo
+✅ CategorySection com 4 categorias
 ✅ Links navegáveis: Louvor, Pregação, Crescimento, Testemunhos
-✅ REMOVIDO: /explorar (substituído por busca global)
-👤 Configurações (/configuracoes)
-✅ Foto de perfil: <img> nativo com cache bust
+✅ Stats simplificadas (100% Curadoria)
+✅ Responsive mobile
+✅ Sem repetição de textos
+👤 Configurações (/configuracoes) ✅ COMPLETO
+✅ Avatar com <img> nativo + cache bust
 ✅ Avatar grande 100px com overlay câmera
-✅ NOVO: Avatar precarregado do banco (se existir)
+✅ Avatar precarregado do banco
 ✅ Nome completo precarregado do banco
 ✅ Alterar senha (mín. 6 chars)
 ✅ Encerrar sessão
-✅ Zona de perigo: excluir conta (em breve)
-✅ Arquivo: src/app/configuracoes/ConfiguracoesClient.tsx
-👤 Perfil Público (/perfil)
-✅ Exibir perfil do usuário
-✅ NOVO: Avatar carregado do banco se existir
+✅ Design System colors
+✅ Responsive mobile
+👤 Perfil Público (/perfil) ✅ COMPLETO
+✅ Avatar carregado do banco com fallback emoji
 ✅ Nome completo
 ✅ Email
 ✅ Membro desde
 ✅ Links para: Histórico, Playlists, Configurações
-✅ Arquivo: src/app/perfil/PerfilClient.tsx
-📺 Histórico (/historico)
-✅ Dark theme: backgroundColor: '#111111'
+✅ Design System colors
+📺 Histórico (/historico) ✅ COMPLETO
+✅ Design System theme (marfim + verde)
 ✅ Listar conteúdos assistidos
 ✅ Botão "Assistir" para retomar
 ✅ Botão "Remover" do histórico
 ✅ Botão "Limpar histórico" (todos)
 ✅ Status de conclusão (check mark ✓)
-✅ Arquivo: src/app/historico/HistoricoClient.tsx
-🎵 Playlists (/playlist)
-✅ Dark theme: backgroundColor: '#111111'
+✅ Cards com cores tema
+✅ Responsive mobile
+🎵 Playlists (/playlist) ✅ COMPLETO
+✅ Design System theme (marfim + verde)
 ✅ Criar nova playlist
 ✅ Editar nome e descrição
 ✅ Toggle privada/pública
 ✅ Deletar playlist
-✅ FUNCIONALIDADE PENDENTE: Adicionar conteúdo às playlists
-Requer: tabela playlist_items no Supabase
-Status: A implementar (adicionar conteúdo via drag/drop ou modal)
-✅ Arquivo: src/app/playlist/PlaylistClient.tsx
-📤 Meus Uploads (/meus-uploads)
-✅ Dark theme: backgroundColor: '#111111'
+✅ Grid responsivo
+✅ Cards com hover effects
+❌ Adicionar conteúdo às playlists (pendente — requer playlist_items table)
+📤 Meus Uploads (/meus-uploads) ✅ COMPLETO
+✅ Design System theme (verde + dourado + vermelho)
 ✅ Listar uploads do usuário
 ✅ Status: Pendente (⏳), Aprovado (✅), Rejeitado (❌)
 ✅ 3 cards de resumo com contadores
 ✅ Thumbnail + título + categoria + data
 ✅ Link "Ver" apenas para aprovados
-✅ Arquivo: src/app/meus-uploads/MeusUploadsClient.tsx
-🛡️ Painel de Curadoria (/admin) — ✅ COMPLETO
+✅ Hover effects com shadow
+✅ Responsive mobile
+🛡️ Painel de Curadoria (/admin) ✅ COMPLETO
 ✅ 3 abas: Pendentes, Aprovados, Rejeitados
 ✅ Sync automática: Query ao trocar de aba
 ✅ Filtros: Categoria, Autor, Busca, Ordenação
 ✅ Ações: Aprovar, Rejeitar, Destacar, Deletar
-✅ NOVO: Layout responsivo mobile (sem canto branco)
+✅ Layout responsivo mobile (sem canto branco)
 ✅ Cards com Flexbox + thumbnail 100x64px
-✅ Arquivo: src/app/admin/AdminClient.tsx
-Melhorias Mobile:
-
-✅ Padding reduzido para mobile (16px)
-✅ Flex layout (não grid quebrado)
-✅ Sem borderRadius conflitante
-✅ Botões em grid 2 colunas
-✅ Sem overflow/canto branco
-✅ overflowX: 'hidden' no main
-✅ Abas com WebkitOverflowScrolling: 'touch'
-📤 Upload de Conteúdo (/admin/upload) — ✅ COMPLETO
+✅ Design System colors
+✅ Dark theme alternativo
+✅ Notificação automática aos admins
+📤 Upload de Conteúdo (/admin/upload) ✅ COMPLETO
 ✅ Tipos: Vídeo, Áudio, Texto
 ✅ Upload via presigned URLs (R2)
 ✅ Progresso: Barra de progresso
 ✅ Status: pending → fila de curadoria
-✅ NOVO: Notificação automática aos admins
+✅ Notificação automática aos admins
 ✅ Validação de tipo e tamanho
-✅ Arquivo: src/app/admin/upload/UploadClient.tsx
-👥 Gerenciar Usuários (/admin/usuarios) — ✅ SUPERADMIN ONLY
+✅ Design System colors
+✅ Responsive mobile
+👥 Gerenciar Usuários (/admin/usuarios) ✅ COMPLETO
+✅ Superadmin only — proteção de rota
 ✅ Gerencia roles: user/admin/superadmin
 ✅ Define escopos: categorias + criadores
-✅ Dark theme completo
-✅ Arquivo: src/app/admin/usuarios/page.tsx
+✅ Select em dourado com hover
+✅ Design System colors completo
+✅ Responsive mobile
+✅ Badge de admin/superadmin coloridas
+📄 Páginas Estáticas ✅ COMPLETO
+✅ /criadores (criar conta, monetização)
+✅ /suporte (FAQ, contato)
+✅ /sobre (missão, valores)
+✅ /igrejas (B2B)
+✅ /privacidade (LGPD)
+✅ Todas com 'use client' e Design System colors
+🎨 Design System Implementado
+Arquivo: src/lib/design-system.ts
+
+typescript
+Copy code
+export const DESIGN_SYSTEM = {
+  colors: {
+    primary: {
+      main: '#1E3A2E',        // Verde profundo
+      light: '#2D5A45',       // Verde mais claro
+      dark: '#0F1F1A',        // Verde muito escuro
+      accent: '#D4AF7C',      // Dourado suave
+    },
+    secondary: {
+      success: '#6B7F68',     // Verde natural
+      warning: '#F59E0B',     // Amarelo/Aviso
+      error: '#C84C3C',       // Vermelho-cobre
+      info: '#2D5A45',        // Verde médio
+    },
+    neutral: {
+      marfim: '#F8F6EF',      // Marfim claro
+      light: '#E8E3DE',       // Bege claro
+      medium: '#C9C4BE',      // Cinza médio
+      dark: '#6B6B6B',        // Cinza escuro
+      charcoal: '#3F3F3F',    // Carvão
+      graphite: '#1F1F1F',    // Grafite
+    },
+    bg: {
+      primary: '#F8F6EF',     // Marfim (fundo principal)
+      secondary: '#FFFFFF',   // Branco puro
+      dark: '#1A1A1A',        // Dark mode
+      accent: '#2D5A45',      // Verde médio
+    },
+    text: {
+      dark: '#1F1F1F',        // Grafite - texto principal
+      light: '#FFFFFF',       // Branco - texto em fundo escuro
+      primary: '#1F1F1F',     // Grafite
+      secondary: '#6B6B6B',   // Cinza escuro
+      tertiary: '#999999',    // Cinza médio
+      muted: '#C9C4BE',       // Cinza claro
+    }
+  },
+  // ... typography, spacing, shadows, etc
+}
+Aplicado em todos os componentes:
+
+✅ Header (verde + dourado)
+✅ Footer (verde + dourado)
+✅ Hero (marfim + verde)
+✅ Cards (branco + borders cinza)
+✅ Botões (verde + dourado)
+✅ Inputs (branco + cinza)
+✅ Status badges (cores específicas)
+✅ Responsive design completo
 🔐 Authentication & Permissions
 typescript
 Copy code
@@ -175,85 +231,13 @@ Copy code
 'user'       → Usuário comum (pode fazer upload)
 'admin'      → Admin (pode aprovar/rejeitar de seu escopo)
 'superadmin' → Superadmin (acesso total)
-
-// Verificação nos componentes
-const { data: profile } = await supabase
-  .from('profiles')
-  .select('role')
-  .eq('id', user.id)
-  .single()
-
-if (!['user', 'admin', 'superadmin'].includes(profile.role)) {
-  router.push('/') // acesso negado
-}
-🔑 Key Features by Component
-✅ 1. Painel de Curadoria (/admin)
-Arquivo: src/app/admin/AdminClient.tsx
-
-Feature	Status	Detalhe
-3 abas (Pendentes/Aprovados/Rejeitados)	✅	Tabs com contadores realtime
-Carregamento paralelo	✅	Promise.all() busca 3 status simultaneamente
-Sync ao trocar aba	✅	loadContents(status) query atualizada
-Filtros	✅	Categoria, Autor, Busca (title/desc), Ordenação
-Ações	✅	Aprovar, Rejeitar, Destacar, Deletar
-Mobile responsivo	✅	Flexbox, sem overflow, sem canto branco
-Cards com thumbnail	✅	100x64px thumbnail + info em coluna
-✅ 2. Upload de Conteúdo (/admin/upload)
-Arquivo: src/app/admin/upload/UploadClient.tsx
-
-Feature	Status	Detalhe
-Seleção de tipo	✅	Vídeo, Áudio, Texto
-Upload de arquivo	✅	Presigned URLs via /api/upload/presigned
-Upload de thumbnail	✅	Opcional, com preview
-Progresso	✅	Barras de progresso XMLHttpRequest
-Validação	✅	Tipo MIME, tamanho máx
-Status pending	✅	Salva como 'pending' para curadoria
-Notificação aos admins	✅	notifyAdminsOfPendingContent()
-✅ 3. Configurações (/configuracoes)
-Arquivo: src/app/configuracoes/ConfiguracoesClient.tsx
-
-Feature	Status	Detalhe
-Avatar upload	✅	Via /api/upload-avatar, com preview
-Avatar precarregado	✅	Busca avatar_url do banco, mostra imagem
-Nome completo	✅	Preenchido do banco, editável
-Alterar senha	✅	Mín. 6 chars, validação
-Logout	✅	Encerrar sessão segura
-Deletar conta	🔄	Em breve
-✅ 4. Perfil Público (/perfil)
-Arquivo: src/app/perfil/PerfilClient.tsx
-
-Feature	Status	Detalhe
-Exibir perfil	✅	Nome, email, membro desde
-Avatar com imagem	✅	Carrega do banco, fallback emoji
-Links rápidos	✅	Histórico, Playlists, Configurações
-Dark theme	✅	backgroundColor: '#111111'
-✅ 5. Histórico (/historico)
-Arquivo: src/app/historico/HistoricoClient.tsx
-
-Feature	Status	Detalhe
-Listar conteúdos	✅	Query watch_history do banco
-Resumir/Retomar	✅	Botão "Assistir" com link
-Remover item	✅	Delete do histórico
-Limpar tudo	✅	Delete all do usuário
-Status conclusão	✅	Badge ✓ se completado
-Dark theme	✅	backgroundColor: '#111111'
-✅ 6. Playlists (/playlist)
-Arquivo: src/app/playlist/PlaylistClient.tsx
-
-Feature	Status	Detalhe
-Criar playlist	✅	Nome, descrição, privacidade
-Editar playlist	✅	Atualiza título/desc/público
-Deletar playlist	✅	Confirmação antes
-Listar playlists	✅	Grid responsivo
-Toggle público/privado	✅	🌐 badge se pública
-Adicionar conteúdo	🔄	PENDENTE - requer playlist_items table
 📊 Database Schema
 profiles table
 sql
 Copy code
 id (uuid, pk)
-full_name (text, nullable) -- Preenchido com nome do email no init
-avatar_url (text, nullable) -- URL do storage
+full_name (text, nullable)
+avatar_url (text, nullable)
 role (text) -- 'user' | 'admin' | 'superadmin'
 managed_categories (jsonb, nullable)
 managed_creators (jsonb, nullable)
@@ -267,9 +251,9 @@ title (text, required)
 description (text, nullable)
 type (text) -- 'video' | 'audio' | 'text'
 status (text) -- 'pending' | 'approved' | 'rejected'
-url_media (text, nullable) -- URL do vídeo/áudio
-url_thumb (text, nullable) -- URL da thumbnail
-duration (text, nullable) -- Ex: "45:30"
+url_media (text, nullable)
+url_thumb (text, nullable)
+duration (text, nullable)
 category_id (uuid, fk)
 creator_id (uuid, fk → profiles)
 is_featured (boolean)
@@ -281,8 +265,8 @@ Copy code
 id (uuid, pk)
 name (text) -- 'Louvor', 'Pregação', etc
 slug (text) -- 'louvor', 'pregacao'
-color (text) -- '#B8860B'
-icon (text) -- '🎵'
+color (text) -- '#1E3A2E', '#D4AF7C'
+icon (text) -- '🎵', '📖'
 description (text, nullable)
 created_at (timestamp)
 notifications table
@@ -291,8 +275,8 @@ Copy code
 id (uuid, pk)
 user_id (uuid, fk → profiles)
 type (text) -- 'pending_content' | 'content_approved' | 'content_rejected'
-title (text) -- "📋 Novo conteúdo para aprovar"
-message (text) -- "Seu título" aqui..."
+title (text)
+message (text)
 read (boolean, default false)
 metadata (jsonb, nullable) -- { content_id: uuid }
 created_at (timestamp)
@@ -303,8 +287,8 @@ id (uuid, pk)
 user_id (uuid, fk → profiles)
 content_id (uuid, fk → contents)
 watched_at (timestamp)
-progress_sec (integer) -- Segundos assistidos
-completed (boolean) -- true se assistiu completo
+progress_sec (integer)
+completed (boolean)
 created_at (timestamp)
 updated_at (timestamp)
 playlists table
@@ -323,65 +307,21 @@ Copy code
 id (uuid, pk)
 playlist_id (uuid, fk → playlists)
 content_id (uuid, fk → contents)
-position (integer) -- Ordem na playlist
+position (integer)
 added_at (timestamp)
 🔧 API Endpoints
 POST /api/upload-avatar
 Upload de avatar para o usuário
 
-typescript
-Copy code
-// Request
-{ file: File }
-
-// Response
-{ url: string }
-
-// Salva em: storage/avatars/{user.id}.jpg
-// Cache bust: ?t=${Date.now()}
 POST /api/upload/presigned
 Gera presigned URL para upload no R2
 
-typescript
-Copy code
-// Request
-{ 
-  fileName: string
-  fileType: string
-  uploadType: 'video' | 'thumb'
-}
-
-// Response
-{ 
-  presignedUrl: string
-  publicUrl: string
-}
 POST /api/init-profile
 Inicializa profile com dados do email
 
-typescript
-Copy code
-// Request
-{ 
-  full_name?: string
-  avatar_url?: string
-}
-
-// Response
-{ data: Profile }
 POST /api/admin/delete-files
 Deleta arquivos do R2 antes de remover do banco
 
-typescript
-Copy code
-// Request
-{ 
-  url_media: string
-  url_thumb: string
-}
-
-// Response
-{ success: boolean }
 📁 Project Structure
 src/
 ├── app/
@@ -391,6 +331,8 @@ src/
 │   ├── admin/upload/
 │   │   ├── UploadClient.tsx             ✅ Upload de conteúdo
 │   │   └── page.tsx
+│   ├── admin/usuarios/
+│   │   └── page.tsx                     ✅ Gerenciar usuários
 │   ├── configuracoes/
 │   │   ├── ConfiguracoesClient.tsx      ✅ Perfil do usuário
 │   │   └── page.tsx
@@ -398,7 +340,7 @@ src/
 │   │   ├── PerfilClient.tsx             ✅ Perfil público
 │   │   └── page.tsx
 │   ├── historico/
-│   │   ├── HistoricoClient.tsx          ✅ Histórico de assistência
+│   │   ├── HistoricoClient.tsx          ✅ Histórico
 │   │   └── page.tsx
 │   ├── playlist/
 │   │   ├── PlaylistClient.tsx           ✅ Gerenciar playlists
@@ -407,21 +349,31 @@ src/
 │   │   ├── MeusUploadsClient.tsx        ✅ Uploads do usuário
 │   │   └── page.tsx
 │   ├── notificacoes/
-│   │   ├── page.tsx                     🔄 Em desenvolvimento
-│   │   └── NotificacoesClient.tsx       🔄 Em desenvolvimento
-│   ├── admin/usuarios/
-│   │   └── page.tsx                     ✅ Gerenciar usuários (superadmin)
-│   ├── layout.tsx
+│   │   ├── page.tsx                     ✅ Página de notificações
+│   │   └── NotificacoesClient.tsx       ✅ Componente realtime
+│   ├── criadores/
+│   │   └── page.tsx                     ✅ Página estática
+│   ├── suporte/
+│   │   └── page.tsx                     ✅ Central de suporte
+│   ├── sobre/
+│   │   └── page.tsx                     ✅ Sobre a plataforma
+│   ├── igrejas/
+│   │   └── page.tsx                     ✅ Para Igrejas (B2B)
+│   ├── privacidade/
+│   │   └── page.tsx                     ✅ Política de privacidade
+│   ├── layout.tsx                        ✅ Root layout com Design System
 │   └── page.tsx                          ✅ Home com CategorySection
 ├── components/
-│   ├── Header.tsx                        ✅ Com notificações realtime + busca
+│   ├── Header.tsx                        ✅ Com notificações + busca
 │   ├── BuscaGlobalClient.tsx             ✅ Busca desktop (Ctrl+K)
-│   ├── BuscaGlobalClientMobile.tsx       ✅ Busca mobile (menu)
-│   ├── Footer.tsx
+│   ├── BuscaGlobalClientMobile.tsx       ✅ Busca mobile
+│   ├── Footer.tsx                        ✅ Com Design System
 │   ├── CategorySection.tsx               ✅ Categorias
 │   ├── VideoCard.tsx                     ✅ Card de vídeo
+│   ├── Hero.tsx                          ✅ Hero section
 │   └── ...
 ├── lib/
+│   ├── design-system.ts                 ✅ Design System global
 │   ├── supabase.ts                      Client Supabase
 │   ├── supabase-server.ts               Server Supabase
 │   ├── supabase-admin.ts                Admin Supabase
@@ -431,15 +383,19 @@ src/
 │   ├── r2.ts                            Upload limits config
 │   ├── cultua-config.ts                 Config colors & constants
 │   └── ...
+├── styles/
+│   ├── cultua.css                       ✅ CSS variables + resets
+│   ├── globals.css                      ✅ Tailwind + custom components
+│   └── ...
 ├── types/
-│   └── index.ts                         Type definitions (Content, User, etc)
+│   └── index.ts                         Type definitions
 └── api/
     ├── upload-avatar/route.ts            ✅ Upload avatar
     ├── upload/presigned/route.ts         ✅ Presigned URLs
     ├── init-profile/route.ts             ✅ Init profile
     ├── admin/delete-files/route.ts       ✅ Delete de arquivos
     └── ...
-🎯 User Flow
+🎯 User Flows
 1. Novo Usuário
 Signup → cria auth.users
   ↓
@@ -448,16 +404,15 @@ Trigger cria profile com full_name = email.split('@')[0]
 User vai em /configuracoes
   ↓
 Nome já vem preenchido ✅
-Pode editar e salvar
-Avatar fallback é emoji com inicial
+Avatar fallback é emoji
 2. Upload de Conteúdo
 User vai em /admin/upload
   ↓
 Seleciona tipo: Vídeo, Áudio, Texto
   ↓
-Preenche: título, descrição, categoria, duração
+Preenche: título, descrição, categoria
   ↓
-Upload vídeo + thumbnail (opcional)
+Upload vídeo + thumbnail
   ↓
 Status: pending → fila de curadoria
   ↓
@@ -465,42 +420,26 @@ Status: pending → fila de curadoria
 3. Curadoria (Admin)
 Admin vai em /admin
   ↓
-Vê 3 abas: Pendentes, Aprovados, Rejeitados (com contadores)
-  ↓
-Clica em aba → query busca dados atualizados
+Vê 3 abas com contadores realtime
   ↓
 Filtra por categoria/autor/busca
   ↓
 Aprova ou Rejeita
   ↓
-Item sai da aba e vai pro destino
-4. Visualização (Público)
-Home mostra categorias
-  ↓
-Clica em categoria → lista vídeos aprovados
-  ↓
-Clica em vídeo → player (a implementar)
-  ↓
-Vê info: criador, data, duração
-  ↓
-Video salvo no histórico automaticamente
-5. Busca Global (Novo!)
-Desktop: Ctrl+K ou clica 🔍 no nav
+Item sai da aba
+4. Busca Global
+Desktop: Ctrl+K ou clica 🔍
 Mobile: Toca 🔍 no menu
   ↓
-Digita termo: "louvor"
+Digita termo
   ↓
 Resultados aparecem em realtime
   ↓
-Setas (↑↓) navegam
-  ↓
 Enter abre resultado
-  ↓
-ESC fecha
 🚀 Deploy Checklist
 ✅ Variáveis de ambiente (.env.local)
-✅ Supabase database schema (SQL migrations)
-✅ Storage buckets criados (avatars, videos, thumbs)
+✅ Supabase database schema
+✅ Storage buckets criados
 ✅ RLS policies configuradas
 ✅ Trigger de profile creation ativo
 ✅ Presigned URLs working
@@ -508,25 +447,101 @@ ESC fecha
 ✅ Upload de conteúdo working
 ✅ Notificações realtime working
 ✅ Busca global indexada
-🐛 Common Issues & Fixes
-Problema	Causa	Fix
-Avatar não carrega	Cache, URL quebrada	Cache bust com ?t=${Date.now()}
-Nome não precarrega	full_name null	Init profile via /api/init-profile ou trigger
-Aprovados zera ao clicar	Query não filtra por tab	filteredContents deve filtrar por tab === status
-Canto branco no mobile	borderRadius + overflow	Usar Flexbox, overflow: hidden, boxSizing: 'border-box'
-Notificação não atualiza	Realtime listener não subscrito	Verificar useEffect com channel.subscribe()
-Busca lenta	Sem índices no banco	Criar índice em contents(title, description, status)
+✅ Design System aplicado em 100% dos componentes
+🔄 Roadmap Atualizado
+Sprint Atual (Q4 2026)
+✅ Design System + cores marfim/verde/dourado
+✅ Header + Footer + Navigation
+✅ Busca Global (Ctrl+K + mobile)
+✅ Notificações realtime
+✅ Painel de Curadoria
+✅ Upload de Conteúdo
+✅ Gerenciar Usuários
+🔄 Player Plyr.js em /content/[id]
+🔄 Playlist items — adicionar conteúdo
+🆕 Q1 2027 — ACESSIBILIDADE
+🔄 WCAG 2.1 AA compliance em 100% do site
+
+ARIA labels em todos os componentes
+Keyboard navigation (Tab, Enter, Escape)
+Focus management
+Color contrast ratios ≥ 4.5:1
+Text alternatives para imagens
+Form validation com mensagens acessíveis
+Skip links para navegação
+Semantic HTML (buttons, labels, headings)
+Screen reader testing (NVDA, JAWS)
+Mobile accessibility (touch targets 48x48px)
+🔄 Documentação de Acessibilidade
+
+Guia de contribução acessível
+Checklist de acessibilidade
+Testes automáticos (axe-core)
+🆕 Q2 2027 — KIDS AREA
+🔄 Área Infantil Separada (/kids)
+Interface colorida e amigável
+Conteúdo curado para crianças (3-12 anos)
+Modo parental com controles
+Design simplificado
+Letras maiores
+Animações suaves
+Sem publicidade
+Timer de uso (controle parental)
+Categorias infantis:
+🎵 Louvor Kids
+📖 Histórias Bíblicas
+🎨 Artesanato Cristão
+🎮 Jogos Educativos
+Gamificação (badges, pontos)
+Pais podem gerenciar acesso
+🆕 Q3 2027 — CONTEÚDO DE ACESSIBILIDADE
+🔄 Nova Categoria: Acessibilidade
+
+✅ Legendas em 100% dos vídeos
+🔄 Audiodescrição em vídeos
+🔄 Transcrições completas
+🔄 Conteúdo em LIBRAS (intérprete)
+🔄 Conteúdo para surdocegos
+🔄 Devocionais com leitura facilitada
+🔄 Conteúdo para pessoas com deficiência visual
+🔄 Conteúdo para pessoas com deficiência intelectual
+🔄 Preacher notes com fonte clara + espaçamento
+🔄 Features de Acessibilidade
+
+Ajuste de tamanho de fonte (A+ A-)
+Modo alto contraste
+Modo noturno
+Modo dyslexia-friendly (fonte Comic Sans/Arial)
+Redução de animações
+Pausas entre parágrafos na leitura
+Leitor de tela otimizado
+Q4 2027 — CRESCIMENTO
+Doações (Stripe / Mercado Pago)
+Comentários moderados
+Excluir conta + alterar e-mail
+Social sharing
+Favoritos
+Recomendações IA
+Q1 2028 — B2B Igrejas
+Salas exclusivas
+Assinatura recorrente
+Dashboard de estatísticas
+Q2+ 2028 — IA + Apps
+Whisper transcrição automática
+App nativo (React Native)
+Busca semântica com embeddings
+Recomendações IA
 📝 Padrões Obrigatórios
 Dark Theme Wrapper
-tsx
+typescript
 Copy code
-<div style={{ minHeight: '100vh', backgroundColor: '#111111' }}>
+<div style={{ minHeight: '100vh', backgroundColor: DS.colors.bg.primary }}>
   <Header />
   <MeuClient ... />
   <Footer />
 </div>
 Avatar Nativo (OBRIGATÓRIO)
-tsx
+typescript
 Copy code
 // ✅ CORRETO — sem next/image
 <img
@@ -540,6 +555,20 @@ Copy code
     objectFit: 'cover'
   }}
 />
+Client Components (OBRIGATÓRIO)
+typescript
+Copy code
+// ✅ CORRETO
+'use client'
+
+import { useState, useEffect } from 'react'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
+
+const DS = DESIGN_SYSTEM
+
+export default function MeuComponente() {
+  // ... com event handlers
+}
 Supabase Clients
 typescript
 Copy code
@@ -552,9 +581,8 @@ const supabase = await createServerSupabase()
 // Admin (NUNCA em client!)
 import { supabaseAdmin } from '@/lib/supabase-admin'
 Mobile Responsivo
-tsx
+typescript
 Copy code
-// Main container
 <main style={{
   maxWidth: '1200px',
   width: '100%',
@@ -563,197 +591,85 @@ Copy code
   padding: '16px',
   overflowX: 'hidden'
 }}>
-
-// Flex items mobile
-<div style={{
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '16px',
-  width: '100%',
-  minWidth: 0
-}}>
-🔄 Last Updated
-2026-09-13 03:15 UTC
-
-✅ Implementado Hoje
-✅ Painel de Curadoria — Layout mobile sem canto branco
-✅ BuscaGlobalClient (Desktop Ctrl+K)
-✅ BuscaGlobalClientMobile (Menu mobile)
-✅ Notificações sempre visíveis (desktop + mobile)
-✅ Perfil com avatar precarregado do banco
-✅ Histórico com dark theme
-✅ Playlists com dark theme
-✅ Meus Uploads com status badges
-✅ Remover /explorar (substituído por busca)
-✅ Notificação automática aos admins no upload
-✅ RLS policies para upload
-✅ AdminClient responsivo (flexbox, sem grid quebrado)
-🔄 Roadmap
-Sprint Atual
-
-🔄 /notificacoes — página (listar + marcar como lida)
-🔄 Player Plyr.js em /content/[id]
-🔄 Playlist items — adicionar conteúdo às playlists
-Q2
-
-Doações (Stripe / Mercado Pago)
-Comentários moderados
-Excluir conta + alterar e-mail
-Social sharing
-Favoritos
-Q3 — B2B Igrejas
-
-Salas exclusivas
-Assinatura recorrente (break-even mês 9-10)
-Dashboard de estatísticas
-Q4 — IA + Apps
-
-Whisper transcrição
-App nativo (React Native)
-Busca semântica com embeddings
-Recomendações IA
-🎯 Key Decisions
-Avatar nativo: Usar <img> puro, sem Next/Image (mais simples, sem SSR issues)
-Dark theme: Tudo com #111111 background + #1a1a1a cards
-Flexbox mobile: Evitar grid complexos que quebram em mobile
-RLS policies: Usuários só veem conteúdo próprio + aprovado
-Notificações realtime: Supabase triggers + listeners no Header
-Busca global: Ctrl+K desktop, menu mobile (padrão web moderno)
-Curadoria sync: Query nova ao trocar aba (nunca fica desincronizado)
+🐛 Common Issues & Fixes
+Problema	Causa	Fix
+Avatar não carrega	Cache, URL quebrada	Cache bust com ?t=${Date.now()}
+Cores erradas	Design System não importado	import { DESIGN_SYSTEM } from '@/lib/design-system'
+Select preto	Styles inline conflitantes	Usar DS.colors.primary.accent
+Notificações não atualizam	Realtime não subscrito	Verificar channel.subscribe()
+Busca lenta	Sem índices	Criar índice em contents(title, description)
+Mobile com canto branco	Flex + overflow	overflowX: 'hidden' no main
 📞 Support & Debugging
-Verificar Notificações:
-
+Verificar Notificações
 sql
 Copy code
 SELECT * FROM notifications 
 WHERE user_id = 'seu-id'
 ORDER BY created_at DESC
 LIMIT 10;
-Testar RLS Upload:
-
-sql
+Testar Design System
+typescript
 Copy code
--- Verificar policies
-SELECT * FROM pg_policies 
-WHERE tablename = 'contents';
-Ver Logs de Upload:
-
+// Verificar se cores estão corretas
+console.log(DS.colors.primary.main) // #1E3A2E
+console.log(DS.colors.primary.accent) // #D4AF7C
+console.log(DS.colors.bg.primary) // #F8F6EF
+Ver Logs de Upload
 bash
 Copy code
-# Vercel
 vercel logs -n 50
+🎯 Key Decisions
+Avatar nativo: Usar <img> puro, sem Next/Image (mais simples)
+Design System: Centralizado em src/lib/design-system.ts
+Theme colors: Marfim (#F8F6EF) + Verde (#1E3A2E) + Dourado (#D4AF7C)
+Mobile: Flexbox, nunca grid complexo
+RLS policies: Usuários veem só conteúdo aprovado + próprio
+Notificações realtime: Supabase triggers + listeners
+Busca global: Ctrl+K desktop, menu mobile
+Curadoria sync: Query nova ao trocar aba
+Acessibilidade: WCAG 2.1 AA como padrão obrigatório
+Kids Area: Interface separada com controles parentais
+Conteúdo Acessível: Legendas, audiodescrição, LIBRAS obrigatórias
+📊 Status Geral
+Feature	Status	Progresso
+Auth & Login	✅ Completo	100%
+Header & Nav	✅ Completo	100%
+Busca Global	✅ Completo	100%
+Notificações	✅ Parcial	80%
+Home	✅ Completo	100%
+Configurações	✅ Completo	100%
+Perfil	✅ Completo	100%
+Histórico	✅ Completo	100%
+Playlists	✅ Parcial	80%
+Meus Uploads	✅ Completo	100%
+Painel Admin	✅ Completo	100%
+Gerenciar Usuários	✅ Completo	100%
+Design System	✅ Completo	100%
+Acessibilidade	🔄 Iniciado	10%
+Kids Area	📋 Planejado	0%
+Conteúdo Acessível	📋 Planejado	0%
+🎉 Última Atualização
+Data: 2026-09-14 23:17 UTC
 
+Mudanças Implementadas Hoje:
 
-🔔 Status de Notificações
-Sim, parcialmente implementado:
+✅ Design System global com cores corretas (Marfim + Verde + Dourado)
+✅ Todas as páginas atualizadas com Design System
+✅ Header + Footer em verde + dourado
+✅ Cards com borders e hovers corretos
+✅ Notificações com emojis ao invés de "Check/Box"
+✅ Gerenciar Usuários com select em dourado
+✅ Meus Uploads com cores verde/dourado/vermelho
+✅ Histórico com Design System colors
+✅ Playlists com Design System colors
+✅ Todas as páginas estáticas com 'use client'
+✅ Hero limpo sem repetições
+✅ Roadmap atualizado com Acessibilidade, Kids Area, Conteúdo Acessível
+Próximas Prioridades:
 
-✅ O que já foi feito:
-Tabela notifications no Supabase ✅
-Badge realtime no Header ✅
-Mostra contador de notificações não lidas
-Atualiza em tempo real
-Botão 🔔 sempre visível ✅
-Desktop: Entre busca e avatar
-Mobile: No menu
-Notificação automática ao upload ✅
-notifyAdminsOfPendingContent() chamada ao fazer upload
-Função em src/lib/db.ts
-Realtime listener no Header ✅
-Supabase channel escuta novos inserts
-❌ O que FALTA:
-Página /notificacoes ❌
-
-Listar todas as notificações
-Marcar como lida
-Deletar notificação
-Filtrar por tipo
-Notificações de APROVAÇÃO/REJEIÇÃO ❌
-
-Quando admin aprova → notifica criador
-Quando admin rejeita → notifica criador
-Link no Header ❌
-
-Ao clicar em 🔔 deve levar para /notificacoes
-(Atualmente leva, mas página não existe)
-🎯 Resumo para o context.md:
-markdown
-Copy code
-### 📬 Notificações — Status
-- ✅ Tabela criada com RLS
-- ✅ Badge realtime no Header
-- ✅ Botão 🔔 sempre visível (desktop + mobile)
-- ✅ Notificação ao upload (admins)
-- ❌ Página `/notificacoes` — A IMPLEMENTAR
-- ❌ Notificação ao aprovar/rejeitar — A IMPLEMENTAR
-
-Sim, COMPLETAMENTE implementado! ✅
-
-✅ O que foi feito:
-Desktop (Ctrl+K)
-✅ BuscaGlobalClient.tsx criado
-✅ Abre ao pressionar Ctrl+K (ou Cmd+K no Mac)
-✅ Modal com fundo escuro
-✅ Input para digitar
-✅ Busca realtime em contents (título + descrição)
-✅ Navegação com setas ↑↓
-✅ Enter para abrir resultado
-✅ ESC para fechar
-✅ Badge com contador de resultados
-✅ Thumbnail + categoria + duração
-✅ Botão no Header (antes do avatar)
-Mobile (Menu)
-✅ BuscaGlobalClientMobile.tsx criado
-✅ Botão 🔍 no menu mobile
-✅ Modal fullscreen ao clicar
-✅ Input para digitar
-✅ Busca realtime
-✅ Resultados em lista
-✅ Botão X para fechar
-✅ ESC para fechar
-Features Gerais
-✅ Busca em contents aprovados apenas
-✅ Query: title.ilike + description.ilike
-✅ Limite: 10 resultados
-✅ Realtime: Sem delay
-✅ Icons por tipo: 🎬 vídeo, 🎵 áudio, 📄 texto
-✅ Hover/clique abre /content/[id]
-✅ Cores tema dark
-📁 Arquivos Criados:
-src/components/
-├── BuscaGlobalClient.tsx          ✅ Desktop (Ctrl+K)
-├── BuscaGlobalClientMobile.tsx    ✅ Mobile (🔍)
-└── Header.tsx                      ✅ Integrada
-✅ Checklist de Implementação:
-✅ Criado BuscaGlobalClient.tsx
-✅ Criado BuscaGlobalClientMobile.tsx
-✅ Adicionado import no Header
-✅ Adicionado <BuscaGlobalClient /> no nav desktop
-✅ Adicionado <BuscaGlobalClientMobile /> no menu mobile
-✅ Testado Ctrl+K
-✅ Testado clique em 🔍 mobile
-✅ Navegação com setas funcionando
-✅ Enter abre resultado
-✅ ESC fecha modal
-✅ Removido /explorar (substituído por busca)
-🎯 Já funciona 100%!
-Você pode:
-
-Desktop: Pressione Ctrl+K (ou Cmd+K no Mac)
-Mobile: Toque em 🔍 no menu
-Digitar: Escreva qualquer termo (ex: "louvor")
-Navegar: Use ↑↓ ou mouse
-Abrir: Pressione Enter ou clique no resultado
-📝 Update no context.md:
-markdown
-Copy code
-### 🔍 Busca Global (Ctrl+K) — ✅ COMPLETO
-- ✅ Desktop: Botão no nav + Ctrl+K
-- ✅ Mobile: Botão 🔍 no menu
-- ✅ Realtime search em contents aprovados
-- ✅ Navegação com setas (↑ ↓)
-- ✅ Enter para abrir resultado
-- ✅ Escape para fechar
-- ✅ Preview com thumbnail + categoria + duração
-- ✅ Arquivo: src/components/BuscaGlobalClient.tsx
-- ✅ Arquivo: src/components/BuscaGlobalClientMobile.tsx
-- ✅ Removido: /explorar (substituído por busca)
+Player Plyr.js em /content/[id]
+Playlist items adicionar conteúdo
+Iniciar Sprint de Acessibilidade (WCAG 2.1 AA)
+Planejamento Kids Area
+Estratégia de Conteúdo Acessível
+🎨 CULTUA — Plataforma de Conteúdo Cristão Acessível e Inclusiva 🙏✨

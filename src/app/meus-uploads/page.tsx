@@ -1,10 +1,12 @@
-// src/app/meus-uploads/page.tsx
 import { createServerSupabase } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import MeusUploadsClient from './MeusUploadsClient'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
 import type { ContentWithStatus } from '@/types'
+
+const DS = DESIGN_SYSTEM
 
 export const metadata = { title: 'Meus Uploads — CULTUA' }
 
@@ -20,7 +22,7 @@ export default async function MeusUploadsPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#111111' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: DS.colors.bg.primary }}>
       <Header />
       <MeusUploadsClient contents={(contents ?? []) as ContentWithStatus[]} />
       <Footer />

@@ -1,10 +1,12 @@
-// src/app/notificacoes/page.tsx
 import { createServerSupabase } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import NotificacoesClient from './NotificacoesClient'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
 import type { Metadata } from 'next'
+
+const DS = DESIGN_SYSTEM
 
 export const metadata: Metadata = {
   title: 'Notificações',
@@ -17,7 +19,6 @@ export const revalidate = 0
 export default async function NotificacoesPage() {
   const supabase = await createServerSupabase()
 
-  // ✅ Verificar se usuário está autenticado
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -27,7 +28,7 @@ export default async function NotificacoesPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#111111' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: DS.colors.bg.primary }}>
       <Header />
       <NotificacoesClient userId={user.id} />
       <Footer />
