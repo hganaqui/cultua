@@ -1,230 +1,328 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { signUp } from '@/lib/auth'
-import { translateAuthError } from '@/types'
-import { isValidEmail } from '@/lib/utils'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { DESIGN_SYSTEM } from '@/lib/design-system'
 
 const DS = DESIGN_SYSTEM
 
 export default function SignupForm() {
   const router = useRouter()
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  const [name, setName]         = useState('')
-  const [email, setEmail]       = useState('')
-  const [password, setPassword] = useState('')
-  const [confirm, setConfirm]   = useState('')
-  const [loading, setLoading]   = useState(false)
-  const [error, setError]       = useState<string | null>(null)
-  const [success, setSuccess]   = useState(false)
-
-  const emailInvalid   = email.length > 0   && !isValidEmail(email)
-  const passwordWeak   = password.length > 0 && password.length < 6
-  const passwordDiff   = confirm.length > 0  && confirm !== password
-  const formInvalid    = emailInvalid || passwordWeak || passwordDiff
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setError(null)
-
-    if (formInvalid) return
-
+    setError('')
     setLoading(true)
-    const { error } = await signUp(email, password, name)
 
-    if (error) {
-      setError(translateAuthError(error.message))
+    try {
+      // Validações
+      if (!formData.name.trim()) {
+        setError('Nome é obrigatório')
+        setLoading(false)
+        return
+      }
+
+      if (!formData.email.trim()) {
+        setError('Email é obrigatório')
+        setLoading(false)
+        return
+      }
+
+      if (formData.password.length < 6) {
+        setError('Senha deve ter no mínimo 6 caracteres')
+        setLoading(false)
+        return
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        setError('Senhas não conferem')
+        setLoading(false)
+        return
+      }
+
+      // ✅ Chamar signUp (que já envia email automático)
+      const { data, error: signUpError } = await signUp(
+        formData.email,
+        formData.password,
+        formData.name
+      )
+
+      if (signUpError) {
+        // Mensagens de erro mais amigáveis
+        if (signUpError.message.includes('already exists')) {
+          setError('Este email já está cadastrado')
+        } else if (signUpError.message.includes('invalid email')) {
+          setError('Email inválido')
+        } else {
+          setError(signUpError.message || 'Erro ao criar conta')
+        }
+        setLoading(false)
+        return
+      }
+
+      if (!data.user) {
+        setError('Erro ao criar conta')
+        setLoading(false)
+        return
+      }
+
+      // ✅ Sucesso — vai para página de verificação
+      router.push('/auth/check-email')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao criar conta')
+    } finally {
       setLoading(false)
-      return
     }
-
-    setSuccess(true)
-    setLoading(false)
-  }
-
-  if (success) {
-    return (
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: '56px', marginBottom: '16px' }}>📬</div>
-        <h2 style={{ color: DS.colors.primary.main, fontWeight: '800', fontSize: '22px', marginBottom: '12px' }}>
-          Confirme seu e-mail
-        </h2>
-        <p style={{ color: DS.colors.text.secondary, fontSize: '15px', lineHeight: 1.7, marginBottom: '24px' }}>
-          Enviamos um link para{' '}
-          <strong style={{ color: DS.colors.text.light }}>{email}</strong>.
-          <br />
-          Clique no link para ativar sua conta.
-        </p>
-        <Link href="/auth/login" style={{ color: DS.colors.primary.main, fontWeight: '600', textDecoration: 'none', fontSize: '14px' }}>
-          ← Voltar para o login
-        </Link>
-      </div>
-    )
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-
-      {error && (
-        <div style={{
-          backgroundColor: DS.colors.secondary.error + '15',
-          border: `1px solid ${DS.colors.secondary.error}30`,
-          borderRadius: DS.borderRadius.md,
-          padding: '12px 16px',
-          marginBottom: '20px',
-          color: DS.colors.secondary.error,
-          fontSize: '14px',
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {/* Campo Nome */}
+      <div>
+        <label style={{
+          display: 'block',
+          color: DS.colors.text.dark,
+          fontSize: '13px',
+          fontWeight: '600',
+          marginBottom: '6px',
         }}>
-          ⚠️ {error}
-        </div>
-      )}
-
-      <div style={{ marginBottom: '16px' }}>
-        <label style={labelStyle}>Nome</label>
+          Nome Completo
+        </label>
         <input
           type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Seu nome"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          placeholder="Seu nome completo"
           required
-          style={inputStyle}
-          onFocus={(e) => (e.target.style.borderColor = DS.colors.primary.main)}
-          onBlur={(e)  => (e.target.style.borderColor = DS.colors.neutral.light)}
+          style={{
+            width: '100%',
+            padding: '12px 14px',
+            border: `1px solid ${DS.colors.neutral.light}`,
+            borderRadius: DS.borderRadius.md,
+            fontSize: '14px',
+            color: DS.colors.text.dark,
+            backgroundColor: DS.colors.bg.secondary,
+            boxSizing: 'border-box',
+            transition: DS.transitions.base,
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = DS.colors.primary.main
+            e.currentTarget.style.boxShadow = `0 0 0 3px ${DS.colors.primary.main}20`
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = DS.colors.neutral.light
+            e.currentTarget.style.boxShadow = 'none'
+          }}
         />
       </div>
 
-      <div style={{ marginBottom: '16px' }}>
-        <label style={labelStyle}>E-mail</label>
+      {/* Campo Email */}
+      <div>
+        <label style={{
+          display: 'block',
+          color: DS.colors.text.dark,
+          fontSize: '13px',
+          fontWeight: '600',
+          marginBottom: '6px',
+        }}>
+          Email
+        </label>
         <input
           type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
           placeholder="seu@email.com"
           required
           style={{
-            ...inputStyle,
-            borderColor: emailInvalid ? DS.colors.secondary.error : DS.colors.neutral.light,
+            width: '100%',
+            padding: '12px 14px',
+            border: `1px solid ${DS.colors.neutral.light}`,
+            borderRadius: DS.borderRadius.md,
+            fontSize: '14px',
+            color: DS.colors.text.dark,
+            backgroundColor: DS.colors.bg.secondary,
+            boxSizing: 'border-box',
+            transition: DS.transitions.base,
           }}
-          onFocus={(e) => (e.target.style.borderColor = emailInvalid ? DS.colors.secondary.error : DS.colors.primary.main)}
-          onBlur={(e)  => (e.target.style.borderColor = emailInvalid ? DS.colors.secondary.error : DS.colors.neutral.light)}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = DS.colors.primary.main
+            e.currentTarget.style.boxShadow = `0 0 0 3px ${DS.colors.primary.main}20`
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = DS.colors.neutral.light
+            e.currentTarget.style.boxShadow = 'none'
+          }}
         />
-        {emailInvalid && <Hint text="E-mail inválido" />}
       </div>
 
-      <div style={{ marginBottom: '16px' }}>
-        <label style={labelStyle}>Senha</label>
+      {/* Campo Senha */}
+      <div>
+        <label style={{
+          display: 'block',
+          color: DS.colors.text.dark,
+          fontSize: '13px',
+          fontWeight: '600',
+          marginBottom: '6px',
+        }}>
+          Senha
+        </label>
         <input
           type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
           placeholder="Mínimo 6 caracteres"
           required
           minLength={6}
           style={{
-            ...inputStyle,
-            borderColor: passwordWeak ? DS.colors.secondary.error : DS.colors.neutral.light,
+            width: '100%',
+            padding: '12px 14px',
+            border: `1px solid ${DS.colors.neutral.light}`,
+            borderRadius: DS.borderRadius.md,
+            fontSize: '14px',
+            color: DS.colors.text.dark,
+            backgroundColor: DS.colors.bg.secondary,
+            boxSizing: 'border-box',
+            transition: DS.transitions.base,
           }}
-          onFocus={(e) => (e.target.style.borderColor = passwordWeak ? DS.colors.secondary.error : DS.colors.primary.main)}
-          onBlur={(e)  => (e.target.style.borderColor = passwordWeak ? DS.colors.secondary.error : DS.colors.neutral.light)}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = DS.colors.primary.main
+            e.currentTarget.style.boxShadow = `0 0 0 3px ${DS.colors.primary.main}20`
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = DS.colors.neutral.light
+            e.currentTarget.style.boxShadow = 'none'
+          }}
         />
-        {passwordWeak && <Hint text="Mínimo 6 caracteres" />}
       </div>
 
-      <div style={{ marginBottom: '24px' }}>
-        <label style={labelStyle}>Confirmar senha</label>
+      {/* Campo Confirmar Senha */}
+      <div>
+        <label style={{
+          display: 'block',
+          color: DS.colors.text.dark,
+          fontSize: '13px',
+          fontWeight: '600',
+          marginBottom: '6px',
+        }}>
+          Confirmar Senha
+        </label>
         <input
           type="password"
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          placeholder="Repita a senha"
+          name="confirmPassword"
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          placeholder="Confirme sua senha"
           required
+          minLength={6}
           style={{
-            ...inputStyle,
-            borderColor: passwordDiff ? DS.colors.secondary.error : DS.colors.neutral.light,
+            width: '100%',
+            padding: '12px 14px',
+            border: `1px solid ${DS.colors.neutral.light}`,
+            borderRadius: DS.borderRadius.md,
+            fontSize: '14px',
+            color: DS.colors.text.dark,
+            backgroundColor: DS.colors.bg.secondary,
+            boxSizing: 'border-box',
+            transition: DS.transitions.base,
           }}
-          onFocus={(e) => (e.target.style.borderColor = passwordDiff ? DS.colors.secondary.error : DS.colors.primary.main)}
-          onBlur={(e)  => (e.target.style.borderColor = passwordDiff ? DS.colors.secondary.error : DS.colors.neutral.light)}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = DS.colors.primary.main
+            e.currentTarget.style.boxShadow = `0 0 0 3px ${DS.colors.primary.main}20`
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = DS.colors.neutral.light
+            e.currentTarget.style.boxShadow = 'none'
+          }}
         />
-        {passwordDiff && <Hint text="As senhas não coincidem" />}
       </div>
 
+      {/* Mensagem de Erro */}
+      {error && (
+        <div style={{
+          backgroundColor: DS.colors.secondary.error + '15',
+          border: `1px solid ${DS.colors.secondary.error}30`,
+          color: DS.colors.secondary.error,
+          padding: '12px 14px',
+          borderRadius: DS.borderRadius.md,
+          fontSize: '13px',
+          fontWeight: '500',
+        }}>
+          ✗ {error}
+        </div>
+      )}
+
+      {/* Botão Enviar */}
       <button
         type="submit"
-        disabled={loading || formInvalid}
+        disabled={loading}
         style={{
-          width: '100%',
-          backgroundColor: loading || formInvalid ? DS.colors.primary.dark : DS.colors.primary.main,
+          backgroundColor: loading ? '#A8A8A8' : DS.colors.primary.main,
           color: 'white',
           border: 'none',
+          padding: '12px 16px',
           borderRadius: DS.borderRadius.md,
-          padding: '14px',
-          fontSize: DS.typography.fontSize.base,
-          fontWeight: DS.typography.fontWeight.bold,
-          cursor: loading || formInvalid ? 'not-allowed' : 'pointer',
-          opacity: formInvalid && !loading ? 0.6 : 1,
+          fontSize: '14px',
+          fontWeight: '700',
+          cursor: loading ? 'not-allowed' : 'pointer',
+          opacity: loading ? 0.6 : 1,
           transition: DS.transitions.base,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
+        }}
+        onMouseEnter={(e) => {
+          if (!loading) {
+            e.currentTarget.style.backgroundColor = DS.colors.primary.light
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!loading) {
+            e.currentTarget.style.backgroundColor = DS.colors.primary.main
+          }
         }}
       >
-        {loading ? <><Spinner /> Criando conta...</> : '🙏 Criar Conta Gratuita'}
+        {loading ? '⏳ Criando conta...' : '✓ Criar Conta'}
       </button>
 
-      <p style={{ textAlign: 'center', color: DS.colors.text.secondary, fontSize: '14px', marginTop: '20px' }}>
+      {/* Link para Login */}
+      <p style={{
+        color: DS.colors.text.secondary,
+        fontSize: '13px',
+        textAlign: 'center',
+        marginTop: '8px',
+      }}>
         Já tem conta?{' '}
-        <Link href="/auth/login" style={{ color: DS.colors.primary.main, fontWeight: '600', textDecoration: 'none' }}>
-          Entrar
+        <Link href="/auth/login" style={{
+          color: DS.colors.primary.main,
+          fontWeight: '700',
+          textDecoration: 'none',
+          transition: DS.transitions.base,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.color = DS.colors.primary.light
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = DS.colors.primary.main
+        }}
+        >
+          Entrar aqui
         </Link>
       </p>
     </form>
   )
-}
-
-function Spinner() {
-  return (
-    <span style={{
-      width: '16px', 
-      height: '16px',
-      border: `2px solid ${DS.colors.text.secondary}33`,
-      borderTopColor: 'white',
-      borderRadius: '50%',
-      display: 'inline-block',
-      animation: 'spin 0.7s linear infinite',
-      flexShrink: 0,
-    }} />
-  )
-}
-
-function Hint({ text }: { text: string }) {
-  return (
-    <span style={{ color: DS.colors.secondary.error, fontSize: '12px', marginTop: '4px', display: 'block' }}>
-      {text}
-    </span>
-  )
-}
-
-const labelStyle: React.CSSProperties = {
-  display: 'block', 
-  color: DS.colors.text.secondary, 
-  fontSize: '13px', 
-  fontWeight: '600', 
-  marginBottom: '8px',
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%', 
-  backgroundColor: '#FFFFFF',
-  border: `1.5px solid ${DS.colors.neutral.light}`,
-  borderRadius: DS.borderRadius.md, 
-  padding: '12px 16px', 
-  color: DS.colors.text.primary,
-  fontSize: '15px', 
-  outline: 'none', 
-  boxSizing: 'border-box', 
-  transition: DS.transitions.base,
 }

@@ -19,6 +19,23 @@ export async function signUp(email: string, password: string, name: string) {
       emailRedirectTo: `${APP_URL}/auth/callback`,
     },
   })
+  
+  // ✅ NOVO: Se conta criada, chama endpoint customizado
+  if (data.user && !error) {
+    try {
+      await fetch(`${APP_URL}/api/auth/send-confirmation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: data.user.email,
+          token: data.session?.access_token || 'verification-needed',
+        }),
+      })
+    } catch (err) {
+      console.error('Erro ao enviar email customizado:', err)
+    }
+  }
+
   return { data, error }
 }
 
@@ -35,4 +52,34 @@ export async function getSession() {
 export async function getCurrentUser() {
   const { data, error } = await supabase.auth.getUser()
   return { user: data.user, error }
+}
+
+// ✅ NOVO: Reset password
+export async function resetPassword(email: string) {
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${APP_URL}/auth/reset-password`,
+  })
+  
+  // ✅ Chamar endpoint customizado
+  if (!error) {
+    try {
+      await fetch(`${APP_URL}/api/auth/send-reset`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+    } catch (err) {
+      console.error('Erro ao enviar email de reset:', err)
+    }
+  }
+
+  return { data, error }
+}
+
+// ✅ NOVO: Update password
+export async function updatePassword(password: string) {
+  const { data, error } = await supabase.auth.updateUser({
+    password,
+  })
+  return { data, error }
 }

@@ -5,8 +5,22 @@ import { NextResponse } from 'next/server'
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/'
+  const error = searchParams.get('error')
+  const error_description = searchParams.get('error_description')
 
+  // ✅ Se tiver erro no callback
+  if (error || error_description) {
+    return NextResponse.redirect(
+      new URL(
+        `/auth/error?message=${encodeURIComponent(
+          error_description || error || 'Erro na confirmação'
+        )}`,
+        request.url
+      )
+    )
+  }
+
+  // ✅ Se tiver code, trocar por sessão
   if (code) {
     const cookieStore = await cookies()
 
@@ -26,16 +40,31 @@ export async function GET(request: Request) {
     )
 
     // Troca o code por uma sessão válida
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
 
-    if (!error) {
-      // ✅ Confirmado → vai para home logado
-      return NextResponse.redirect(new URL(next, request.url))
+    if (!exchangeError) {
+      // ✅ Sucesso → vai para página de sucesso
+      return NextResponse.redirect(
+        new URL('/auth/success', request.url)
+      )
     }
+
+    // ✅ Erro ao trocar code
+    return NextResponse.redirect(
+      new URL(
+        `/auth/error?message=${encodeURIComponent(
+          exchangeError?.message || 'Erro ao confirmar email'
+        )}`,
+        request.url
+      )
+    )
   }
 
-  // Erro → vai para login com mensagem
+  // ✅ Sem code — link inválido
   return NextResponse.redirect(
-    new URL('/auth/login?error=confirmation_failed', request.url)
+    new URL(
+      '/auth/error?message=Link inválido ou expirado',
+      request.url
+    )
   )
 }
