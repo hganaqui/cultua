@@ -3,7 +3,10 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
 import type { Notification } from '@/types'
+
+const DS = DESIGN_SYSTEM
 
 interface NotificacoesClientProps {
   userId: string
@@ -100,6 +103,19 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
     }
   }
 
+  function getNotificationIcon(type: string): string {
+    switch (type) {
+      case 'content_approved':
+        return '✅'
+      case 'content_rejected':
+        return '❌'
+      case 'pending_content':
+        return '⏳'
+      default:
+        return '🔔'
+    }
+  }
+
   function handleNotificationClick(notification: Notification) {
     if (!notification.read) {
       markAsRead(notification.id)
@@ -122,35 +138,31 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
   return (
     <main style={{
       minHeight: 'calc(100vh - 120px)',
-      backgroundColor: '#111111',
+      backgroundColor: DS.colors.bg.primary,
       padding: '40px 16px',
     }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '30px',
-            paddingBottom: '20px',
-            borderBottom: '2px solid #B8860B',
-          }}
-        >
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '30px',
+          paddingBottom: '20px',
+          borderBottom: `2px solid ${DS.colors.primary.accent}`,
+        }}>
           <div>
-            <h1
-              style={{
-                color: '#FFFFFF',
-                margin: '0 0 5px 0',
-                fontSize: '28px',
-                fontWeight: '800',
-              }}
-            >
-              Notificacoes
+            <h1 style={{
+              color: DS.colors.text.dark,
+              margin: '0 0 5px 0',
+              fontSize: '28px',
+              fontWeight: '800',
+            }}>
+              🔔 Notificações
             </h1>
-            <p style={{ color: '#CCCCCC', margin: 0, fontSize: '14px' }}>
+            <p style={{ color: DS.colors.text.secondary, margin: 0, fontSize: '14px' }}>
               {unreadCount > 0
-                ? `${unreadCount} nao lida${unreadCount > 1 ? 's' : ''}`
-                : 'Todas as notificacoes lidas'}
+                ? `${unreadCount} não lida${unreadCount > 1 ? 's' : ''}`
+                : 'Todas as notificações lidas'}
             </p>
           </div>
           {unreadCount > 0 && (
@@ -158,23 +170,23 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
               onClick={markAllAsRead}
               style={{
                 padding: '10px 16px',
-                backgroundColor: '#B8860B',
-                color: '#111111',
+                backgroundColor: DS.colors.primary.accent,
+                color: DS.colors.text.dark,
                 border: 'none',
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontWeight: 'bold',
                 fontSize: '13px',
-                transition: 'background-color 0.2s',
+                transition: DS.transitions.base,
               }}
               onMouseOver={(e) =>
-                (e.currentTarget.style.backgroundColor = '#D4AF37')
+                (e.currentTarget.style.backgroundColor = '#E8C895')
               }
               onMouseOut={(e) =>
-                (e.currentTarget.style.backgroundColor = '#B8860B')
+                (e.currentTarget.style.backgroundColor = DS.colors.primary.accent)
               }
             >
-              Marcar tudo como lido
+              ✓ Marcar tudo como lido
             </button>
           )}
         </div>
@@ -186,48 +198,46 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
               onClick={() => setFilter(f)}
               style={{
                 padding: '8px 16px',
-                backgroundColor: filter === f ? '#B8860B' : '#1a1a1a',
-                color: filter === f ? '#111111' : '#CCCCCC',
-                border: `1px solid ${filter === f ? '#B8860B' : '#333333'}`,
+                backgroundColor: filter === f ? DS.colors.primary.main : DS.colors.bg.secondary,
+                color: filter === f ? 'white' : DS.colors.text.secondary,
+                border: `1px solid ${filter === f ? DS.colors.primary.main : DS.colors.neutral.light}`,
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontWeight: filter === f ? 'bold' : 'normal',
                 fontSize: '13px',
-                transition: 'all 0.2s',
+                transition: DS.transitions.base,
               }}
               onMouseOver={(e) => {
-                if (filter !== f) e.currentTarget.style.backgroundColor = '#2a2a2a'
+                if (filter !== f) e.currentTarget.style.backgroundColor = DS.colors.bg.secondary
               }}
               onMouseOut={(e) => {
-                if (filter !== f) e.currentTarget.style.backgroundColor = '#1a1a1a'
+                if (filter !== f) e.currentTarget.style.backgroundColor = DS.colors.bg.secondary
               }}
             >
-              {f === 'all' ? 'Todas' : 'Nao lidas'}
+              {f === 'all' ? 'Todas' : 'Não Lidas'}
             </button>
           ))}
         </div>
 
         {loading && (
           <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-            <p style={{ color: '#CCCCCC' }}>Carregando notificacoes...</p>
+            <p style={{ color: DS.colors.text.secondary }}>Carregando notificações...</p>
           </div>
         )}
 
         {!loading && filteredNotifications.length === 0 && (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '60px 20px',
-              backgroundColor: '#1a1a1a',
-              borderRadius: '8px',
-              border: '1px solid #333333',
-            }}
-          >
-            <p style={{ fontSize: '48px', margin: '0 0 10px 0' }}>Box</p>
-            <p style={{ color: '#CCCCCC', margin: 0, fontSize: '14px' }}>
+          <div style={{
+            textAlign: 'center',
+            padding: '60px 20px',
+            backgroundColor: DS.colors.bg.secondary,
+            borderRadius: '8px',
+            border: `1px solid ${DS.colors.neutral.light}`,
+          }}>
+            <p style={{ fontSize: '48px', margin: '0 0 10px 0' }}>📭</p>
+            <p style={{ color: DS.colors.text.secondary, margin: 0, fontSize: '14px' }}>
               {filter === 'unread'
-                ? 'Nenhuma notificacao nao lida'
-                : 'Nenhuma notificacao'}
+                ? 'Nenhuma notificação não lida'
+                : 'Nenhuma notificação'}
             </p>
           </div>
         )}
@@ -238,70 +248,61 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
               <div
                 key={notification.id}
                 style={{
-                  backgroundColor: notification.read ? '#1a1a1a' : '#2a2a2a',
+                  backgroundColor: notification.read ? DS.colors.bg.secondary : DS.colors.primary.accent + '15',
                   border: `1px solid ${
                     notification.read
-                      ? '#333333'
-                      : '#B8860B'
+                      ? DS.colors.neutral.light
+                      : DS.colors.primary.accent
                   }`,
                   borderRadius: '8px',
                   padding: '16px',
                   display: 'flex',
                   gap: '16px',
                   alignItems: 'flex-start',
-                  transition: 'all 0.2s ease',
+                  transition: DS.transitions.base,
                   cursor: 'pointer',
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#2a2a2a'
-                  e.currentTarget.style.borderColor = '#B8860B'
+                  e.currentTarget.style.backgroundColor = DS.colors.primary.accent + '25'
+                  e.currentTarget.style.borderColor = DS.colors.primary.accent
                 }}
                 onMouseOut={(e) => {
                   e.currentTarget.style.backgroundColor = notification.read
-                    ? '#1a1a1a'
-                    : '#2a2a2a'
+                    ? DS.colors.bg.secondary
+                    : DS.colors.primary.accent + '15'
                   e.currentTarget.style.borderColor = notification.read
-                    ? '#333333'
-                    : '#B8860B'
+                    ? DS.colors.neutral.light
+                    : DS.colors.primary.accent
                 }}
                 onClick={() => handleNotificationClick(notification)}
               >
-                <div
-                  style={{
-                    fontSize: '24px',
-                    minWidth: '40px',
-                    textAlign: 'center',
-                  }}
-                >
-                  {notification.type === 'content_approved' && 'Check'}
-                  {notification.type === 'content_rejected' && 'X'}
-                  {notification.type === 'pending_content' && 'Clock'}
-                  {!['content_approved', 'content_rejected', 'pending_content'].includes(notification.type) && 'Bell'}
+                <div style={{
+                  fontSize: '24px',
+                  minWidth: '40px',
+                  textAlign: 'center',
+                }}>
+                  {getNotificationIcon(notification.type)}
                 </div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <h3
-                    style={{
-                      color: '#FFFFFF',
-                      margin: '0 0 4px 0',
-                      fontSize: '16px',
-                      fontWeight: 'bold',
-                    }}
-                  >
+                  <h3 style={{
+                    color: DS.colors.text.dark,
+                    margin: '0 0 4px 0',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                  }}>
                     {notification.title}
                   </h3>
                   {notification.message && (
-                    <p
-                      style={{
-                        color: '#CCCCCC',
-                        margin: '0 0 8px 0',
-                        fontSize: '14px',
-                      }}
-                    >
+                    <p style={{
+                      color: DS.colors.text.secondary,
+                      margin: '0 0 8px 0',
+                      fontSize: '14px',
+                    }}>
                       {notification.message}
                     </p>
                   )}
-                  <p style={{ color: '#666666', margin: 0, fontSize: '12px' }}>
+                  <p style={{ color: DS.colors.text.muted, margin: 0, fontSize: '12px' }}>
                     {new Date(notification.created_at).toLocaleDateString(
                       'pt-BR',
                       {
@@ -314,25 +315,21 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
                   </p>
                 </div>
 
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px',
-                    alignItems: 'flex-end',
-                  }}
-                >
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                  alignItems: 'flex-end',
+                }}>
                   {!notification.read && (
-                    <span
-                      style={{
-                        backgroundColor: '#B8860B',
-                        color: '#111111',
-                        padding: '4px 10px',
-                        borderRadius: '4px',
-                        fontSize: '11px',
-                        fontWeight: 'bold',
-                      }}
-                    >
+                    <span style={{
+                      backgroundColor: DS.colors.primary.accent,
+                      color: DS.colors.text.dark,
+                      padding: '4px 10px',
+                      borderRadius: '4px',
+                      fontSize: '11px',
+                      fontWeight: 'bold',
+                    }}>
                       Nova
                     </span>
                   )}
@@ -344,24 +341,22 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
                     }}
                     style={{
                       backgroundColor: 'transparent',
-                      color: '#EF4444',
+                      color: DS.colors.secondary.error,
                       border: 'none',
                       cursor: 'pointer',
                       fontSize: '13px',
                       padding: '4px 8px',
                       borderRadius: '4px',
-                      transition: 'all 0.2s',
+                      transition: DS.transitions.base,
                     }}
                     onMouseOver={(e) => {
-                      e.currentTarget.style.backgroundColor = '#EF4444'
-                      e.currentTarget.style.color = '#FFFFFF'
+                      e.currentTarget.style.backgroundColor = DS.colors.secondary.error + '15'
                     }}
                     onMouseOut={(e) => {
                       e.currentTarget.style.backgroundColor = 'transparent'
-                      e.currentTarget.style.color = '#EF4444'
                     }}
                   >
-                    X Deletar
+                    ✕ Deletar
                   </button>
                 </div>
               </div>

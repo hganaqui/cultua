@@ -210,19 +210,29 @@ export default function UsuariosClient({ users, categories, allCreators }: Props
                     {rcfg.label}
                   </span>
 
-                  <select
+<select
                     value={u.role}
                     disabled={loading === `role-${u.id}`}
                     onChange={e => changeRole(u.id, e.target.value as UserRole)}
                     style={{
-                      backgroundColor: DS.colors.neutral.charcoal, 
-                      border: `1px solid ${DS.colors.neutral.dark}`,
-                      color: DS.colors.text.secondary, 
+                      backgroundColor: DS.colors.primary.accent,  // ✅ DOURADO
+                      color: DS.colors.text.dark,                 // ✅ Texto escuro
+                      border: `2px solid ${DS.colors.primary.accent}`,
                       borderRadius: '8px', 
-                      padding: '6px 10px',
+                      padding: '8px 12px',
                       fontSize: '13px', 
+                      fontWeight: '600',
                       cursor: 'pointer', 
                       flexShrink: 0,
+                      transition: DS.transitions.base,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#E8C895'
+                      e.currentTarget.style.borderColor = '#E8C895'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = DS.colors.primary.accent
+                      e.currentTarget.style.borderColor = DS.colors.primary.accent
                     }}
                   >
                     <option value="user">Usuário</option>
