@@ -1,4 +1,3 @@
-// src/components/Header.tsx
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
@@ -6,19 +5,20 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { signOut } from '@/lib/auth'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
 import BuscaGlobalClient from './BuscaGlobalClient'
 import BuscaGlobalClientMobile from './BuscaGlobalClientMobile'
 import type { User } from '@supabase/supabase-js'
 import type { UserRole } from '@/types'
 
-// ── Tipos internos ────────────────────────────────────────────────────────────
+const DS = DESIGN_SYSTEM
+
 interface ProfileState {
   role: UserRole
   avatar_url: string | null
   full_name: string | null
 }
 
-// ── Nav links ─────────────────────────────────────────────────────────────────
 const NAV_LINKS = [
   { href: '/', label: 'Início' },
   { href: '/categoria/louvor', label: '🎵 Louvor' },
@@ -46,7 +46,6 @@ export default function Header() {
   const [loading, setLoading] = useState(true)
   const [unread, setUnread] = useState(0)
 
-  // ── Busca profile completo ────────────────────────────────────────────────
   async function fetchProfile(userId: string) {
     const { data } = await supabase
       .from('profiles')
@@ -56,7 +55,6 @@ export default function Header() {
     setProfile(data ?? { role: 'user', avatar_url: null, full_name: null })
   }
 
-  // ── Busca notificações não lidas ──────────────────────────────────────────
   async function fetchUnread(userId: string) {
     const { count, error } = await supabase
       .from('notifications')
@@ -69,7 +67,6 @@ export default function Header() {
     }
   }
 
-  // ── Auth listener ─────────────────────────────────────────────────────────
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
       const u = data.session?.user ?? null
@@ -99,7 +96,6 @@ export default function Header() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // ── Realtime notificações ─────────────────────────────────────────────────
   useEffect(() => {
     if (!user) return
 
@@ -122,7 +118,6 @@ export default function Header() {
     }
   }, [user])
 
-  // ── Fecha dropdown ao clicar fora ─────────────────────────────────────────
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
       if (dropRef.current && !dropRef.current.contains(e.target as Node)) {
@@ -133,7 +128,6 @@ export default function Header() {
     return () => document.removeEventListener('mousedown', onClickOutside)
   }, [])
 
-  // ── Computed ──────────────────────────────────────────────────────────────
   const role = profile?.role ?? 'user'
   const isAdmin = role === 'admin' || role === 'superadmin'
   const isSuperadmin = role === 'superadmin'
@@ -144,7 +138,7 @@ export default function Header() {
     ?? 'Usuário'
 
   const ROLE_BADGE = {
-    admin: { label: '⭐ Admin', color: '#B8860B', bg: 'rgba(184,134,11,0.15)', border: 'rgba(184,134,11,0.3)' },
+    admin: { label: '⭐ Admin', color: DS.colors.primary.accent, bg: DS.colors.primary.accent + '15', border: DS.colors.primary.accent + '30' },
     superadmin: { label: '⚡ Superadmin', color: '#A855F7', bg: 'rgba(168,85,247,0.15)', border: 'rgba(168,85,247,0.3)' },
   }
   const badge = isAdmin ? ROLE_BADGE[role as 'admin' | 'superadmin'] : null
@@ -157,7 +151,6 @@ export default function Header() {
     router.refresh()
   }
 
-  // ── Avatar (foto ou inicial) ──────────────────────────────────────────────
   const Avatar = ({ size = 28 }: { size?: number }) => {
     const avatarUrl = profile?.avatar_url
     return avatarUrl ? (
@@ -179,13 +172,13 @@ export default function Header() {
       <div style={{
         width: size,
         height: size,
-        backgroundColor: '#B8860B',
+        backgroundColor: DS.colors.primary.accent,
         borderRadius: '50%',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         fontSize: size * 0.46,
-        fontWeight: '700',
+        fontWeight: DS.typography.fontWeight.extrabold,
         color: 'white',
         flexShrink: 0,
       }}>
@@ -194,11 +187,10 @@ export default function Header() {
     )
   }
 
-  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <header style={{
-      backgroundColor: '#1A1A1A',
-      borderBottom: '2px solid #B8860B',
+      backgroundColor: DS.colors.primary.main,
+      borderBottom: `2px solid ${DS.colors.primary.accent}`,
       position: 'sticky',
       top: 0,
       zIndex: 100,
@@ -229,15 +221,15 @@ export default function Header() {
             style={{
               width: '32px',
               height: '32px',
-              borderRadius: '8px',
+              borderRadius: DS.borderRadius.md,
               objectFit: 'cover',
             }}
           />
           <span
             style={{
               fontSize: '18px',
-              fontWeight: '900',
-              color: '#B8860B',
+              fontWeight: DS.typography.fontWeight.extrabold,
+              color: DS.colors.primary.accent,
               letterSpacing: '2px',
             }}
           >
@@ -259,21 +251,20 @@ export default function Header() {
               key={item.href}
               href={item.href}
               style={{
-                color: '#CCCCCC',
+                color: 'white',
                 textDecoration: 'none',
                 fontSize: '14px',
                 padding: '6px 10px',
-                borderRadius: '8px',
-                transition: 'color 0.15s',
+                borderRadius: DS.borderRadius.md,
+                transition: DS.transitions.base,
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#B8860B')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#CCCCCC')}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = DS.colors.primary.light)}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
               {item.label}
             </Link>
           ))}
 
-          {/* ✅ BUSCA GLOBAL */}
           <BuscaGlobalClient />
         </nav>
 
@@ -286,7 +277,6 @@ export default function Header() {
             gap: '8px',
           }}
         >
-          {/* ✅ NOTIFICAÇÕES DESKTOP - SEMPRE VISÍVEL */}
           {!loading && user && (
             <Link
               href="/notificacoes"
@@ -295,35 +285,35 @@ export default function Header() {
                 alignItems: 'center',
                 gap: '6px',
                 position: 'relative',
-                backgroundColor: unread > 0 ? 'rgba(239,68,68,0.1)' : 'transparent',
-                border: `1.5px solid ${unread > 0 ? '#EF4444' : '#333333'}`,
-                borderRadius: '8px',
+                backgroundColor: unread > 0 ? 'rgba(200, 76, 60, 0.2)' : 'transparent',
+                border: `1.5px solid ${unread > 0 ? '#C84C3C' : 'rgba(255,255,255,0.3)'}`,
+                borderRadius: DS.borderRadius.md,
                 padding: '8px 12px',
                 textDecoration: 'none',
-                color: unread > 0 ? '#EF4444' : '#CCCCCC',
+                color: unread > 0 ? '#FFB3B0' : 'rgba(255,255,255,0.7)',
                 fontSize: '14px',
                 fontWeight: unread > 0 ? '600' : '400',
-                transition: 'all 0.2s',
+                transition: DS.transitions.base,
                 cursor: 'pointer',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#B8860B'
-                e.currentTarget.style.color = '#B8860B'
+                e.currentTarget.style.borderColor = DS.colors.primary.accent
+                e.currentTarget.style.color = DS.colors.primary.accent
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = unread > 0 ? '#EF4444' : '#333333'
-                e.currentTarget.style.color = unread > 0 ? '#EF4444' : '#CCCCCC'
+                e.currentTarget.style.borderColor = unread > 0 ? '#C84C3C' : 'rgba(255,255,255,0.3)'
+                e.currentTarget.style.color = unread > 0 ? '#FFB3B0' : 'rgba(255,255,255,0.7)'
               }}
             >
               🔔
               {unread > 0 && (
                 <span
                   style={{
-                    backgroundColor: '#EF4444',
+                    backgroundColor: '#C84C3C',
                     color: 'white',
                     fontSize: '10px',
-                    fontWeight: '700',
-                    borderRadius: '9999px',
+                    fontWeight: DS.typography.fontWeight.extrabold,
+                    borderRadius: DS.borderRadius.full,
                     minWidth: '18px',
                     height: '18px',
                     display: 'flex',
@@ -342,8 +332,8 @@ export default function Header() {
               style={{
                 width: '120px',
                 height: '36px',
-                backgroundColor: '#2D2D2D',
-                borderRadius: '9999px',
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                borderRadius: DS.borderRadius.full,
                 opacity: 0.5,
               }}
             />
@@ -354,56 +344,54 @@ export default function Header() {
                 position: 'relative',
               }}
             >
-              {/* Botão avatar */}
               <button
                 onClick={() => setUserMenu(!userMenu)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  backgroundColor: 'transparent',
-                  border: '1.5px solid #B8860B',
-                  borderRadius: '9999px',
+                  backgroundColor: DS.colors.primary.accent,
+                  border: `1.5px solid ${DS.colors.primary.accent}`,
+                  borderRadius: DS.borderRadius.full,
                   padding: '5px 12px 5px 5px',
                   cursor: 'pointer',
-                  color: '#CCCCCC',
+                  color: DS.colors.text.dark,
                   fontSize: '14px',
                   position: 'relative',
-                  transition: 'background-color 0.2s',
+                  transition: DS.transitions.base,
+                  fontWeight: '600',
                 }}
                 onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = 'rgba(184,134,11,0.1)')
+                  (e.currentTarget.style.backgroundColor = '#E8C895')
                 }
                 onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = 'transparent')
+                  (e.currentTarget.style.backgroundColor = DS.colors.primary.accent)
                 }
               >
                 <Avatar size={28} />
                 {displayName}
-                <span style={{ fontSize: '10px', color: '#666' }}>▼</span>
+                <span style={{ fontSize: '10px', color: DS.colors.text.dark }}>▼</span>
               </button>
 
-              {/* Dropdown */}
               {userMenu && (
                 <div
                   style={{
                     position: 'absolute',
                     top: 'calc(100% + 8px)',
                     right: 0,
-                    backgroundColor: '#222222',
-                    border: '1px solid #333333',
-                    borderRadius: '14px',
+                    backgroundColor: DS.colors.bg.secondary,
+                    border: `1px solid ${DS.colors.neutral.light}`,
+                    borderRadius: DS.borderRadius.xl,
                     padding: '8px',
-                    minWidth: '210px',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                    minWidth: '200px',
+                    boxShadow: DS.shadows['2xl'],
                     zIndex: 200,
                   }}
                 >
-                  {/* Cabeçalho dropdown */}
                   <div
                     style={{
-                      padding: '10px 12px 12px',
-                      borderBottom: '1px solid #333333',
+                      padding: '8px 12px 12px',
+                      borderBottom: `1px solid ${DS.colors.neutral.light}`,
                       marginBottom: '4px',
                     }}
                   >
@@ -418,16 +406,16 @@ export default function Header() {
                       <div>
                         <div
                           style={{
-                            color: '#FFFFFF',
+                            color: DS.colors.text.dark,
                             fontSize: '13px',
-                            fontWeight: '700',
+                            fontWeight: DS.typography.fontWeight.bold,
                           }}
                         >
                           {displayName}
                         </div>
                         <div
                           style={{
-                            color: '#555',
+                            color: DS.colors.text.secondary,
                             fontSize: '11px',
                           }}
                         >
@@ -443,9 +431,9 @@ export default function Header() {
                           backgroundColor: badge.bg,
                           color: badge.color,
                           fontSize: '10px',
-                          fontWeight: '700',
+                          fontWeight: DS.typography.fontWeight.extrabold,
                           padding: '2px 10px',
-                          borderRadius: '9999px',
+                          borderRadius: DS.borderRadius.full,
                           border: `1px solid ${badge.border}`,
                           letterSpacing: '0.4px',
                         }}
@@ -455,74 +443,62 @@ export default function Header() {
                     )}
                   </div>
 
-                  {/* Links usuário */}
                   {USER_LINKS.map((item) => (
                     <DropItem
                       key={item.href}
                       href={item.href}
+                      label={item.label}
                       onClick={() => setUserMenu(false)}
-                    >
-                      {item.label}
-                    </DropItem>
+                    />
                   ))}
 
-                  {/* Links admin */}
                   {isAdmin && (
                     <>
-                      <div
-                        style={{
-                          height: '1px',
-                          backgroundColor: '#333',
-                          margin: '6px 0',
-                        }}
-                      />
+                      <div style={{ height: '1px', backgroundColor: DS.colors.neutral.light, margin: '6px 0' }} />
                       <DropItem
                         href="/admin"
+                        label="🛡️ Painel de Curadoria"
                         onClick={() => setUserMenu(false)}
                         highlight
-                      >
-                        🛡️ Painel de Curadoria
-                      </DropItem>
+                      />
                       {isSuperadmin && (
                         <DropItem
                           href="/admin/usuarios"
+                          label="⚡ Gerenciar Usuários"
                           onClick={() => setUserMenu(false)}
                           highlight
                           color="#A855F7"
-                        >
-                          ⚡ Gerenciar Usuários
-                        </DropItem>
+                        />
                       )}
                     </>
                   )}
 
-                  {/* Logout */}
-                  <div
-                    style={{
-                      height: '1px',
-                      backgroundColor: '#333',
-                      margin: '6px 0',
-                    }}
-                  />
+                  {unread > 0 && (
+                    <DropItem
+                      href="/notificacoes"
+                      label={`🔔 Notificações (${unread})`}
+                      onClick={() => setUserMenu(false)}
+                    />
+                  )}
+
+                  <div style={{ height: '1px', backgroundColor: DS.colors.neutral.light, margin: '6px 0' }} />
                   <button
                     onClick={handleSignOut}
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
+                      display: 'block',
                       width: '100%',
                       textAlign: 'left',
                       backgroundColor: 'transparent',
                       border: 'none',
-                      color: '#EF4444',
+                      color: '#C84C3C',
                       fontSize: '13px',
                       padding: '8px 12px',
-                      borderRadius: '8px',
+                      borderRadius: DS.borderRadius.md,
                       cursor: 'pointer',
-                      transition: 'background-color 0.15s',
+                      transition: DS.transitions.base,
                     }}
                     onMouseEnter={(e) =>
-                      (e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.1)')
+                      (e.currentTarget.style.backgroundColor = '#C84C3C' + '15')
                     }
                     onMouseLeave={(e) =>
                       (e.currentTarget.style.backgroundColor = 'transparent')
@@ -538,7 +514,7 @@ export default function Header() {
               <Link
                 href="/auth/login"
                 style={{
-                  color: '#CCCCCC',
+                  color: 'white',
                   textDecoration: 'none',
                   fontSize: '14px',
                   padding: '8px 12px',
@@ -549,13 +525,13 @@ export default function Header() {
               <Link
                 href="/auth/signup"
                 style={{
-                  backgroundColor: '#B8860B',
-                  color: 'white',
+                  backgroundColor: DS.colors.primary.accent,
+                  color: DS.colors.text.dark,
                   textDecoration: 'none',
                   fontSize: '14px',
-                  fontWeight: '600',
+                  fontWeight: DS.typography.fontWeight.semibold,
                   padding: '8px 16px',
-                  borderRadius: '8px',
+                  borderRadius: DS.borderRadius.md,
                 }}
               >
                 Começar
@@ -571,37 +547,14 @@ export default function Header() {
           style={{
             backgroundColor: 'transparent',
             border: 'none',
-            color: '#B8860B',
+            color: DS.colors.primary.accent,
             fontSize: '24px',
             cursor: 'pointer',
             padding: '4px',
             display: 'none',
-            position: 'relative',
           }}
         >
           {menuOpen ? '✕' : '☰'}
-          {/* Badge mobile */}
-          {unread > 0 && !menuOpen && (
-            <span
-              style={{
-                position: 'absolute',
-                top: '0',
-                right: '0',
-                backgroundColor: '#EF4444',
-                color: 'white',
-                fontSize: '9px',
-                fontWeight: '700',
-                borderRadius: '9999px',
-                minWidth: '14px',
-                height: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              {unread > 9 ? '9+' : unread}
-            </span>
-          )}
         </button>
       </div>
 
@@ -613,15 +566,14 @@ export default function Header() {
             top: '60px',
             left: 0,
             right: 0,
-            backgroundColor: '#222222',
-            borderTop: '1px solid #333333',
+            backgroundColor: DS.colors.bg.secondary,
+            borderTop: `1px solid ${DS.colors.neutral.light}`,
             padding: '16px',
             zIndex: 99,
             maxHeight: 'calc(100vh - 60px)',
             overflowY: 'auto',
           }}
         >
-          {/* Nav links mobile */}
           {NAV_LINKS.map((item) => (
             <Link
               key={item.href}
@@ -629,20 +581,22 @@ export default function Header() {
               onClick={() => setMenuOpen(false)}
               style={{
                 display: 'block',
-                color: '#CCCCCC',
+                color: DS.colors.text.secondary,
                 textDecoration: 'none',
                 fontSize: '16px',
                 padding: '12px 0',
-                borderBottom: '1px solid #333333',
+                borderBottom: `1px solid ${DS.colors.neutral.light}`,
+                transition: DS.transitions.base,
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = DS.colors.primary.main)}
+              onMouseLeave={(e) => (e.currentTarget.style.color = DS.colors.text.secondary)}
             >
               {item.label}
             </Link>
           ))}
 
-          {/* ✅ BUSCA MOBILE */}
-          <div style={{ borderBottom: '1px solid #333333', margin: '12px 0', paddingBottom: '12px' }}>
-            <p style={{ color: '#CCCCCC', fontSize: '12px', margin: '0 0 8px 0', fontWeight: '600' }}>
+          <div style={{ borderBottom: `1px solid ${DS.colors.neutral.light}`, margin: '12px 0', paddingBottom: '12px' }}>
+            <p style={{ color: DS.colors.text.secondary, fontSize: '12px', margin: '0 0 8px 0', fontWeight: '600' }}>
               🔍 Buscar
             </p>
             <BuscaGlobalClientMobile />
@@ -651,14 +605,13 @@ export default function Header() {
           <div style={{ marginTop: '16px' }}>
             {user ? (
               <>
-                {/* Perfil mobile */}
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '12px',
                     padding: '12px 0',
-                    borderBottom: '1px solid #333333',
+                    borderBottom: `1px solid ${DS.colors.neutral.light}`,
                     marginBottom: '12px',
                   }}
                 >
@@ -666,42 +619,24 @@ export default function Header() {
                   <div>
                     <div
                       style={{
-                        color: '#FFF',
+                        color: DS.colors.text.dark,
                         fontSize: '14px',
-                        fontWeight: '700',
+                        fontWeight: DS.typography.fontWeight.bold,
                       }}
                     >
                       {displayName}
                     </div>
                     <div
                       style={{
-                        color: '#555',
+                        color: DS.colors.text.secondary,
                         fontSize: '11px',
                       }}
                     >
                       {user.email}
                     </div>
-                    {badge && (
-                      <span
-                        style={{
-                          display: 'inline-block',
-                          marginTop: '4px',
-                          backgroundColor: badge.bg,
-                          color: badge.color,
-                          fontSize: '10px',
-                          fontWeight: '700',
-                          padding: '2px 8px',
-                          borderRadius: '9999px',
-                          border: `1px solid ${badge.border}`,
-                        }}
-                      >
-                        {badge.label}
-                      </span>
-                    )}
                   </div>
                 </div>
 
-                {/* Links usuário mobile */}
                 {USER_LINKS.map((item) => (
                   <Link
                     key={item.href}
@@ -709,18 +644,20 @@ export default function Header() {
                     onClick={() => setMenuOpen(false)}
                     style={{
                       display: 'block',
-                      color: '#CCCCCC',
+                      color: DS.colors.text.secondary,
                       textDecoration: 'none',
                       fontSize: '15px',
                       padding: '10px 0',
-                      borderBottom: '1px solid #2a2a2a',
+                      borderBottom: `1px solid ${DS.colors.neutral.light}`,
+                      transition: DS.transitions.base,
                     }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = DS.colors.primary.main)}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = DS.colors.text.secondary)}
                   >
                     {item.label}
                   </Link>
                 ))}
 
-                {/* ✅ NOTIFICAÇÕES MOBILE - SEMPRE VISÍVEL */}
                 <Link
                   href="/notificacoes"
                   onClick={() => setMenuOpen(false)}
@@ -728,11 +665,11 @@ export default function Header() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',
-                    color: unread > 0 ? '#EF4444' : '#CCCCCC',
+                    color: unread > 0 ? '#C84C3C' : DS.colors.text.secondary,
                     textDecoration: 'none',
                     fontSize: '15px',
                     padding: '10px 0',
-                    borderBottom: '1px solid #2a2a2a',
+                    borderBottom: `1px solid ${DS.colors.neutral.light}`,
                     fontWeight: unread > 0 ? '600' : '500',
                   }}
                 >
@@ -740,11 +677,11 @@ export default function Header() {
                   {unread > 0 && (
                     <span
                       style={{
-                        backgroundColor: '#EF4444',
+                        backgroundColor: '#C84C3C',
                         color: 'white',
                         fontSize: '10px',
-                        fontWeight: '700',
-                        borderRadius: '9999px',
+                        fontWeight: DS.typography.fontWeight.extrabold,
+                        borderRadius: DS.borderRadius.full,
                         minWidth: '16px',
                         height: '16px',
                         display: 'flex',
@@ -757,13 +694,12 @@ export default function Header() {
                   )}
                 </Link>
 
-                {/* Admin mobile */}
                 {isAdmin && (
                   <>
                     <div
                       style={{
                         height: '1px',
-                        backgroundColor: '#333',
+                        backgroundColor: DS.colors.neutral.light,
                         margin: '8px 0',
                       }}
                     />
@@ -772,12 +708,12 @@ export default function Header() {
                       onClick={() => setMenuOpen(false)}
                       style={{
                         display: 'block',
-                        color: '#B8860B',
+                        color: DS.colors.primary.main,
                         textDecoration: 'none',
                         fontSize: '15px',
                         padding: '10px 0',
-                        borderBottom: '1px solid #2a2a2a',
-                        fontWeight: '600',
+                        borderBottom: `1px solid ${DS.colors.neutral.light}`,
+                        fontWeight: DS.typography.fontWeight.semibold,
                       }}
                     >
                       🛡️ Painel de Curadoria
@@ -792,8 +728,8 @@ export default function Header() {
                           textDecoration: 'none',
                           fontSize: '15px',
                           padding: '10px 0',
-                          borderBottom: '1px solid #2a2a2a',
-                          fontWeight: '600',
+                          borderBottom: `1px solid ${DS.colors.neutral.light}`,
+                          fontWeight: DS.typography.fontWeight.semibold,
                         }}
                       >
                         ⚡ Gerenciar Usuários
@@ -802,20 +738,20 @@ export default function Header() {
                   </>
                 )}
 
-                {/* Sair mobile */}
                 <button
                   onClick={handleSignOut}
                   style={{
                     marginTop: '12px',
                     width: '100%',
-                    backgroundColor: 'rgba(239,68,68,0.1)',
-                    color: '#EF4444',
-                    border: '1px solid rgba(239,68,68,0.3)',
-                    borderRadius: '8px',
+                    backgroundColor: '#C84C3C' + '15',
+                    color: '#C84C3C',
+                    border: `1px solid #C84C3C30`,
+                    borderRadius: DS.borderRadius.md,
                     padding: '12px',
                     fontSize: '15px',
-                    fontWeight: '600',
+                    fontWeight: DS.typography.fontWeight.semibold,
                     cursor: 'pointer',
+                    transition: DS.transitions.base,
                   }}
                 >
                   🚪 Sair
@@ -829,11 +765,11 @@ export default function Header() {
                   style={{
                     flex: 1,
                     textAlign: 'center',
-                    color: '#CCCCCC',
+                    color: DS.colors.text.secondary,
                     textDecoration: 'none',
                     padding: '12px',
-                    border: '1px solid #444444',
-                    borderRadius: '8px',
+                    border: `1px solid ${DS.colors.neutral.light}`,
+                    borderRadius: DS.borderRadius.md,
                     fontSize: '15px',
                   }}
                 >
@@ -845,13 +781,13 @@ export default function Header() {
                   style={{
                     flex: 1,
                     textAlign: 'center',
-                    backgroundColor: '#B8860B',
-                    color: 'white',
+                    backgroundColor: DS.colors.primary.accent,
+                    color: DS.colors.text.dark,
                     textDecoration: 'none',
                     padding: '12px',
-                    borderRadius: '8px',
+                    borderRadius: DS.borderRadius.md,
                     fontSize: '15px',
-                    fontWeight: '600',
+                    fontWeight: DS.typography.fontWeight.semibold,
                   }}
                 >
                   Começar
@@ -872,17 +808,16 @@ export default function Header() {
   )
 }
 
-// ── Subcomponente DropItem ────────────────────────────────────────────────────
 function DropItem({
   href,
+  label,
   onClick,
-  children,
   highlight = false,
-  color = '#B8860B',
+  color = DS.colors.primary.main,
 }: {
   href: string
+  label: string
   onClick: () => void
-  children: React.ReactNode
   highlight?: boolean
   color?: string
 }) {
@@ -892,21 +827,21 @@ function DropItem({
       onClick={onClick}
       style={{
         display: 'block',
+        color: highlight ? color : DS.colors.text.secondary,
         textDecoration: 'none',
-        color: highlight ? color : '#CCCCCC',
         fontSize: '13px',
         padding: '8px 12px',
-        borderRadius: '8px',
-        transition: 'background-color 0.15s',
+        borderRadius: DS.borderRadius.md,
+        transition: DS.transitions.base,
       }}
       onMouseEnter={(e) =>
         (e.currentTarget.style.backgroundColor = highlight
           ? `${color}22`
-          : '#333333')
+          : DS.colors.neutral.charcoal)
       }
       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
     >
-      {children}
+      {label}
     </Link>
   )
 }

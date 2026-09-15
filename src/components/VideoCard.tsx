@@ -1,6 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
+
+const DS = DESIGN_SYSTEM
 
 interface VideoCardProps {
   id: string
@@ -29,30 +32,32 @@ export default function VideoCard({
     <Link href={`/content/${id}`} style={{ textDecoration: 'none' }}>
       <div
         style={{
-          backgroundColor: '#F5F3F0',
-          borderRadius: '12px',
+          backgroundColor: DS.colors.bg.secondary,
+          borderRadius: DS.borderRadius.lg,
           overflow: 'hidden',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-          transition: 'all 0.3s ease',
+          boxShadow: DS.shadows.sm,
+          transition: DS.transitions.base,
           cursor: 'pointer',
-          border: '1px solid #E8E3DE',
+          border: `1px solid ${DS.colors.neutral.light}`,
           display: 'flex',
           flexDirection: 'column',
           height: '100%',
         }}
         onMouseEnter={(e) => {
           ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'
-          ;(e.currentTarget as HTMLElement).style.boxShadow = '0 12px 24px rgba(0,0,0,0.12)'
+          ;(e.currentTarget as HTMLElement).style.boxShadow = DS.shadows.md
+          ;(e.currentTarget as HTMLElement).style.borderColor = DS.colors.primary.main
         }}
         onMouseLeave={(e) => {
           ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
-          ;(e.currentTarget as HTMLElement).style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)'
+          ;(e.currentTarget as HTMLElement).style.boxShadow = DS.shadows.sm
+          ;(e.currentTarget as HTMLElement).style.borderColor = DS.colors.neutral.light
         }}
       >
         <div style={{
           width: '100%',
           aspectRatio: '16/9',
-          backgroundColor: thumbnail ? 'transparent' : '#EFEFEB',
+          backgroundColor: thumbnail ? 'transparent' : DS.colors.neutral.medium,
           backgroundImage: thumbnail ? `url(${thumbnail})` : 'none',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -72,9 +77,9 @@ export default function VideoCard({
             backgroundColor: 'rgba(0,0,0,0.7)',
             color: 'white',
             padding: '4px 8px',
-            borderRadius: '4px',
+            borderRadius: DS.borderRadius.sm,
             fontSize: '12px',
-            fontWeight: '600',
+            fontWeight: DS.typography.fontWeight.semibold,
           }}>
             {duration}
           </div>
@@ -84,12 +89,12 @@ export default function VideoCard({
               position: 'absolute',
               top: '8px',
               left: '8px',
-              backgroundColor: '#B8860B',
+              backgroundColor: DS.colors.primary.main,
               color: 'white',
               padding: '4px 10px',
-              borderRadius: '9999px',
+              borderRadius: DS.borderRadius.full,
               fontSize: '11px',
-              fontWeight: '700',
+              fontWeight: DS.typography.fontWeight.extrabold,
             }}>
               ✨ Destaque
             </div>
@@ -99,12 +104,12 @@ export default function VideoCard({
               position: 'absolute',
               top: '8px',
               left: '8px',
-              backgroundColor: '#4CAF50',
+              backgroundColor: DS.colors.secondary.success,
               color: 'white',
               padding: '4px 10px',
-              borderRadius: '9999px',
+              borderRadius: DS.borderRadius.full,
               fontSize: '11px',
-              fontWeight: '700',
+              fontWeight: DS.typography.fontWeight.extrabold,
             }}>
               Novo
             </div>
@@ -117,14 +122,14 @@ export default function VideoCard({
             transform: 'translate(-50%, -50%)',
             width: '48px',
             height: '48px',
-            backgroundColor: 'rgba(184,134,11,0.9)',
+            backgroundColor: DS.colors.primary.main + 'E6',
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '18px',
             opacity: 0.8,
-            transition: 'opacity 0.3s',
+            transition: DS.transitions.base,
           }}>
             ▶
           </div>
@@ -133,7 +138,7 @@ export default function VideoCard({
         <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
           <span style={{
             fontSize: '11px',
-            fontWeight: '600',
+            fontWeight: DS.typography.fontWeight.semibold,
             color: categoryColor,
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
@@ -144,8 +149,8 @@ export default function VideoCard({
 
           <h3 style={{
             fontSize: '15px',
-            fontWeight: '700',
-            color: '#222222',
+            fontWeight: DS.typography.fontWeight.bold,
+            color: DS.colors.text.dark,
             margin: '0 0 8px 0',
             lineHeight: 1.4,
             display: '-webkit-box',
@@ -158,8 +163,8 @@ export default function VideoCard({
 
           <span style={{
             fontSize: '13px',
-            color: '#666666',
-            fontWeight: '500',
+            color: DS.colors.text.secondary,
+            fontWeight: DS.typography.fontWeight.medium,
             marginTop: 'auto',
           }}>
             {creator}

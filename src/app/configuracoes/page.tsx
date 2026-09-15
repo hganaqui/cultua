@@ -3,8 +3,11 @@ import { redirect } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ConfiguracoesClient from './ConfiguracoesClient'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
 import type { Metadata } from 'next'
 import type { Profile } from '@/types'
+
+const DS = DESIGN_SYSTEM
 
 export const metadata: Metadata = { title: 'Configurações — CULTUA' }
 export const revalidate = 0
@@ -21,7 +24,6 @@ export default async function ConfiguracoesPage() {
     .eq('id', user.id)
     .single()
 
-
   const safeProfile: Profile = profile ?? {
     id: user.id,
     full_name: user.email?.split('@')[0] || 'Usuário',
@@ -33,7 +35,7 @@ export default async function ConfiguracoesPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#111111' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: DS.colors.bg.primary }}>
       <Header />
       <ConfiguracoesClient
         profile={safeProfile}

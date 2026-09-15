@@ -1,10 +1,12 @@
-// src/components/BuscaGlobalClientMobile.tsx
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import type { Content } from '@/types'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
+import type { Tag } from '@/types'
+
+const DS = DESIGN_SYSTEM
 
 interface SearchResult {
   id: string
@@ -13,6 +15,7 @@ interface SearchResult {
   url_thumb: string | null
   duration: string | null
   category_name: string
+  tags: Tag[]
 }
 
 export default function BuscaGlobalClientMobile() {
@@ -23,7 +26,6 @@ export default function BuscaGlobalClientMobile() {
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // ── Fechamodal ─────────────────────────────────
   useEffect(() => {
     if (!isOpen) return
 
@@ -57,7 +59,8 @@ export default function BuscaGlobalClientMobile() {
           type,
           url_thumb,
           duration,
-          category:categories(name)
+          category:categories(name),
+          tags:content_tags(tag:tags(*))
         `
         )
         .eq('status', 'approved')
@@ -68,16 +71,28 @@ export default function BuscaGlobalClientMobile() {
 
       if (error) throw error
 
-      const formatted = (data as any[]).map((item) => ({
-        id: item.id,
-        title: item.title,
-        type: item.type,
-        url_thumb: item.url_thumb,
-        duration: item.duration,
-        category_name: Array.isArray(item.category)
-          ? item.category[0]?.name ?? 'Sem categoria'
-          : item.category?.name ?? 'Sem categoria',
-      }))
+      const formatted = (data as any[]).map((item) => {
+        const tagsList: Tag[] = []
+        if (item.tags && Array.isArray(item.tags)) {
+          item.tags.forEach((ct: any) => {
+            if (ct.tag) {
+              tagsList.push(ct.tag)
+            }
+          })
+        }
+
+        return {
+          id: item.id,
+          title: item.title,
+          type: item.type,
+          url_thumb: item.url_thumb,
+          duration: item.duration,
+          category_name: Array.isArray(item.category)
+            ? item.category[0]?.name ?? 'Sem categoria'
+            : item.category?.name ?? 'Sem categoria',
+          tags: tagsList,
+        }
+      })
 
       setResults(formatted)
     } catch (err) {
@@ -108,7 +123,6 @@ export default function BuscaGlobalClientMobile() {
 
   return (
     <>
-      {/* Botão buscar mobile */}
       <button
         onClick={() => {
           setIsOpen(true)
@@ -117,7 +131,7 @@ export default function BuscaGlobalClientMobile() {
         style={{
           backgroundColor: 'transparent',
           border: 'none',
-          color: '#B8860B',
+          color: DS.colors.primary.main,
           fontSize: '18px',
           cursor: 'pointer',
           padding: '8px',
@@ -126,7 +140,6 @@ export default function BuscaGlobalClientMobile() {
         🔍
       </button>
 
-      {/* Modal busca mobile */}
       {isOpen && (
         <div
           style={{
@@ -144,9 +157,9 @@ export default function BuscaGlobalClientMobile() {
           <div
             ref={containerRef}
             style={{
-              backgroundColor: '#1A1A1A',
+              backgroundColor: DS.colors.bg.secondary,
               padding: '16px',
-              borderBottom: '1px solid #333333',
+              borderBottom: `1px solid ${DS.colors.neutral.light}`,
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
@@ -160,13 +173,13 @@ export default function BuscaGlobalClientMobile() {
               onChange={(e) => handleSearch(e.target.value)}
               style={{
                 flex: 1,
-                backgroundColor: '#2D2D2D',
-                color: '#FFFFFF',
-                border: '1px solid #333333',
+                backgroundColor: '#FFFFFF',
+                color: DS.colors.text.primary,
+                border: `1px solid ${DS.colors.neutral.light}`,
                 outline: 'none',
                 fontSize: '16px',
                 padding: '8px 12px',
-                borderRadius: '6px',
+                borderRadius: DS.borderRadius.md,
               }}
             />
             <button
@@ -178,7 +191,7 @@ export default function BuscaGlobalClientMobile() {
               style={{
                 backgroundColor: 'transparent',
                 border: 'none',
-                color: '#EF4444',
+                color: DS.colors.secondary.error,
                 fontSize: '18px',
                 cursor: 'pointer',
               }}
@@ -187,7 +200,6 @@ export default function BuscaGlobalClientMobile() {
             </button>
           </div>
 
-          {/* Resultados mobile */}
           <div
             style={{
               flex: 1,
@@ -196,7 +208,7 @@ export default function BuscaGlobalClientMobile() {
             }}
           >
             {loading && (
-              <div style={{ padding: '20px', textAlign: 'center', color: '#CCCCCC' }}>
+              <div style={{ padding: '20px', textAlign: 'center', color: DS.colors.text.secondary }}>
                 ⏳ Buscando...
               </div>
             )}
@@ -206,7 +218,7 @@ export default function BuscaGlobalClientMobile() {
                 style={{
                   padding: '20px',
                   textAlign: 'center',
-                  color: '#CCCCCC',
+                  color: DS.colors.text.secondary,
                 }}
               >
                 Nenhum resultado para "{query}"
@@ -218,7 +230,7 @@ export default function BuscaGlobalClientMobile() {
                 style={{
                   padding: '20px',
                   textAlign: 'center',
-                  color: '#666666',
+                  color: DS.colors.text.secondary,
                 }}
               >
                 <p style={{ margin: 0 }}>Digite para buscar</p>
@@ -234,93 +246,139 @@ export default function BuscaGlobalClientMobile() {
                   onClick={() => setIsOpen(false)}
                   style={{
                     display: 'flex',
-                    gap: '12px',
+                    flexDirection: 'column',
+                    gap: '8px',
                     padding: '12px',
-                    borderBottom: '1px solid #2a2a2a',
+                    borderBottom: `1px solid ${DS.colors.neutral.light}`,
                     backgroundColor: 'transparent',
                     cursor: 'pointer',
                     textDecoration: 'none',
-                    transition: 'background-color 0.15s ease',
+                    transition: DS.transitions.base,
                   }}
                   onMouseOver={(e) => {
-                    e.currentTarget.style.backgroundColor = '#2a2a2a'
+                    e.currentTarget.style.backgroundColor = DS.colors.neutral.charcoal + '40'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent'
                   }}
                 >
-                  {result.url_thumb ? (
-                    <img
-                      src={result.url_thumb}
-                      alt={result.title}
-                      style={{
-                        width: '48px',
-                        height: '48px',
-                        borderRadius: '6px',
-                        objectFit: 'cover',
-                        flexShrink: 0,
-                      }}
-                    />
-                  ) : (
-                    <div
-                      style={{
-                        width: '48px',
-                        height: '48px',
-                        borderRadius: '6px',
-                        backgroundColor: '#333333',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '24px',
-                        flexShrink: 0,
-                      }}
-                    >
-                      {getTypeIcon(result.type)}
-                    </div>
-                  )}
-
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h4
-                      style={{
-                        color: '#FFFFFF',
-                        margin: '0 0 4px 0',
-                        fontSize: '14px',
-                        fontWeight: 'bold',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {result.title}
-                    </h4>
-                    <div
-                      style={{
-                        display: 'flex',
-                        gap: '8px',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                      }}
-                    >
-                      <span
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    {result.url_thumb ? (
+                      <img
+                        src={result.url_thumb}
+                        alt={result.title}
                         style={{
-                          fontSize: '11px',
-                          backgroundColor: '#333333',
-                          color: '#CCCCCC',
-                          padding: '2px 6px',
-                          borderRadius: '3px',
+                          width: '48px',
+                          height: '48px',
+                          borderRadius: DS.borderRadius.md,
+                          objectFit: 'cover',
+                          flexShrink: 0,
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: '48px',
+                          height: '48px',
+                          borderRadius: DS.borderRadius.md,
+                          backgroundColor: DS.colors.neutral.medium,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '24px',
+                          flexShrink: 0,
                         }}
                       >
-                        {result.category_name}
-                      </span>
-                      {result.duration && (
+                        {getTypeIcon(result.type)}
+                      </div>
+                    )}
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <h4
+                        style={{
+                          color: DS.colors.text.dark,
+                          margin: '0 0 4px 0',
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {result.title}
+                      </h4>
+                      <div
+                        style={{
+                          display: 'flex',
+                          gap: '8px',
+                          alignItems: 'center',
+                          flexWrap: 'wrap',
+                        }}
+                      >
                         <span
                           style={{
                             fontSize: '11px',
-                            color: '#666666',
+                            backgroundColor: DS.colors.neutral.medium,
+                            color: DS.colors.text.secondary,
+                            padding: '2px 6px',
+                            borderRadius: DS.borderRadius.sm,
                           }}
                         >
-                          {result.duration}
+                          {result.category_name}
+                        </span>
+                        {result.duration && (
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              color: DS.colors.text.secondary,
+                            }}
+                          >
+                            {result.duration}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {result.tags.length > 0 && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        gap: '6px',
+                        flexWrap: 'wrap',
+                        paddingLeft: '60px',
+                      }}
+                    >
+                      {result.tags.slice(0, 2).map(tag => (
+                        <span
+                          key={tag.id}
+                          style={{
+                            fontSize: '10px',
+                            backgroundColor: tag.color + '30',
+                            color: tag.color,
+                            padding: '2px 6px',
+                            borderRadius: DS.borderRadius.sm,
+                            fontWeight: '600',
+                          }}
+                        >
+                          {tag.icon} {tag.name}
+                        </span>
+                      ))}
+                      {result.tags.length > 2 && (
+                        <span
+                          style={{
+                            fontSize: '10px',
+                            backgroundColor: DS.colors.neutral.medium,
+                            color: DS.colors.text.secondary,
+                            padding: '2px 6px',
+                            borderRadius: DS.borderRadius.sm,
+                          }}
+                        >
+                          +{result.tags.length - 2}
                         </span>
                       )}
                     </div>
-                  </div>
+                  )}
                 </Link>
               ))}
           </div>

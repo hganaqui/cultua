@@ -1,51 +1,112 @@
-// src/app/not-found.tsx
 'use client'
 
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
+
+const DS = DESIGN_SYSTEM
 
 export default function NotFound() {
   const [hoveredBtn, setHoveredBtn] = useState<'home' | 'explorar' | null>(null)
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-white flex flex-col items-center justify-center px-6 py-10 text-center font-sans">
+    <main style={{
+      minHeight: '100vh',
+      backgroundColor: DS.colors.bg.primary,
+      color: DS.colors.text.light,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '24px',
+      textAlign: 'center',
+      fontFamily: DS.typography.fontFamily.main,
+    }}>
       {/* Imagem 404 */}
-      <div className="mb-8 max-w-xs">
+      <div style={{ marginBottom: '32px', maxWidth: '240px' }}>
         <Image
           src="/404-not-found.jpg"
           alt="Conteúdo não encontrado"
           width={240}
           height={240}
           priority
-          className="w-full h-auto rounded-2xl"
+          style={{
+            width: '100%',
+            height: 'auto',
+            borderRadius: '16px',
+          }}
         />
       </div>
 
+      {/* Heading */}
+      <h1 style={{
+        fontSize: DS.typography.fontSize['4xl'],
+        fontWeight: DS.typography.fontWeight.extrabold,
+        color: DS.colors.text.dark,
+        marginBottom: DS.spacing.lg,
+      }}>
+        Página não encontrada
+      </h1>
+
       {/* Subtítulo */}
-      <p className="text-gray-400 text-base max-w-sm leading-relaxed mb-10">
-        O conteúdo que você procura pode ter sido removido ou o endereço está incorreto
-        ou pagina inexistente.
+      <p style={{
+        color: DS.colors.text.secondary,
+        fontSize: DS.typography.fontSize.base,
+        maxWidth: '448px',
+        lineHeight: DS.typography.lineHeight.relaxed,
+        marginBottom: '40px',
+      }}>
+        O conteúdo que você procura pode ter sido removido ou o endereço está incorreto ou página inexistente.
       </p>
 
       {/* Versículo */}
-      <blockquote className="border-l-4 border-amber-500 pl-5 mb-12 max-w-md text-left">
-        <p className="text-gray-300 italic mb-3 text-sm leading-relaxed">
-          "Porque eu sei os planos que tenho para vocês, planos de fazê-los prosperar e não de
-          causar dano, planos de dar a vocês esperança e um futuro."
+      <blockquote style={{
+        borderLeft: `4px solid ${DS.colors.primary.main}`,
+        paddingLeft: DS.spacing.lg,
+        marginBottom: '48px',
+        maxWidth: '448px',
+        textAlign: 'left',
+      }}>
+        <p style={{
+          color: DS.colors.text.secondary,
+          fontStyle: 'italic',
+          marginBottom: DS.spacing.md,
+          fontSize: DS.typography.fontSize.sm,
+          lineHeight: DS.typography.lineHeight.relaxed,
+        }}>
+          "Porque eu sei os planos que tenho para vocês, planos de fazê-los prosperar e não de causar dano, planos de dar a vocês esperança e um futuro."
         </p>
-        <cite className="text-amber-500 text-xs font-bold">Jeremias 29:11</cite>
+        <cite style={{
+          color: DS.colors.primary.main,
+          fontSize: DS.typography.fontSize.xs,
+          fontWeight: DS.typography.fontWeight.bold,
+          fontStyle: 'normal',
+        }}>
+          Jeremias 29:11
+        </cite>
       </blockquote>
 
       {/* Ações */}
-      <div className="flex gap-4 flex-wrap justify-center">
+      <div style={{
+        display: 'flex',
+        gap: DS.spacing.lg,
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+      }}>
         <Link
           href="/"
-          className={`px-8 py-3 rounded-lg font-bold text-base transition-opacity ${
-            hoveredBtn === 'home'
-              ? 'bg-amber-500 text-black opacity-85'
-              : 'bg-amber-500 text-black opacity-100'
-          }`}
+          style={{
+            padding: `${DS.spacing.md} ${DS.spacing.xl}`,
+            borderRadius: DS.borderRadius.md,
+            fontWeight: DS.typography.fontWeight.bold,
+            fontSize: DS.typography.fontSize.base,
+            transition: DS.transitions.base,
+            backgroundColor: hoveredBtn === 'home' ? `${DS.colors.primary.main}CC` : DS.colors.primary.main,
+            color: '#FFFFFF',
+            textDecoration: 'none',
+            display: 'inline-block',
+          }}
           onMouseEnter={() => setHoveredBtn('home')}
           onMouseLeave={() => setHoveredBtn(null)}
         >
@@ -54,11 +115,18 @@ export default function NotFound() {
 
         <Link
           href="/explorar"
-          className={`px-8 py-3 rounded-lg font-semibold text-base border transition-colors ${
-            hoveredBtn === 'explorar'
-              ? 'bg-transparent text-white border-amber-500'
-              : 'bg-transparent text-white border-gray-700'
-          }`}
+          style={{
+            padding: `${DS.spacing.md} ${DS.spacing.xl}`,
+            borderRadius: DS.borderRadius.md,
+            fontWeight: DS.typography.fontWeight.semibold,
+            fontSize: DS.typography.fontSize.base,
+            border: `2px solid ${hoveredBtn === 'explorar' ? DS.colors.primary.main : DS.colors.neutral.light}`,
+            backgroundColor: hoveredBtn === 'explorar' ? `${DS.colors.primary.main}15` : 'transparent',
+            color: '#FFFFFF',
+            textDecoration: 'none',
+            display: 'inline-block',
+            transition: DS.transitions.base,
+          }}
           onMouseEnter={() => setHoveredBtn('explorar')}
           onMouseLeave={() => setHoveredBtn(null)}
         >

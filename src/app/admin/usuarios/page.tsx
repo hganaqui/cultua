@@ -1,4 +1,3 @@
-// src/app/admin/usuarios/page.tsx
 import { createServerSupabase } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { redirect } from 'next/navigation'
@@ -6,6 +5,9 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import UsuariosClient from './UsuariosClient'
 import type { AdminWithScopes, Category } from '@/types'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
+
+const DS = DESIGN_SYSTEM
 
 export const metadata = { title: 'Gerenciar Usuários — CULTUA' }
 
@@ -18,25 +20,20 @@ export default async function UsuariosPage() {
     .from('profiles').select('role').eq('id', user.id).single()
   if (myProfile?.role !== 'superadmin') redirect('/admin')
 
-  // Todos os perfis
   const { data: profiles } = await supabaseAdmin
     .from('profiles')
     .select('id, full_name, role, created_at')
     .order('created_at', { ascending: false })
 
-  // Emails via auth admin
   const { data: { users: authUsers } } = await supabaseAdmin.auth.admin.listUsers()
   const emailMap = Object.fromEntries(authUsers.map(u => [u.id, u.email ?? '']))
 
-  // Todos os escopos
   const { data: allScopes } = await supabaseAdmin
     .from('admin_scopes').select('*')
 
-  // Categorias
   const { data: categories } = await supabaseAdmin
     .from('categories').select('id, name, slug').order('name')
 
-  // Criadores
   const { data: creators } = await supabaseAdmin
     .from('profiles').select('id, full_name').order('full_name')
 
@@ -57,8 +54,7 @@ export default async function UsuariosPage() {
   }))
 
   return (
-    // ✅ dark background + Header + Footer
-    <div style={{ minHeight: '100vh', backgroundColor: '#111111' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: DS.colors.bg.primary }}>
       <Header />
       <UsuariosClient
         users={users}

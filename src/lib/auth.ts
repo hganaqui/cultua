@@ -1,11 +1,6 @@
-// src/lib/auth.ts — ARQUIVO NOVO
-// Usa o `supabase` que já existe em lib/supabase.ts
-// NÃO duplica cliente
+import { supabase } from '@/lib/supabase'
 
-import supabase from '@/lib/supabase'
-import type { User } from '@/types'
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL!  // já existe no .env.local
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
 export async function signIn(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -21,26 +16,22 @@ export async function signUp(email: string, password: string, name: string) {
     password,
     options: {
       data: { full_name: name.trim() },
-      // ✅ garante redirect para o host correto (Vercel ou localhost)
       emailRedirectTo: `${APP_URL}/auth/callback`,
     },
   })
   return { data, error }
 }
 
-// ── Logout ─────────────────────────────────────────────────────────────────
 export async function signOut() {
   const { error } = await supabase.auth.signOut()
   return { error }
 }
 
-// ── Sessão atual ───────────────────────────────────────────────────────────
 export async function getSession() {
   const { data, error } = await supabase.auth.getSession()
   return { session: data.session, error }
 }
 
-// ── Usuário atual ──────────────────────────────────────────────────────────
 export async function getCurrentUser() {
   const { data, error } = await supabase.auth.getUser()
   return { user: data.user, error }

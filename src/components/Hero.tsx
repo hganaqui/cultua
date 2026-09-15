@@ -1,9 +1,14 @@
+'use client'
+
 import Link from 'next/link'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
+
+const DS = DESIGN_SYSTEM
 
 export default function Hero() {
   return (
     <section style={{
-      background: 'linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 50%, #1A1A1A 100%)',
+      background: `linear-gradient(135deg, ${DS.colors.bg.primary} 0%, ${DS.colors.bg.secondary} 50%, ${DS.colors.bg.primary} 100%)`,
       padding: '60px 16px',
       textAlign: 'center',
     }}>
@@ -24,26 +29,25 @@ export default function Hero() {
       `}</style>
 
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
           gap: '8px',
-          backgroundColor: 'rgba(184,134,11,0.2)',
-          color: '#D4AF37',
+          backgroundColor: DS.colors.primary.main + '20',
+          color: DS.colors.primary.accent,
           padding: '6px 16px',
-          borderRadius: '9999px',
+          borderRadius: DS.borderRadius.full,
           fontSize: '13px',
-          fontWeight: '600',
+          fontWeight: DS.typography.fontWeight.semibold,
           marginBottom: '24px',
-          border: '1px solid rgba(184,134,11,0.3)',
+          border: `1px solid ${DS.colors.primary.main}30`,
         }}>
           📖 Conteúdo cristão curado para edificar sua fé
         </div>
 
         <h1 className="hero-title" style={{
-          fontWeight: '900',
-          color: '#B8860B',
+          fontWeight: DS.typography.fontWeight.extrabold,
+          color: DS.colors.primary.main,
           lineHeight: 1.1,
           marginBottom: '16px',
           letterSpacing: '-1px',
@@ -52,7 +56,7 @@ export default function Hero() {
         </h1>
 
         <p className="hero-subtitle" style={{
-          color: '#CCCCCC',
+          color: DS.colors.text.secondary,
           fontWeight: '400',
           marginBottom: '16px',
           lineHeight: 1.4,
@@ -61,7 +65,7 @@ export default function Hero() {
         </p>
 
         <p className="hero-desc" style={{
-          color: '#999999',
+          color: DS.colors.text.secondary,
           maxWidth: '560px',
           margin: '0 auto 40px',
           lineHeight: 1.7,
@@ -78,35 +82,53 @@ export default function Hero() {
           marginBottom: '48px',
         }}>
           <Link href="/auth/signup" style={{
-            backgroundColor: '#B8860B',
+            backgroundColor: DS.colors.primary.main,
             color: 'white',
             textDecoration: 'none',
             padding: '14px 28px',
-            borderRadius: '12px',
+            borderRadius: DS.borderRadius.lg,
             fontSize: '16px',
-            fontWeight: '700',
+            fontWeight: DS.typography.fontWeight.bold,
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
             width: 'fit-content',
-          }}>
+            transition: DS.transitions.base,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = DS.colors.primary.light
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = DS.colors.primary.main
+          }}
+          >
             🎵 Começar Gratuitamente
           </Link>
 
           <Link href="#conteudo" style={{
-            backgroundColor: 'transparent',
-            color: '#CCCCCC',
+            backgroundColor: DS.colors.primary.accent,
+            color: DS.colors.text.dark,
             textDecoration: 'none',
             padding: '14px 28px',
-            borderRadius: '12px',
+            borderRadius: DS.borderRadius.lg,
             fontSize: '16px',
-            fontWeight: '600',
-            border: '2px solid #444444',
+            fontWeight: DS.typography.fontWeight.semibold,
+            border: `2px solid ${DS.colors.primary.accent}`,
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
             width: 'fit-content',
-          }}>
+            transition: DS.transitions.base,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#E8C895'
+            e.currentTarget.style.borderColor = '#E8C895'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = DS.colors.primary.accent
+            e.currentTarget.style.borderColor = DS.colors.primary.accent
+          }}
+          >
             📖 Ver Conteúdo
           </Link>
         </div>
@@ -122,8 +144,8 @@ export default function Hero() {
             <div key={stat.label} style={{ textAlign: 'center' }}>
               <div style={{
                 fontSize: '32px',
-                fontWeight: '900',
-                color: '#B8860B',
+                fontWeight: DS.typography.fontWeight.extrabold,
+                color: DS.colors.primary.main,
                 lineHeight: 1,
                 marginBottom: '4px',
               }}>
@@ -131,15 +153,14 @@ export default function Hero() {
               </div>
               <div style={{
                 fontSize: '13px',
-                color: '#666666',
-                fontWeight: '500',
+                color: DS.colors.text.secondary,
+                fontWeight: DS.typography.fontWeight.medium,
               }}>
                 {stat.label}
               </div>
             </div>
           ))}
         </div>
-
       </div>
     </section>
   )

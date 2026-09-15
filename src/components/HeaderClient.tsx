@@ -1,4 +1,3 @@
-// src/components/HeaderClient.tsx
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
@@ -6,8 +5,11 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signOut } from '@/lib/auth'
 import { createBrowserClient } from '@supabase/ssr'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import type { UserRole } from '@/types'
+
+const DS = DESIGN_SYSTEM
 
 interface HeaderClientProps {
   user: SupabaseUser | null
@@ -35,7 +37,6 @@ export default function HeaderClient({ user, profile }: HeaderClientProps) {
   const isAdmin    = role === 'admin' || role === 'superadmin'
   const isSuperadmin = role === 'superadmin'
 
-  // Busca notificações não lidas
   useEffect(() => {
     if (!user) return
     const supabase = createBrowserClient(
@@ -52,7 +53,6 @@ export default function HeaderClient({ user, profile }: HeaderClientProps) {
     }
     fetchUnread()
 
-    // Realtime: nova notificação
     const channel = supabase
       .channel('notifications')
       .on('postgres_changes', {
@@ -66,7 +66,6 @@ export default function HeaderClient({ user, profile }: HeaderClientProps) {
     return () => { supabase.removeChannel(channel) }
   }, [user])
 
-  // Fecha dropdown ao clicar fora
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -83,42 +82,40 @@ export default function HeaderClient({ user, profile }: HeaderClientProps) {
     router.refresh()
   }
 
-  // ── Avatar (foto ou inicial) ────────────────────────────────────────────
-const Avatar = ({ size = 28 }: { size?: number }) => (
-  avatarUrl ? (
-    <img  // ✅ MUDOU: <img> nativo em vez de <Image>
-      src={avatarUrl + `?t=${Date.now()}`}  // ✅ CACHE BUST
-      alt={displayName}
-      onError={(e) => {
-        // Se der erro, mostra inicial
-        (e.target as HTMLImageElement).style.display = 'none'
-      }}
-      style={{
+  const Avatar = ({ size = 28 }: { size?: number }) => (
+    avatarUrl ? (
+      <img
+        src={avatarUrl + `?t=${Date.now()}`}
+        alt={displayName}
+        onError={(e) => {
+          (e.target as HTMLImageElement).style.display = 'none'
+        }}
+        style={{
+          width: size,
+          height: size,
+          borderRadius: '50%',
+          objectFit: 'cover',
+          flexShrink: 0,
+        }}
+      />
+    ) : (
+      <div style={{
         width: size,
         height: size,
+        backgroundColor: DS.colors.primary.main,
         borderRadius: '50%',
-        objectFit: 'cover',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: size * 0.46,
+        fontWeight: DS.typography.fontWeight.extrabold,
+        color: 'white',
         flexShrink: 0,
-      }}
-    />
-  ) : (
-    <div style={{
-      width: size,
-      height: size,
-      backgroundColor: '#B8860B',
-      borderRadius: '50%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: size * 0.46,
-      fontWeight: '700',
-      color: 'white',
-      flexShrink: 0,
-    }}>
-      {displayName[0].toUpperCase()}
-    </div>
+      }}>
+        {displayName[0].toUpperCase()}
+      </div>
+    )
   )
-)
 
   const navLinks = [
     { href: '/categoria/louvor',       label: '🎵 Louvor' },
@@ -137,77 +134,94 @@ const Avatar = ({ size = 28 }: { size?: number }) => (
 
   return (
     <>
-      {/* ── Desktop auth ────────────────────────────────────────────── */}
       <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {user ? (
           <div ref={dropdownRef} style={{ position: 'relative' }}>
-
-            {/* Botão avatar */}
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                backgroundColor: 'transparent', border: '1.5px solid #B8860B',
-                borderRadius: '9999px', padding: '5px 12px 5px 5px',
-                cursor: 'pointer', color: '#CCCCCC', fontSize: '14px',
-                transition: 'background-color 0.2s', position: 'relative',
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '8px',
+                backgroundColor: 'transparent', 
+                border: `1.5px solid ${DS.colors.primary.main}`,
+                borderRadius: DS.borderRadius.full, 
+                padding: '5px 12px 5px 5px',
+                cursor: 'pointer', 
+                color: DS.colors.text.light, 
+                fontSize: '14px',
+                transition: DS.transitions.base, 
+                position: 'relative',
               }}
-              onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(184,134,11,0.1)')}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = DS.colors.primary.main + '15')}
               onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
               <Avatar size={28} />
               {displayName}
-              {/* Badge de notificações */}
               {unreadCount > 0 && (
                 <span style={{
-                  position: 'absolute', top: '-4px', right: '28px',
-                  backgroundColor: '#EF4444', color: 'white',
-                  fontSize: '10px', fontWeight: '700', borderRadius: '9999px',
-                  minWidth: '16px', height: '16px',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  position: 'absolute', 
+                  top: '-4px', 
+                  right: '28px',
+                  backgroundColor: DS.colors.secondary.error, 
+                  color: 'white',
+                  fontSize: '10px', 
+                  fontWeight: DS.typography.fontWeight.extrabold, 
+                  borderRadius: DS.borderRadius.full,
+                  minWidth: '16px', 
+                  height: '16px',
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
                   padding: '0 4px',
                 }}>
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
-              <span style={{ fontSize: '10px', color: '#666' }}>▼</span>
+              <span style={{ fontSize: '10px', color: DS.colors.text.secondary }}>▼</span>
             </button>
 
-            {/* Dropdown */}
             {userMenuOpen && (
               <div style={{
-                position: 'absolute', top: 'calc(100% + 8px)', right: 0,
-                backgroundColor: '#222222', border: '1px solid #333333',
-                borderRadius: '12px', padding: '8px', minWidth: '200px',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.4)', zIndex: 200,
+                position: 'absolute', 
+                top: 'calc(100% + 8px)', 
+                right: 0,
+                backgroundColor: DS.colors.bg.secondary, 
+                border: `1px solid ${DS.colors.neutral.light}`,
+                borderRadius: DS.borderRadius.xl, 
+                padding: '8px', 
+                minWidth: '200px',
+                boxShadow: DS.shadows['2xl'], 
+                zIndex: 200,
               }}>
-                {/* Cabeçalho do dropdown */}
                 <div style={{
                   padding: '8px 12px 12px',
-                  borderBottom: '1px solid #333333', marginBottom: '4px',
+                  borderBottom: `1px solid ${DS.colors.neutral.light}`, 
+                  marginBottom: '4px',
                 }}>
-                  <div style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: '600' }}>
+                  <div style={{ color: DS.colors.text.dark, fontSize: '13px', fontWeight: DS.typography.fontWeight.bold }}>
                     {displayName}
                   </div>
-                  <div style={{ color: '#666666', fontSize: '11px', marginTop: '2px' }}>
+                  <div style={{ color: DS.colors.text.secondary, fontSize: '11px', marginTop: '2px' }}>
                     {user.email}
                   </div>
-                  {/* Badge de role */}
                   {isAdmin && (
                     <span style={{
-                      display: 'inline-block', marginTop: '6px',
-                      fontSize: '10px', fontWeight: '700',
-                      backgroundColor: isSuperadmin ? 'rgba(168,85,247,0.2)' : 'rgba(184,134,11,0.2)',
-                      color: isSuperadmin ? '#A855F7' : '#B8860B',
-                      border: `1px solid ${isSuperadmin ? '#A855F7' : '#B8860B'}`,
-                      borderRadius: '9999px', padding: '2px 8px',
+                      display: 'inline-block', 
+                      marginTop: '6px',
+                      fontSize: '10px', 
+                      fontWeight: DS.typography.fontWeight.extrabold,
+                      backgroundColor: isSuperadmin ? 'rgba(168,85,247,0.15)' : DS.colors.primary.main + '15',
+                      color: isSuperadmin ? '#A855F7' : DS.colors.primary.main,
+                      border: `1px solid ${isSuperadmin ? '#A855F7' : DS.colors.primary.main}30`,
+                      borderRadius: DS.borderRadius.full, 
+                      padding: '2px 8px',
                     }}>
                       {isSuperadmin ? '⚡ SUPERADMIN' : '⭐ ADMIN'}
                     </span>
                   )}
                 </div>
 
-                {/* Links usuário */}
                 {userMenuItems.map(item => (
                   <DropdownLink
                     key={item.href}
@@ -217,12 +231,9 @@ const Avatar = ({ size = 28 }: { size?: number }) => (
                   />
                 ))}
 
-                {/* Links admin */}
                 {isAdmin && (
                   <>
-                    <div style={{
-                      height: '1px', backgroundColor: '#333', margin: '6px 0',
-                    }} />
+                    <div style={{ height: '1px', backgroundColor: DS.colors.neutral.light, margin: '6px 0' }} />
                     <DropdownLink
                       href="/admin"
                       label="🛡️ Painel de Curadoria"
@@ -241,7 +252,6 @@ const Avatar = ({ size = 28 }: { size?: number }) => (
                   </>
                 )}
 
-                {/* Notificações */}
                 {unreadCount > 0 && (
                   <DropdownLink
                     href="/notificacoes"
@@ -250,18 +260,23 @@ const Avatar = ({ size = 28 }: { size?: number }) => (
                   />
                 )}
 
-                {/* Logout */}
-                <div style={{ height: '1px', backgroundColor: '#333', margin: '6px 0' }} />
+                <div style={{ height: '1px', backgroundColor: DS.colors.neutral.light, margin: '6px 0' }} />
                 <button
                   onClick={handleSignOut}
                   style={{
-                    display: 'block', width: '100%', textAlign: 'left',
-                    backgroundColor: 'transparent', border: 'none',
-                    color: '#EF4444', fontSize: '13px', padding: '8px 12px',
-                    borderRadius: '8px', cursor: 'pointer',
-                    transition: 'background-color 0.15s',
+                    display: 'block', 
+                    width: '100%', 
+                    textAlign: 'left',
+                    backgroundColor: 'transparent', 
+                    border: 'none',
+                    color: DS.colors.secondary.error, 
+                    fontSize: '13px', 
+                    padding: '8px 12px',
+                    borderRadius: DS.borderRadius.md, 
+                    cursor: 'pointer',
+                    transition: DS.transitions.base,
                   }}
-                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.1)')}
+                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = DS.colors.secondary.error + '15')}
                   onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                 >
                   🚪 Sair
@@ -272,42 +287,67 @@ const Avatar = ({ size = 28 }: { size?: number }) => (
         ) : (
           <>
             <Link href="/auth/login" style={{
-              color: '#CCCCCC', textDecoration: 'none', fontSize: '14px', padding: '8px 12px',
+              color: DS.colors.text.secondary, 
+              textDecoration: 'none', 
+              fontSize: '14px', 
+              padding: '8px 12px',
             }}>Entrar</Link>
             <Link href="/auth/signup" style={{
-              backgroundColor: '#B8860B', color: 'white', textDecoration: 'none',
-              fontSize: '14px', fontWeight: '600', padding: '8px 16px', borderRadius: '8px',
+              backgroundColor: DS.colors.primary.main, 
+              color: 'white', 
+              textDecoration: 'none',
+              fontSize: '14px', 
+              fontWeight: DS.typography.fontWeight.semibold, 
+              padding: '8px 16px', 
+              borderRadius: DS.borderRadius.md,
             }}>Começar</Link>
           </>
         )}
       </div>
 
-      {/* ── Mobile hamburger ────────────────────────────────────────── */}
       <button
         className="mobile-menu-btn"
         onClick={() => setMenuOpen(!menuOpen)}
         style={{
-          backgroundColor: 'transparent', border: 'none', color: '#B8860B',
-          fontSize: '24px', cursor: 'pointer', padding: '4px', display: 'none',
+          backgroundColor: 'transparent', 
+          border: 'none', 
+          color: DS.colors.primary.main,
+          fontSize: '24px', 
+          cursor: 'pointer', 
+          padding: '4px', 
+          display: 'none',
         }}
       >
         {menuOpen ? '✕' : '☰'}
       </button>
 
-      {/* ── Menu mobile ─────────────────────────────────────────────── */}
       {menuOpen && (
         <div style={{
-          position: 'fixed', top: '60px', left: 0, right: 0,
-          backgroundColor: '#222222', borderTop: '1px solid #333333',
-          padding: '16px', zIndex: 99, maxHeight: 'calc(100vh - 60px)', overflowY: 'auto',
+          position: 'fixed', 
+          top: '60px', 
+          left: 0, 
+          right: 0,
+          backgroundColor: DS.colors.bg.secondary, 
+          borderTop: `1px solid ${DS.colors.neutral.light}`,
+          padding: '16px', 
+          zIndex: 99, 
+          maxHeight: 'calc(100vh - 60px)', 
+          overflowY: 'auto',
         }}>
           {[{ href: '/', label: 'Início' }, ...navLinks].map(item => (
             <Link key={item.href} href={item.href}
               onClick={() => setMenuOpen(false)}
               style={{
-                display: 'block', color: '#CCCCCC', textDecoration: 'none',
-                fontSize: '16px', padding: '12px 0', borderBottom: '1px solid #333333',
+                display: 'block', 
+                color: DS.colors.text.secondary, 
+                textDecoration: 'none',
+                fontSize: '16px', 
+                padding: '12px 0', 
+                borderBottom: `1px solid ${DS.colors.neutral.light}`,
+                transition: DS.transitions.base,
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = DS.colors.primary.main)}
+              onMouseLeave={(e) => (e.currentTarget.style.color = DS.colors.text.secondary)}
             >{item.label}</Link>
           ))}
 
@@ -315,44 +355,73 @@ const Avatar = ({ size = 28 }: { size?: number }) => (
             {user ? (
               <>
                 <div style={{
-                  display: 'flex', alignItems: 'center', gap: '10px',
-                  padding: '12px 0', borderBottom: '1px solid #333333', marginBottom: '12px',
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '10px',
+                  padding: '12px 0', 
+                  borderBottom: `1px solid ${DS.colors.neutral.light}`, 
+                  marginBottom: '12px',
                 }}>
                   <Avatar size={36} />
                   <div>
-                    <div style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: '600' }}>
+                    <div style={{ color: DS.colors.text.dark, fontSize: '14px', fontWeight: DS.typography.fontWeight.bold }}>
                       {displayName}
                     </div>
-                    <div style={{ color: '#666666', fontSize: '11px' }}>{user.email}</div>
+                    <div style={{ color: DS.colors.text.secondary, fontSize: '11px' }}>{user.email}</div>
                   </div>
                 </div>
                 {[...userMenuItems, ...(isAdmin ? [{ href: '/admin', label: '🛡️ Painel de Curadoria' }] : [])].map(item => (
                   <Link key={item.href} href={item.href}
                     onClick={() => setMenuOpen(false)}
                     style={{
-                      display: 'block', color: '#CCCCCC', textDecoration: 'none',
-                      fontSize: '15px', padding: '10px 0', borderBottom: '1px solid #2a2a2a',
+                      display: 'block', 
+                      color: DS.colors.text.secondary, 
+                      textDecoration: 'none',
+                      fontSize: '15px', 
+                      padding: '10px 0', 
+                      borderBottom: `1px solid ${DS.colors.neutral.light}`,
+                      transition: DS.transitions.base,
                     }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = DS.colors.primary.main)}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = DS.colors.text.secondary)}
                   >{item.label}</Link>
                 ))}
                 <button onClick={handleSignOut} style={{
-                  marginTop: '12px', width: '100%',
-                  backgroundColor: 'rgba(239,68,68,0.1)',
-                  color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)',
-                  borderRadius: '8px', padding: '12px', fontSize: '15px',
-                  fontWeight: '600', cursor: 'pointer',
+                  marginTop: '12px', 
+                  width: '100%',
+                  backgroundColor: DS.colors.secondary.error + '15',
+                  color: DS.colors.secondary.error, 
+                  border: `1px solid ${DS.colors.secondary.error}30`,
+                  borderRadius: DS.borderRadius.md, 
+                  padding: '12px', 
+                  fontSize: '15px',
+                  fontWeight: DS.typography.fontWeight.semibold, 
+                  cursor: 'pointer',
+                  transition: DS.transitions.base,
                 }}>🚪 Sair</button>
               </>
             ) : (
               <div style={{ display: 'flex', gap: '12px' }}>
                 <Link href="/auth/login" onClick={() => setMenuOpen(false)} style={{
-                  flex: 1, textAlign: 'center', color: '#CCCCCC', textDecoration: 'none',
-                  padding: '12px', border: '1px solid #444444', borderRadius: '8px', fontSize: '15px',
+                  flex: 1, 
+                  textAlign: 'center', 
+                  color: DS.colors.text.secondary, 
+                  textDecoration: 'none',
+                  padding: '12px', 
+                  border: `1px solid ${DS.colors.neutral.light}`, 
+                  borderRadius: DS.borderRadius.md, 
+                  fontSize: '15px',
                 }}>Entrar</Link>
                 <Link href="/auth/signup" onClick={() => setMenuOpen(false)} style={{
-                  flex: 1, textAlign: 'center', backgroundColor: '#B8860B', color: 'white',
-                  textDecoration: 'none', padding: '12px', borderRadius: '8px',
-                  fontSize: '15px', fontWeight: '600',
+                  flex: 1, 
+                  textAlign: 'center', 
+                  backgroundColor: DS.colors.primary.main, 
+                  color: 'white',
+                  textDecoration: 'none', 
+                  padding: '12px', 
+                  borderRadius: DS.borderRadius.md,
+                  fontSize: '15px', 
+                  fontWeight: DS.typography.fontWeight.semibold,
                 }}>Começar</Link>
               </div>
             )}
@@ -370,24 +439,30 @@ const Avatar = ({ size = 28 }: { size?: number }) => (
   )
 }
 
-// ── Subcomponente DropdownLink ───────────────────────────────────────────────
 function DropdownLink({ 
-  href, label, onClick, highlight = false, color = '#B8860B' 
+  href, label, onClick, highlight = false, color = DS.colors.primary.main
 }: { 
-  href: string; label: string; onClick: () => void
-  highlight?: boolean; color?: string 
+  href: string; 
+  label: string; 
+  onClick: () => void
+  highlight?: boolean; 
+  color?: string 
 }) {
   return (
     <Link
       href={href}
       onClick={onClick}
       style={{
-        display: 'block', color: highlight ? color : '#CCCCCC',
-        textDecoration: 'none', fontSize: '13px',
-        padding: '8px 12px', borderRadius: '8px', transition: 'background-color 0.15s',
+        display: 'block', 
+        color: highlight ? color : DS.colors.text.secondary,
+        textDecoration: 'none', 
+        fontSize: '13px',
+        padding: '8px 12px', 
+        borderRadius: DS.borderRadius.md, 
+        transition: DS.transitions.base,
       }}
       onMouseEnter={e => (e.currentTarget.style.backgroundColor = highlight 
-        ? `${color}22` : '#333333')}
+        ? `${color}22` : DS.colors.neutral.charcoal)}
       onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
     >
       {label}

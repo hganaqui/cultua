@@ -1,4 +1,3 @@
-// src/app/page.tsx
 import Header from '@/components/Header'
 import Hero from '@/components/Hero'
 import CategorySection from '@/components/CategorySection'
@@ -7,7 +6,7 @@ import HomeClient from './HomeClient'
 
 export default function HomePage() {
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#111111' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#F5F3F0' }}>
       <Header />
       <Hero />
       <CategorySection />

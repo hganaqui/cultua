@@ -1,4 +1,3 @@
-// src/components/auth/SignupForm.tsx
 'use client'
 
 import { useState } from 'react'
@@ -6,10 +5,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signUp } from '@/lib/auth'
 import { translateAuthError } from '@/types'
-import { isValidEmail } from '@/lib/utils'      // já existe em utils.ts!
-import { CULTUA_CONFIG } from '@/lib/cultua-config'
+import { isValidEmail } from '@/lib/utils'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
 
-const C = CULTUA_CONFIG.colors
+const DS = DESIGN_SYSTEM
 
 export default function SignupForm() {
   const router = useRouter()
@@ -22,7 +21,6 @@ export default function SignupForm() {
   const [error, setError]       = useState<string | null>(null)
   const [success, setSuccess]   = useState(false)
 
-  // Validações inline — usando isValidEmail de utils.ts que já existe
   const emailInvalid   = email.length > 0   && !isValidEmail(email)
   const passwordWeak   = password.length > 0 && password.length < 6
   const passwordDiff   = confirm.length > 0  && confirm !== password
@@ -47,46 +45,43 @@ export default function SignupForm() {
     setLoading(false)
   }
 
-  // ── Tela pós-cadastro ───────────────────────────────────────────────────
   if (success) {
     return (
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: '56px', marginBottom: '16px' }}>📬</div>
-        <h2 style={{ color: C.primary.main, fontWeight: '800', fontSize: '22px', marginBottom: '12px' }}>
+        <h2 style={{ color: DS.colors.primary.main, fontWeight: '800', fontSize: '22px', marginBottom: '12px' }}>
           Confirme seu e-mail
         </h2>
-        <p style={{ color: '#999999', fontSize: '15px', lineHeight: 1.7, marginBottom: '24px' }}>
+        <p style={{ color: DS.colors.text.secondary, fontSize: '15px', lineHeight: 1.7, marginBottom: '24px' }}>
           Enviamos um link para{' '}
-          <strong style={{ color: '#CCCCCC' }}>{email}</strong>.
+          <strong style={{ color: DS.colors.text.light }}>{email}</strong>.
           <br />
           Clique no link para ativar sua conta.
         </p>
-        <Link href="/auth/login" style={{ color: C.primary.main, fontWeight: '600', textDecoration: 'none', fontSize: '14px' }}>
+        <Link href="/auth/login" style={{ color: DS.colors.primary.main, fontWeight: '600', textDecoration: 'none', fontSize: '14px' }}>
           ← Voltar para o login
         </Link>
       </div>
     )
   }
 
-  // ── Formulário ──────────────────────────────────────────────────────────
   return (
     <form onSubmit={handleSubmit} style={{ width: '100%' }}>
 
       {error && (
         <div style={{
-          backgroundColor: 'rgba(231,76,60,0.1)',
-          border: '1px solid rgba(231,76,60,0.3)',
-          borderRadius: CULTUA_CONFIG.borderRadius.md,
+          backgroundColor: DS.colors.secondary.error + '15',
+          border: `1px solid ${DS.colors.secondary.error}30`,
+          borderRadius: DS.borderRadius.md,
           padding: '12px 16px',
           marginBottom: '20px',
-          color: '#F87171',
+          color: DS.colors.secondary.error,
           fontSize: '14px',
         }}>
           ⚠️ {error}
         </div>
       )}
 
-      {/* Nome */}
       <div style={{ marginBottom: '16px' }}>
         <label style={labelStyle}>Nome</label>
         <input
@@ -96,12 +91,11 @@ export default function SignupForm() {
           placeholder="Seu nome"
           required
           style={inputStyle}
-          onFocus={(e) => (e.target.style.borderColor = C.primary.main)}
-          onBlur={(e)  => (e.target.style.borderColor = '#3D3D3D')}
+          onFocus={(e) => (e.target.style.borderColor = DS.colors.primary.main)}
+          onBlur={(e)  => (e.target.style.borderColor = DS.colors.neutral.light)}
         />
       </div>
 
-      {/* Email */}
       <div style={{ marginBottom: '16px' }}>
         <label style={labelStyle}>E-mail</label>
         <input
@@ -112,15 +106,14 @@ export default function SignupForm() {
           required
           style={{
             ...inputStyle,
-            borderColor: emailInvalid ? '#EF4444' : '#3D3D3D',
+            borderColor: emailInvalid ? DS.colors.secondary.error : DS.colors.neutral.light,
           }}
-          onFocus={(e) => (e.target.style.borderColor = emailInvalid ? '#EF4444' : C.primary.main)}
-          onBlur={(e)  => (e.target.style.borderColor = emailInvalid ? '#EF4444' : '#3D3D3D')}
+          onFocus={(e) => (e.target.style.borderColor = emailInvalid ? DS.colors.secondary.error : DS.colors.primary.main)}
+          onBlur={(e)  => (e.target.style.borderColor = emailInvalid ? DS.colors.secondary.error : DS.colors.neutral.light)}
         />
         {emailInvalid && <Hint text="E-mail inválido" />}
       </div>
 
-      {/* Senha */}
       <div style={{ marginBottom: '16px' }}>
         <label style={labelStyle}>Senha</label>
         <input
@@ -132,15 +125,14 @@ export default function SignupForm() {
           minLength={6}
           style={{
             ...inputStyle,
-            borderColor: passwordWeak ? '#EF4444' : '#3D3D3D',
+            borderColor: passwordWeak ? DS.colors.secondary.error : DS.colors.neutral.light,
           }}
-          onFocus={(e) => (e.target.style.borderColor = passwordWeak ? '#EF4444' : C.primary.main)}
-          onBlur={(e)  => (e.target.style.borderColor = passwordWeak ? '#EF4444' : '#3D3D3D')}
+          onFocus={(e) => (e.target.style.borderColor = passwordWeak ? DS.colors.secondary.error : DS.colors.primary.main)}
+          onBlur={(e)  => (e.target.style.borderColor = passwordWeak ? DS.colors.secondary.error : DS.colors.neutral.light)}
         />
         {passwordWeak && <Hint text="Mínimo 6 caracteres" />}
       </div>
 
-      {/* Confirmar senha */}
       <div style={{ marginBottom: '24px' }}>
         <label style={labelStyle}>Confirmar senha</label>
         <input
@@ -151,10 +143,10 @@ export default function SignupForm() {
           required
           style={{
             ...inputStyle,
-            borderColor: passwordDiff ? '#EF4444' : '#3D3D3D',
+            borderColor: passwordDiff ? DS.colors.secondary.error : DS.colors.neutral.light,
           }}
-          onFocus={(e) => (e.target.style.borderColor = passwordDiff ? '#EF4444' : C.primary.main)}
-          onBlur={(e)  => (e.target.style.borderColor = passwordDiff ? '#EF4444' : '#3D3D3D')}
+          onFocus={(e) => (e.target.style.borderColor = passwordDiff ? DS.colors.secondary.error : DS.colors.primary.main)}
+          onBlur={(e)  => (e.target.style.borderColor = passwordDiff ? DS.colors.secondary.error : DS.colors.neutral.light)}
         />
         {passwordDiff && <Hint text="As senhas não coincidem" />}
       </div>
@@ -164,16 +156,16 @@ export default function SignupForm() {
         disabled={loading || formInvalid}
         style={{
           width: '100%',
-          backgroundColor: loading || formInvalid ? C.primary.dark : C.primary.main,
+          backgroundColor: loading || formInvalid ? DS.colors.primary.dark : DS.colors.primary.main,
           color: 'white',
           border: 'none',
-          borderRadius: CULTUA_CONFIG.borderRadius.md,
+          borderRadius: DS.borderRadius.md,
           padding: '14px',
-          fontSize: CULTUA_CONFIG.typography.fontSize.base,
-          fontWeight: CULTUA_CONFIG.typography.fontWeight.bold,
+          fontSize: DS.typography.fontSize.base,
+          fontWeight: DS.typography.fontWeight.bold,
           cursor: loading || formInvalid ? 'not-allowed' : 'pointer',
           opacity: formInvalid && !loading ? 0.6 : 1,
-          transition: CULTUA_CONFIG.transitions.base,
+          transition: DS.transitions.base,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -183,9 +175,9 @@ export default function SignupForm() {
         {loading ? <><Spinner /> Criando conta...</> : '🙏 Criar Conta Gratuita'}
       </button>
 
-      <p style={{ textAlign: 'center', color: C.text.secondary, fontSize: '14px', marginTop: '20px' }}>
+      <p style={{ textAlign: 'center', color: DS.colors.text.secondary, fontSize: '14px', marginTop: '20px' }}>
         Já tem conta?{' '}
-        <Link href="/auth/login" style={{ color: C.primary.main, fontWeight: '600', textDecoration: 'none' }}>
+        <Link href="/auth/login" style={{ color: DS.colors.primary.main, fontWeight: '600', textDecoration: 'none' }}>
           Entrar
         </Link>
       </p>
@@ -193,12 +185,12 @@ export default function SignupForm() {
   )
 }
 
-// ── Sub-componentes ─────────────────────────────────────────────────────────
 function Spinner() {
   return (
     <span style={{
-      width: '16px', height: '16px',
-      border: '2px solid rgba(255,255,255,0.3)',
+      width: '16px', 
+      height: '16px',
+      border: `2px solid ${DS.colors.text.secondary}33`,
       borderTopColor: 'white',
       borderRadius: '50%',
       display: 'inline-block',
@@ -210,19 +202,29 @@ function Spinner() {
 
 function Hint({ text }: { text: string }) {
   return (
-    <span style={{ color: '#F87171', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+    <span style={{ color: DS.colors.secondary.error, fontSize: '12px', marginTop: '4px', display: 'block' }}>
       {text}
     </span>
   )
 }
 
-// ── Estilos ──────────────────────────────────────────────────────────────────
 const labelStyle: React.CSSProperties = {
-  display: 'block', color: '#CCCCCC', fontSize: '13px', fontWeight: '600', marginBottom: '8px',
+  display: 'block', 
+  color: DS.colors.text.secondary, 
+  fontSize: '13px', 
+  fontWeight: '600', 
+  marginBottom: '8px',
 }
 
 const inputStyle: React.CSSProperties = {
-  width: '100%', backgroundColor: '#2D2D2D', border: '1.5px solid #3D3D3D',
-  borderRadius: '10px', padding: '12px 16px', color: '#FFFFFF',
-  fontSize: '15px', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s',
+  width: '100%', 
+  backgroundColor: '#FFFFFF',
+  border: `1.5px solid ${DS.colors.neutral.light}`,
+  borderRadius: DS.borderRadius.md, 
+  padding: '12px 16px', 
+  color: DS.colors.text.primary,
+  fontSize: '15px', 
+  outline: 'none', 
+  boxSizing: 'border-box', 
+  transition: DS.transitions.base,
 }

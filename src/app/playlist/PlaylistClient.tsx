@@ -3,7 +3,10 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
 import type { Playlist } from '@/types'
+
+const DS = DESIGN_SYSTEM
 
 export default function PlaylistClient() {
   const router = useRouter()
@@ -109,27 +112,48 @@ export default function PlaylistClient() {
       margin: '0 auto', 
       padding: '40px 16px',
       minHeight: '100vh',
-      backgroundColor: '#111111'
+      backgroundColor: DS.colors.bg.primary
     }}>
 
       {/* Cabeçalho */}
       <div style={{
-        display: 'flex', justifyContent: 'space-between',
-        alignItems: 'flex-start', flexWrap: 'wrap',
-        gap: '12px', marginBottom: '32px',
+        display: 'flex', 
+        justifyContent: 'space-between',
+        alignItems: 'flex-start', 
+        flexWrap: 'wrap',
+        gap: '12px', 
+        marginBottom: '32px',
       }}>
         <div>
-          <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#FFFFFF', marginBottom: '4px' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: '800', color: DS.colors.text.dark, marginBottom: '4px' }}>
             🎵 Minhas Playlists
           </h1>
-          <p style={{ color: '#CCCCCC', fontSize: '15px' }}>Organize seu conteúdo favorito</p>
+          <p style={{ color: DS.colors.text.secondary, fontSize: '15px' }}>
+            Organize seu conteúdo favorito
+          </p>
         </div>
         <button onClick={openCreate} style={{
-          backgroundColor: '#B8860B', color: '#111111', border: 'none',
-          padding: '10px 20px', borderRadius: '10px', fontSize: '14px',
-          fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
-          display: 'inline-flex', alignItems: 'center', gap: '6px',
-        }}>
+          backgroundColor: DS.colors.primary.main, 
+          color: 'white', 
+          border: 'none',
+          padding: '10px 20px', 
+          borderRadius: DS.borderRadius.md, 
+          fontSize: '14px',
+          fontWeight: '700', 
+          cursor: 'pointer', 
+          whiteSpace: 'nowrap',
+          display: 'inline-flex', 
+          alignItems: 'center', 
+          gap: '6px',
+          transition: DS.transitions.base,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = DS.colors.primary.light
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = DS.colors.primary.main
+        }}
+        >
           + Nova Playlist
         </button>
       </div>
@@ -143,43 +167,74 @@ export default function PlaylistClient() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '16px' }}>
           {playlists.map(pl => (
             <div key={pl.id} style={{
-              backgroundColor: '#1a1a1a', borderRadius: '16px',
-              padding: '20px', border: '1px solid #333333',
-              display: 'flex', flexDirection: 'column', gap: '12px',
-            }}>
+              backgroundColor: DS.colors.bg.secondary, 
+              borderRadius: DS.borderRadius.lg,
+              padding: '20px', 
+              border: `1px solid ${DS.colors.neutral.light}`,
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '12px',
+              transition: DS.transitions.base,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = DS.colors.primary.main
+              e.currentTarget.style.backgroundColor = DS.colors.neutral.charcoal + '40'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = DS.colors.neutral.light
+              e.currentTarget.style.backgroundColor = DS.colors.bg.secondary
+            }}
+            >
               <div style={{
-                width: '48px', height: '48px', backgroundColor: 'rgba(184,134,11,0.1)',
-                borderRadius: '12px', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', fontSize: '24px', border: '1px solid rgba(184,134,11,0.2)',
+                width: '48px', 
+                height: '48px', 
+                backgroundColor: DS.colors.primary.main + '15',
+                borderRadius: DS.borderRadius.lg, 
+                display: 'flex', 
+                alignItems: 'center',
+                justifyContent: 'center', 
+                fontSize: '24px', 
+                border: `1px solid ${DS.colors.primary.main}30`,
               }}>
                 🎵
               </div>
 
               <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#FFFFFF', marginBottom: '4px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', color: DS.colors.text.dark, marginBottom: '4px' }}>
                   {pl.title}
                 </h3>
                 {pl.description && (
                   <p style={{
-                    fontSize: '13px', color: '#CCCCCC', lineHeight: 1.5,
-                    display: '-webkit-box', WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                    fontSize: '13px', 
+                    color: DS.colors.text.secondary, 
+                    lineHeight: 1.5,
+                    display: '-webkit-box', 
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical', 
+                    overflow: 'hidden',
+                    margin: 0,
                   }}>
                     {pl.description}
                   </p>
                 )}
                 <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
                   <span style={{
-                    fontSize: '11px', color: '#666666',
-                    backgroundColor: '#2a2a2a', padding: '3px 8px', borderRadius: '9999px',
+                    fontSize: '11px', 
+                    color: DS.colors.text.secondary,
+                    backgroundColor: DS.colors.neutral.charcoal, 
+                    padding: '3px 8px', 
+                    borderRadius: DS.borderRadius.full,
                   }}>
                     {new Date(pl.created_at).toLocaleDateString('pt-BR')}
                   </span>
                   {pl.public && (
                     <span style={{
-                      fontSize: '11px', color: '#22C55E',
-                      backgroundColor: 'rgba(34,197,94,0.1)', padding: '3px 8px',
-                      borderRadius: '9999px', fontWeight: '600',
+                      fontSize: '11px', 
+                      color: DS.colors.secondary.success,
+                      backgroundColor: DS.colors.secondary.success + '15', 
+                      padding: '3px 8px',
+                      borderRadius: DS.borderRadius.full, 
+                      fontWeight: '600',
                     }}>
                       🌐 Pública
                     </span>
@@ -190,19 +245,46 @@ export default function PlaylistClient() {
               {/* Ações */}
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button onClick={() => openEdit(pl)} style={{
-                  flex: 1, backgroundColor: '#2a2a2a', color: '#CCCCCC',
-                  border: '1px solid #333333', borderRadius: '8px', padding: '8px',
-                  fontSize: '13px', fontWeight: '600', cursor: 'pointer',
-                }}>
+                  flex: 1, 
+                  backgroundColor: DS.colors.neutral.charcoal, 
+                  color: DS.colors.text.secondary,
+                  border: `1px solid ${DS.colors.neutral.light}`, 
+                  borderRadius: DS.borderRadius.md, 
+                  padding: '8px',
+                  fontSize: '13px', 
+                  fontWeight: '600', 
+                  cursor: 'pointer',
+                  transition: DS.transitions.base,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = DS.colors.primary.main
+                  e.currentTarget.style.color = DS.colors.primary.main
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = DS.colors.neutral.light
+                  e.currentTarget.style.color = DS.colors.text.secondary
+                }}
+                >
                   ✏️ Editar
                 </button>
                 <button
                   onClick={() => handleDelete(pl.id)}
                   disabled={deleteId === pl.id}
                   style={{
-                    backgroundColor: 'rgba(239,68,68,0.1)', color: '#EF4444',
-                    border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px',
-                    padding: '8px 12px', fontSize: '13px', cursor: 'pointer',
+                    backgroundColor: DS.colors.secondary.error + '15', 
+                    color: DS.colors.secondary.error,
+                    border: `1px solid ${DS.colors.secondary.error}30`, 
+                    borderRadius: DS.borderRadius.md,
+                    padding: '8px 12px', 
+                    fontSize: '13px', 
+                    cursor: 'pointer',
+                    transition: DS.transitions.base,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = DS.colors.secondary.error + '25'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = DS.colors.secondary.error + '15'
                   }}
                 >
                   {deleteId === pl.id ? '...' : '🗑️'}
@@ -221,14 +303,20 @@ export default function PlaylistClient() {
             onClick={() => setShowModal(false)}
           />
           <div style={{
-            position: 'fixed', top: '50%', left: '50%',
+            position: 'fixed', 
+            top: '50%', 
+            left: '50%',
             transform: 'translate(-50%, -50%)',
-            backgroundColor: '#1a1a1a', borderRadius: '20px',
-            padding: '32px', width: '100%', maxWidth: '440px',
-            zIndex: 301, boxShadow: '0 20px 60px rgba(0,0,0,0.8)',
-            border: '1px solid #333333',
+            backgroundColor: DS.colors.bg.secondary, 
+            borderRadius: DS.borderRadius.xl,
+            padding: '32px', 
+            width: '100%', 
+            maxWidth: '440px',
+            zIndex: 301, 
+            boxShadow: DS.shadows['2xl'],
+            border: `1px solid ${DS.colors.neutral.light}`,
           }}>
-            <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#FFFFFF', marginBottom: '20px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: '800', color: DS.colors.text.dark, marginBottom: '20px' }}>
               {editItem ? '✏️ Editar Playlist' : '🎵 Nova Playlist'}
             </h2>
 
@@ -241,8 +329,8 @@ export default function PlaylistClient() {
                 placeholder="Ex: Louvores da Manhã"
                 autoFocus
                 style={inputStyle}
-                onFocus={(e) => (e.target.style.borderColor = '#B8860B')}
-                onBlur={(e)  => (e.target.style.borderColor = '#333333')}
+                onFocus={(e) => (e.currentTarget.style.borderColor = DS.colors.primary.main)}
+                onBlur={(e)  => (e.currentTarget.style.borderColor = DS.colors.neutral.light)}
               />
             </div>
 
@@ -254,43 +342,72 @@ export default function PlaylistClient() {
                 placeholder="Opcional..."
                 rows={3}
                 style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }}
-                onFocus={(e) => (e.target.style.borderColor = '#B8860B')}
-                onBlur={(e)  => (e.target.style.borderColor = '#333333')}
+                onFocus={(e) => (e.currentTarget.style.borderColor = DS.colors.primary.main)}
+                onBlur={(e)  => (e.currentTarget.style.borderColor = DS.colors.neutral.light)}
               />
             </div>
 
             <label style={{
-              display: 'flex', alignItems: 'center', gap: '10px',
-              cursor: 'pointer', marginBottom: '24px',
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '10px',
+              cursor: 'pointer', 
+              marginBottom: '24px',
             }}>
               <input
                 type="checkbox"
                 checked={formPublic}
                 onChange={(e) => setFormPublic(e.target.checked)}
-                style={{ width: '16px', height: '16px', accentColor: '#B8860B' }}
+                style={{ width: '16px', height: '16px', accentColor: DS.colors.primary.main }}
               />
-              <span style={{ fontSize: '14px', color: '#CCCCCC' }}>
+              <span style={{ fontSize: '14px', color: DS.colors.text.secondary }}>
                 🌐 Tornar pública (qualquer pessoa pode ver)
               </span>
             </label>
 
             <div style={{ display: 'flex', gap: '10px' }}>
               <button onClick={() => setShowModal(false)} style={{
-                flex: 1, backgroundColor: '#2a2a2a', color: '#CCCCCC',
-                border: '1px solid #333333', borderRadius: '10px', padding: '12px',
-                fontSize: '14px', fontWeight: '600', cursor: 'pointer',
-              }}>
+                flex: 1, 
+                backgroundColor: DS.colors.neutral.charcoal, 
+                color: DS.colors.text.secondary,
+                border: `1px solid ${DS.colors.neutral.light}`, 
+                borderRadius: DS.borderRadius.md, 
+                padding: '12px',
+                fontSize: '14px', 
+                fontWeight: '600', 
+                cursor: 'pointer',
+                transition: DS.transitions.base,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = DS.colors.neutral.medium
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = DS.colors.neutral.charcoal
+              }}
+              >
                 Cancelar
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving || !formTitle.trim()}
                 style={{
-                  flex: 1, backgroundColor: !formTitle.trim() ? '#8B6F0F' : '#B8860B',
-                  color: '#111111', border: 'none', borderRadius: '10px',
-                  padding: '12px', fontSize: '14px', fontWeight: '700',
+                  flex: 1, 
+                  backgroundColor: !formTitle.trim() ? DS.colors.primary.dark : DS.colors.primary.main,
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: DS.borderRadius.md,
+                  padding: '12px', 
+                  fontSize: '14px', 
+                  fontWeight: '700',
                   cursor: saving || !formTitle.trim() ? 'not-allowed' : 'pointer',
                   opacity: !formTitle.trim() ? 0.6 : 1,
+                  transition: DS.transitions.base,
+                }}
+                onMouseEnter={(e) => {
+                  if (formTitle.trim() && !saving) e.currentTarget.style.backgroundColor = DS.colors.primary.light
+                }}
+                onMouseLeave={(e) => {
+                  if (formTitle.trim() && !saving) e.currentTarget.style.backgroundColor = DS.colors.primary.main
                 }}
               >
                 {saving ? 'Salvando...' : editItem ? 'Salvar' : 'Criar'}
@@ -306,21 +423,37 @@ export default function PlaylistClient() {
 function Empty({ onCreate }: { onCreate: () => void }) {
   return (
     <div style={{
-      backgroundColor: '#1a1a1a', borderRadius: '20px', padding: '64px 32px',
-      textAlign: 'center', border: '1px solid #333333',
+      backgroundColor: DS.colors.bg.secondary, 
+      borderRadius: DS.borderRadius.xl, 
+      padding: '64px 32px',
+      textAlign: 'center', 
+      border: `1px solid ${DS.colors.neutral.light}`,
     }}>
       <div style={{ fontSize: '56px', marginBottom: '16px' }}>🎶</div>
-      <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#FFFFFF', marginBottom: '8px' }}>
+      <h2 style={{ fontSize: '20px', fontWeight: '700', color: DS.colors.text.dark, marginBottom: '8px' }}>
         Nenhuma playlist criada ainda
       </h2>
-      <p style={{ color: '#CCCCCC', fontSize: '15px', marginBottom: '28px', lineHeight: 1.6 }}>
+      <p style={{ color: DS.colors.text.secondary, fontSize: '15px', marginBottom: '28px', lineHeight: 1.6 }}>
         Crie playlists personalizadas com pregações,<br />louvores e devocionais.
       </p>
       <button onClick={onCreate} style={{
-        backgroundColor: '#B8860B', color: '#111111', border: 'none',
-        padding: '12px 28px', borderRadius: '10px', fontSize: '15px',
-        fontWeight: '700', cursor: 'pointer',
-      }}>
+        backgroundColor: DS.colors.primary.main, 
+        color: 'white', 
+        border: 'none',
+        padding: '12px 28px', 
+        borderRadius: DS.borderRadius.md, 
+        fontSize: '15px',
+        fontWeight: '700', 
+        cursor: 'pointer',
+        transition: DS.transitions.base,
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = DS.colors.primary.light
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = DS.colors.primary.main
+      }}
+      >
         + Criar primeira playlist
       </button>
     </div>
@@ -333,13 +466,15 @@ function Skeleton() {
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }`}</style>
       {[1, 2, 3].map(i => (
         <div key={i} style={{
-          backgroundColor: '#1a1a1a', borderRadius: '16px', padding: '20px',
-          border: '1px solid #333333',
+          backgroundColor: DS.colors.bg.secondary, 
+          borderRadius: DS.borderRadius.lg, 
+          padding: '20px',
+          border: `1px solid ${DS.colors.neutral.light}`,
           animation: 'pulse 1.5s infinite',
         }}>
-          <div style={{ width: '48px', height: '48px', backgroundColor: '#2a2a2a', borderRadius: '12px', marginBottom: '12px' }} />
-          <div style={{ height: '18px', backgroundColor: '#2a2a2a', borderRadius: '4px', width: '70%', marginBottom: '8px' }} />
-          <div style={{ height: '14px', backgroundColor: '#2a2a2a', borderRadius: '4px', width: '90%' }} />
+          <div style={{ width: '48px', height: '48px', backgroundColor: DS.colors.neutral.medium, borderRadius: DS.borderRadius.lg, marginBottom: '12px' }} />
+          <div style={{ height: '18px', backgroundColor: DS.colors.neutral.medium, borderRadius: '4px', width: '70%', marginBottom: '8px' }} />
+          <div style={{ height: '14px', backgroundColor: DS.colors.neutral.medium, borderRadius: '4px', width: '90%' }} />
         </div>
       ))}
     </div>
@@ -347,12 +482,22 @@ function Skeleton() {
 }
 
 const labelStyle: React.CSSProperties = {
-  display: 'block', color: '#CCCCCC', fontSize: '13px',
-  fontWeight: '600', marginBottom: '8px',
+  display: 'block', 
+  color: DS.colors.text.secondary, 
+  fontSize: '13px',
+  fontWeight: '600', 
+  marginBottom: '8px',
 }
 
 const inputStyle: React.CSSProperties = {
-  width: '100%', backgroundColor: '#2a2a2a', border: '1px solid #333333',
-  borderRadius: '10px', padding: '12px 16px', color: '#FFFFFF', fontSize: '15px',
-  outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s',
+  width: '100%', 
+  backgroundColor: DS.colors.neutral.charcoal, 
+  border: `1px solid ${DS.colors.neutral.light}`,
+  borderRadius: DS.borderRadius.md, 
+  padding: '12px 16px', 
+  color: DS.colors.text.primary, 
+  fontSize: '15px',
+  outline: 'none', 
+  boxSizing: 'border-box', 
+  transition: DS.transitions.base,
 }

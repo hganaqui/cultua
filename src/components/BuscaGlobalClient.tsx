@@ -1,10 +1,12 @@
-// src/components/BuscaGlobalClient.tsx
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import type { Content } from '@/types'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
+import type { Tag } from '@/types'
+
+const DS = DESIGN_SYSTEM
 
 interface SearchResult {
   id: string
@@ -13,6 +15,7 @@ interface SearchResult {
   url_thumb: string | null
   duration: string | null
   category_name: string
+  tags: Tag[]
 }
 
 export default function BuscaGlobalClient() {
@@ -24,24 +27,20 @@ export default function BuscaGlobalClient() {
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // ── Ctrl+K e ESC listeners ──────────────────────────────────────────────
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+K ou Cmd+K
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
         setIsOpen(true)
         setTimeout(() => inputRef.current?.focus(), 0)
       }
 
-      // ESC para fechar
       if (e.key === 'Escape') {
         setIsOpen(false)
         setQuery('')
         setResults([])
       }
 
-      // Navegação com setas (só se modal aberto)
       if (!isOpen || results.length === 0) return
 
       if (e.key === 'ArrowDown') {
@@ -54,7 +53,6 @@ export default function BuscaGlobalClient() {
         setSelectedIndex((prev) => (prev - 1 + results.length) % results.length)
       }
 
-      // Enter para abrir resultado
       if (e.key === 'Enter' && results.length > 0) {
         e.preventDefault()
         const result = results[selectedIndex]
@@ -66,7 +64,6 @@ export default function BuscaGlobalClient() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, results, selectedIndex])
 
-  // ── Fecha modal ao clicar fora ──────────────────────────────────────────
   useEffect(() => {
     if (!isOpen) return
 
@@ -83,7 +80,6 @@ export default function BuscaGlobalClient() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isOpen])
 
-  // ── Busca em tempo real ─────────────────────────────────────────────────
   const performSearch = async (searchQuery: string) => {
     if (!searchQuery.trim()) {
       setResults([])
@@ -101,7 +97,8 @@ export default function BuscaGlobalClient() {
           type,
           url_thumb,
           duration,
-          category:categories(name)
+          category:categories(name),
+          tags:content_tags(tag:tags(*))
         `
         )
         .eq('status', 'approved')
@@ -112,17 +109,28 @@ export default function BuscaGlobalClient() {
 
       if (error) throw error
 
-      // Formatar resultados
-      const formatted = (data as any[]).map((item) => ({
-        id: item.id,
-        title: item.title,
-        type: item.type,
-        url_thumb: item.url_thumb,
-        duration: item.duration,
-        category_name: Array.isArray(item.category)
-          ? item.category[0]?.name ?? 'Sem categoria'
-          : item.category?.name ?? 'Sem categoria',
-      }))
+      const formatted = (data as any[]).map((item) => {
+        const tagsList: Tag[] = []
+        if (item.tags && Array.isArray(item.tags)) {
+          item.tags.forEach((ct: any) => {
+            if (ct.tag) {
+              tagsList.push(ct.tag)
+            }
+          })
+        }
+
+        return {
+          id: item.id,
+          title: item.title,
+          type: item.type,
+          url_thumb: item.url_thumb,
+          duration: item.duration,
+          category_name: Array.isArray(item.category)
+            ? item.category[0]?.name ?? 'Sem categoria'
+            : item.category?.name ?? 'Sem categoria',
+          tags: tagsList,
+        }
+      })
 
       setResults(formatted)
       setSelectedIndex(0)
@@ -139,7 +147,6 @@ export default function BuscaGlobalClient() {
     performSearch(value)
   }
 
-  // ── Ícone por tipo ──────────────────────────────────────────────────────
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'video':
@@ -153,10 +160,8 @@ export default function BuscaGlobalClient() {
     }
   }
 
-  // ── Render ──────────────────────────────────────────────────────────────
   return (
     <>
-      {/* Botão Buscar no Header */}
       <button
         onClick={() => {
           setIsOpen(true)
@@ -167,22 +172,22 @@ export default function BuscaGlobalClient() {
           alignItems: 'center',
           gap: '8px',
           padding: '8px 12px',
-          backgroundColor: '#2D2D2D',
-          color: '#666666',
-          border: '1px solid #333333',
-          borderRadius: '6px',
+          backgroundColor: DS.colors.neutral.charcoal,
+          color: DS.colors.text.secondary,
+          border: `1px solid ${DS.colors.neutral.light}`,
+          borderRadius: DS.borderRadius.md,
           cursor: 'pointer',
           fontSize: '13px',
           fontWeight: '500',
-          transition: 'all 0.2s ease',
+          transition: DS.transitions.base,
         }}
         onMouseOver={(e) => {
-          e.currentTarget.style.borderColor = '#B8860B'
-          e.currentTarget.style.color = '#CCCCCC'
+          e.currentTarget.style.borderColor = DS.colors.primary.main
+          e.currentTarget.style.color = DS.colors.text.light
         }}
         onMouseOut={(e) => {
-          e.currentTarget.style.borderColor = '#333333'
-          e.currentTarget.style.color = '#666666'
+          e.currentTarget.style.borderColor = DS.colors.neutral.light
+          e.currentTarget.style.color = DS.colors.text.secondary
         }}
       >
         🔍 Buscar...{' '}
@@ -190,17 +195,16 @@ export default function BuscaGlobalClient() {
           style={{
             marginLeft: '12px',
             fontSize: '11px',
-            backgroundColor: '#1A1A1A',
+            backgroundColor: DS.colors.bg.primary,
             padding: '2px 6px',
             borderRadius: '3px',
-            border: '1px solid #444444',
+            border: `1px solid ${DS.colors.neutral.light}`,
           }}
         >
           Ctrl K
         </kbd>
       </button>
 
-      {/* Modal */}
       {isOpen && (
         <div
           style={{
@@ -222,19 +226,18 @@ export default function BuscaGlobalClient() {
             style={{
               width: '90%',
               maxWidth: '600px',
-              backgroundColor: '#1A1A1A',
-              borderRadius: '12px',
-              border: '1px solid #333333',
-              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8)',
+              backgroundColor: DS.colors.bg.secondary,
+              borderRadius: DS.borderRadius.lg,
+              border: `1px solid ${DS.colors.neutral.light}`,
+              boxShadow: DS.shadows['2xl'],
               overflow: 'hidden',
               animation: 'slideIn 0.2s ease-out',
             }}
           >
-            {/* Input */}
             <div
               style={{
                 padding: '16px',
-                borderBottom: '1px solid #333333',
+                borderBottom: `1px solid ${DS.colors.neutral.light}`,
                 display: 'flex',
                 alignItems: 'center',
                 gap: '12px',
@@ -250,7 +253,7 @@ export default function BuscaGlobalClient() {
                 style={{
                   flex: 1,
                   backgroundColor: 'transparent',
-                  color: '#FFFFFF',
+                  color: DS.colors.text.primary,
                   border: 'none',
                   outline: 'none',
                   fontSize: '16px',
@@ -259,7 +262,7 @@ export default function BuscaGlobalClient() {
               />
               <span
                 style={{
-                  color: '#666666',
+                  color: DS.colors.text.secondary,
                   fontSize: '12px',
                   fontWeight: 'bold',
                 }}
@@ -268,7 +271,6 @@ export default function BuscaGlobalClient() {
               </span>
             </div>
 
-            {/* Resultados */}
             <div
               style={{
                 maxHeight: '400px',
@@ -276,7 +278,7 @@ export default function BuscaGlobalClient() {
               }}
             >
               {loading && (
-                <div style={{ padding: '20px', textAlign: 'center', color: '#CCCCCC' }}>
+                <div style={{ padding: '20px', textAlign: 'center', color: DS.colors.text.secondary }}>
                   ⏳ Buscando...
                 </div>
               )}
@@ -286,7 +288,7 @@ export default function BuscaGlobalClient() {
                   style={{
                     padding: '20px',
                     textAlign: 'center',
-                    color: '#CCCCCC',
+                    color: DS.colors.text.secondary,
                   }}
                 >
                   Nenhum resultado encontrado para "{query}"
@@ -298,7 +300,7 @@ export default function BuscaGlobalClient() {
                   style={{
                     padding: '20px',
                     textAlign: 'center',
-                    color: '#666666',
+                    color: DS.colors.text.secondary,
                   }}
                 >
                   <p style={{ margin: 0 }}>Digite para começar a buscar</p>
@@ -322,118 +324,157 @@ export default function BuscaGlobalClient() {
                     onClick={() => setIsOpen(false)}
                     style={{
                       display: 'flex',
-                      gap: '12px',
+                      flexDirection: 'column',
+                      gap: '8px',
                       padding: '12px 16px',
-                      borderBottom: '1px solid #2a2a2a',
+                      borderBottom: `1px solid ${DS.colors.neutral.light}`,
                       backgroundColor:
-                        index === selectedIndex ? '#2a2a2a' : 'transparent',
+                        index === selectedIndex ? DS.colors.neutral.charcoal + '40' : 'transparent',
                       cursor: 'pointer',
                       textDecoration: 'none',
-                      transition: 'background-color 0.15s ease',
+                      transition: DS.transitions.base,
                     }}
                     onMouseOver={(e) => {
-                      e.currentTarget.style.backgroundColor = '#2a2a2a'
+                      e.currentTarget.style.backgroundColor = DS.colors.neutral.charcoal + '40'
                       setSelectedIndex(index)
                     }}
                   >
-                    {/* Thumbnail */}
-                    {result.url_thumb ? (
-                      <img
-                        src={result.url_thumb}
-                        alt={result.title}
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      {result.url_thumb ? (
+                        <img
+                          src={result.url_thumb}
+                          alt={result.title}
+                          style={{
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: DS.borderRadius.md,
+                            objectFit: 'cover',
+                            flexShrink: 0,
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: DS.borderRadius.md,
+                            backgroundColor: DS.colors.neutral.medium,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '24px',
+                            flexShrink: 0,
+                          }}
+                        >
+                          {getTypeIcon(result.type)}
+                        </div>
+                      )}
+
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h4
+                          style={{
+                            color: DS.colors.text.dark,
+                            margin: '0 0 4px 0',
+                            fontSize: '14px',
+                            fontWeight: 'bold',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {result.title}
+                        </h4>
+                        <div
+                          style={{
+                            display: 'flex',
+                            gap: '8px',
+                            alignItems: 'center',
+                            flexWrap: 'wrap',
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              backgroundColor: DS.colors.neutral.medium,
+                              color: DS.colors.text.secondary,
+                              padding: '2px 6px',
+                              borderRadius: DS.borderRadius.sm,
+                            }}
+                          >
+                            {result.category_name}
+                          </span>
+                          {result.duration && (
+                            <span
+                              style={{
+                                fontSize: '11px',
+                                color: DS.colors.text.secondary,
+                              }}
+                            >
+                              {result.duration}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <span
                         style={{
-                          width: '48px',
-                          height: '48px',
-                          borderRadius: '6px',
-                          objectFit: 'cover',
-                          flexShrink: 0,
-                        }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: '48px',
-                          height: '48px',
-                          borderRadius: '6px',
-                          backgroundColor: '#333333',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '24px',
+                          fontSize: '18px',
                           flexShrink: 0,
                         }}
                       >
                         {getTypeIcon(result.type)}
-                      </div>
-                    )}
+                      </span>
+                    </div>
 
-                    {/* Info */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <h4
-                        style={{
-                          color: '#FFFFFF',
-                          margin: '0 0 4px 0',
-                          fontSize: '14px',
-                          fontWeight: 'bold',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {result.title}
-                      </h4>
+                    {result.tags.length > 0 && (
                       <div
                         style={{
                           display: 'flex',
-                          gap: '8px',
-                          alignItems: 'center',
+                          gap: '6px',
                           flexWrap: 'wrap',
+                          paddingLeft: '60px',
                         }}
                       >
-                        <span
-                          style={{
-                            fontSize: '11px',
-                            backgroundColor: '#333333',
-                            color: '#CCCCCC',
-                            padding: '2px 6px',
-                            borderRadius: '3px',
-                          }}
-                        >
-                          {result.category_name}
-                        </span>
-                        {result.duration && (
+                        {result.tags.slice(0, 3).map(tag => (
                           <span
+                            key={tag.id}
                             style={{
-                              fontSize: '11px',
-                              color: '#666666',
+                              fontSize: '10px',
+                              backgroundColor: tag.color + '30',
+                              color: tag.color,
+                              padding: '2px 6px',
+                              borderRadius: DS.borderRadius.sm,
+                              fontWeight: '600',
                             }}
                           >
-                            {result.duration}
+                            {tag.icon} {tag.name}
+                          </span>
+                        ))}
+                        {result.tags.length > 3 && (
+                          <span
+                            style={{
+                              fontSize: '10px',
+                              backgroundColor: DS.colors.neutral.medium,
+                              color: DS.colors.text.secondary,
+                              padding: '2px 6px',
+                              borderRadius: DS.borderRadius.sm,
+                            }}
+                          >
+                            +{result.tags.length - 3}
                           </span>
                         )}
                       </div>
-                    </div>
-
-                    {/* Type Badge */}
-                    <span
-                      style={{
-                        fontSize: '18px',
-                        flexShrink: 0,
-                      }}
-                    >
-                      {getTypeIcon(result.type)}
-                    </span>
+                    )}
                   </Link>
                 ))}
             </div>
 
-            {/* Footer */}
             {results.length > 0 && (
               <div
                 style={{
                   padding: '12px 16px',
-                  borderTop: '1px solid #333333',
-                  color: '#666666',
+                  borderTop: `1px solid ${DS.colors.neutral.light}`,
+                  color: DS.colors.text.secondary,
                   fontSize: '12px',
                   textAlign: 'right',
                 }}
@@ -445,7 +486,6 @@ export default function BuscaGlobalClient() {
         </div>
       )}
 
-      {/* Animação */}
       <style>{`
         @keyframes slideIn {
           from {
@@ -463,16 +503,16 @@ export default function BuscaGlobalClient() {
         }
 
         div::-webkit-scrollbar-track {
-          background: #1a1a1a;
+          background: ${DS.colors.bg.secondary};
         }
 
         div::-webkit-scrollbar-thumb {
-          background: #333333;
+          background: ${DS.colors.neutral.medium};
           border-radius: 3px;
         }
 
         div::-webkit-scrollbar-thumb:hover {
-          background: #555555;
+          background: ${DS.colors.neutral.light};
         }
       `}</style>
     </>

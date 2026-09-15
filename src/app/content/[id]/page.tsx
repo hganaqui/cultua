@@ -1,22 +1,23 @@
-// src/app/content/[id]/page.tsx
 import { createServerSupabase } from '@/lib/supabase-server'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ContentPlayer from './ContentPlayer'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
 import type { Metadata } from 'next'
+
+const DS = DESIGN_SYSTEM
 
 type Props = {
   params: Promise<{ id: string }>
 }
 
-// ─── SEO dinâmico ────────────────────────────────────────────────────────────
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
   const supabase = await createServerSupabase()
 
   const { data } = await supabase
     .from('contents')
-    .select('title, description, thumbnail_url, type, categoria:categories(name)')
+    .select('title, description, url_thumb, type, category:categories(name)')
     .or(`id.eq.${id},slug.eq.${id}`)
     .maybeSingle()
 
@@ -34,9 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = data.title as string
   const tipo  = TYPE_LABEL[data.type as string] ?? 'Conteúdo'
-
-  // ✅ Fix: Supabase retorna join como array — pegar o primeiro elemento
-  const categoriaRaw = data.categoria as { name: string }[] | { name: string } | null
+  const categoriaRaw = data.category as { name: string }[] | { name: string } | null
   const catName = Array.isArray(categoriaRaw)
     ? categoriaRaw[0]?.name
     : categoriaRaw?.name
@@ -44,7 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const desc  =
     (data.description as string | null) ??
     `${tipo}${catName ? ` de ${catName}` : ''} — curado para alimentar sua fé.`
-  const image = (data.thumbnail_url as string | null) ?? '/og-default.jpg'
+  const image = (data.url_thumb as string | null) ?? '/og-default.jpg'
   const url   = `https://plataforma-crista.vercel.app/content/${id}`
 
   return {
@@ -71,12 +70,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-// ─── Page ────────────────────────────────────────────────────────────────────
 export default async function ContentPage({ params }: Props) {
   const { id } = await params
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#1A1A1A' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: DS.colors.bg.primary }}>
       <Header />
       <ContentPlayer contentId={id} />
       <Footer />

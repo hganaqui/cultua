@@ -1,10 +1,8 @@
 import type { Metadata } from 'next'
-import { CULTUA_CONFIG } from '@/lib/cultua-config'
 import '@/styles/globals.css'
 import '@/styles/cultua.css'
 
 export const metadata: Metadata = {
-  // ✅ FIX 1: metadataBase — obrigatório para OG images funcionarem em produção
   metadataBase: new URL('https://plataforma-crista.vercel.app'),
 
   title: {
@@ -19,7 +17,7 @@ export const metadata: Metadata = {
   openGraph: {
     type:        'website',
     locale:      'pt_BR',
-    url:         'https://plataforma-crista.vercel.app', // ✅ FIX 2: era cultua.vercel.app (URL errada)
+    url:         'https://plataforma-crista.vercel.app',
     siteName:    'CULTUA',
     title:       'CULTUA — Conteúdo para alimentar sua fé',
     description: 'Pregações, louvores, devocionais e testemunhos. Curado para edificar.',
@@ -33,7 +31,6 @@ export const metadata: Metadata = {
     ],
   },
 
-  // ✅ FIX 3: twitter card faltando — sem isso WhatsApp/X não geram preview
   twitter: {
     card:        'summary_large_image',
     title:       'CULTUA — Conteúdo para alimentar sua fé',
@@ -56,7 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR">
       <head>
-        <meta name="theme-color"                        content="#B8860B" />
+        <meta name="theme-color"                        content="#1E3A2E" />
         <meta name="apple-mobile-web-app-capable"       content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title"         content="CULTUA" />

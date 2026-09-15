@@ -1,15 +1,18 @@
-// src/app/privacidade/page.tsx
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
+import type { Metadata } from 'next'
 
-export const metadata = { title: 'Privacidade — CULTUA' }
+const DS = DESIGN_SYSTEM
+
+export const metadata: Metadata = { title: 'Privacidade — CULTUA' }
 
 export default function PrivacidadePage() {
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#111111' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: DS.colors.bg.primary }}>
       <Header />
       <main style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 16px' }}>
-        <h1 style={{ color: '#FFFFFF', fontSize: '28px', fontWeight: '800', marginBottom: '24px' }}>
+        <h1 style={{ color: DS.colors.text.dark, fontSize: '28px', fontWeight: '800', marginBottom: '24px' }}>
           🔒 Política de Privacidade
         </h1>
         {[
@@ -19,13 +22,18 @@ export default function PrivacidadePage() {
           { title: 'Contato', text: 'Para dúvidas sobre privacidade, entre em contato pelo e-mail da plataforma.' },
         ].map(item => (
           <div key={item.title} style={{
-            backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a',
-            borderRadius: '12px', padding: '20px', marginBottom: '12px',
+            backgroundColor: DS.colors.bg.secondary,
+            border: `1px solid ${DS.colors.neutral.light}`,
+            borderRadius: DS.borderRadius.lg, 
+            padding: '20px', 
+            marginBottom: '12px',
           }}>
-            <h2 style={{ color: '#B8860B', fontSize: '15px', fontWeight: '700', marginBottom: '8px' }}>
+            <h2 style={{ color: DS.colors.primary.main, fontSize: '15px', fontWeight: '700', marginBottom: '8px' }}>
               {item.title}
             </h2>
-            <p style={{ color: '#888888', fontSize: '14px', lineHeight: 1.7 }}>{item.text}</p>
+            <p style={{ color: DS.colors.text.secondary, fontSize: '14px', lineHeight: 1.7, margin: 0 }}>
+              {item.text}
+            </p>
           </div>
         ))}
       </main>

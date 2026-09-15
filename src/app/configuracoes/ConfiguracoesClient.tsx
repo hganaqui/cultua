@@ -4,7 +4,10 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { signOut } from '@/lib/auth'
 import { createBrowserClient } from '@supabase/ssr'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
 import type { Profile } from '@/types'
+
+const DS = DESIGN_SYSTEM
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -19,7 +22,6 @@ interface Props {
 export default function ConfiguracoesClient({ profile, email }: Props) {
   const router = useRouter()
 
-  // ✅ NOVO: States melhorados com validação
   const [fullName, setFullName] = useState<string>('')
   const [avatarUrl, setAvatarUrl] = useState<string>('')
   const [imgError, setImgError] = useState(false)
@@ -48,7 +50,7 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
         const defaultName = email.split('@')[0]
         setFullName(defaultName)
 
-        fetch('/api/init-profile', {
+        fetch('/api/admin/init-profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -66,49 +68,43 @@ export default function ConfiguracoesClient({ profile, email }: Props) {
 
   const displayName = fullName ? fullName.split(' ')[0] : email.split('@')[0] || 'Usuário'
 
-  // ── Salvar nome ──────────────────────────────────────────────────────────
-async function handleSaveName() {
-  if (!fullName.trim()) {
-    setNameMsg('❌ Digite um nome.')
-    return
-  }
-
-  setSavingName(true)
-  setNameMsg('')
-
-  try {
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .update({ full_name: fullName.trim() })
-      .eq('id', profile.id)
-      .select() // ✅ NOVO: retorna os dados atualizados
-
-
-    if (error) {
-      console.error('❌ Erro Supabase:', error)
-      setNameMsg('❌ Erro ao salvar nome.')
+  async function handleSaveName() {
+    if (!fullName.trim()) {
+      setNameMsg('❌ Digite um nome.')
       return
     }
 
-    // ✅ MUDE: Atualiza o state ANTES de recarregar
-    setFullName(fullName.trim())
-    setNameMsg('✅ Nome atualizado!')
+    setSavingName(true)
+    setNameMsg('')
 
-    // ✅ Aguarda um pouco antes de recarregar
-    setTimeout(() => {
-      setNameMsg('')
-      router.refresh() // Recarrega dados do servidor
-    }, 1500)
-  } catch (err) {
-    console.error('❌ Erro catch:', err)
-    setNameMsg('❌ Erro ao salvar.')
-  } finally {
-    setSavingName(false)
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ full_name: fullName.trim() })
+        .eq('id', profile.id)
+        .select()
+
+      if (error) {
+        console.error('❌ Erro Supabase:', error)
+        setNameMsg('❌ Erro ao salvar nome.')
+        return
+      }
+
+      setFullName(fullName.trim())
+      setNameMsg('✅ Nome atualizado!')
+
+      setTimeout(() => {
+        setNameMsg('')
+        router.refresh()
+      }, 1500)
+    } catch (err) {
+      console.error('❌ Erro catch:', err)
+      setNameMsg('❌ Erro ao salvar.')
+    } finally {
+      setSavingName(false)
+    }
   }
-}
 
-  // ── Alterar senha ────────────────────────────────────────────────────────
   async function handleChangePwd() {
     if (newPwd.length < 6) {
       setPwdMsg('❌ Mínimo 6 caracteres.')
@@ -136,7 +132,6 @@ async function handleSaveName() {
     }
   }
 
-  // ── Upload avatar ────────────────────────────────────────────────────────
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -170,7 +165,6 @@ async function handleSaveName() {
         return
       }
 
-      // ✅ Atualiza o estado com a URL
       setImgError(false)
       const newUrl = data.url + `?t=${Date.now()}`
       setAvatarUrl(newUrl)
@@ -197,8 +191,8 @@ async function handleSaveName() {
 
   if (!dataLoaded) {
     return (
-      <main style={{ maxWidth: '700px', margin: '0 auto', padding: '40px 16px', backgroundColor: '#111111', minHeight: '100vh' }}>
-        <div style={{ color: '#666', textAlign: 'center', marginTop: '40px' }}>
+      <main style={{ maxWidth: '700px', margin: '0 auto', padding: '40px 16px', backgroundColor: DS.colors.bg.primary, minHeight: '100vh' }}>
+        <div style={{ color: DS.colors.text.secondary, textAlign: 'center', marginTop: '40px' }}>
           ⏳ Carregando...
         </div>
       </main>
@@ -206,12 +200,12 @@ async function handleSaveName() {
   }
 
   return (
-    <main style={{ maxWidth: '700px', margin: '0 auto', padding: '40px 16px', backgroundColor: '#111111', minHeight: '100vh' }}>
+    <main style={{ maxWidth: '700px', margin: '0 auto', padding: '40px 16px', backgroundColor: DS.colors.bg.primary, minHeight: '100vh' }}>
       <div style={{ marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#FFFFFF', marginBottom: '4px' }}>
+        <h1 style={{ fontSize: '28px', fontWeight: '800', color: DS.colors.text.dark, marginBottom: '4px' }}>
           ⚙️ Configurações
         </h1>
-        <p style={{ color: '#666666', fontSize: '15px' }}>Gerencie sua conta e preferências</p>
+        <p style={{ color: DS.colors.text.secondary, fontSize: '15px' }}>Gerencie sua conta e preferências</p>
       </div>
 
       {/* ── Foto de Perfil ─────────────────────────────────────────── */}
@@ -224,7 +218,6 @@ async function handleSaveName() {
           padding: '24px 0',
         }}>
 
-          {/* Avatar grande */}
           <div
             onClick={() => fileRef.current?.click()}
             style={{
@@ -234,9 +227,9 @@ async function handleSaveName() {
               cursor: 'pointer',
               position: 'relative',
               flexShrink: 0,
-              border: '3px solid #B8860B',
+              border: `3px solid ${DS.colors.primary.main}`,
               overflow: 'hidden',
-              transition: 'all 0.3s ease',
+              transition: DS.transitions.base,
             }}
             title="Clique para alterar foto"
             onMouseEnter={(e) => {
@@ -254,7 +247,6 @@ async function handleSaveName() {
               }
             }}
           >
-            {/* ✅ CORRIGIDO: Carrega a imagem se existir */}
             {avatarUrl && !imgError ? (
               <img
                 src={avatarUrl}
@@ -273,7 +265,7 @@ async function handleSaveName() {
               <div style={{
                 width: '100%',
                 height: '100%',
-                backgroundColor: '#B8860B',
+                backgroundColor: DS.colors.primary.main,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -285,7 +277,6 @@ async function handleSaveName() {
               </div>
             )}
 
-            {/* Overlay câmera */}
             <div className="overlay" style={{
               position: 'absolute',
               inset: 0,
@@ -302,19 +293,18 @@ async function handleSaveName() {
             </div>
           </div>
 
-          {/* Info */}
           <div style={{ textAlign: 'center' }}>
-            <p style={{ color: '#CCCCCC', fontSize: '15px', marginBottom: '4px', fontWeight: '600' }}>
+            <p style={{ color: DS.colors.text.light, fontSize: '15px', marginBottom: '4px', fontWeight: '600' }}>
               {displayName}
             </p>
-            <p style={{ color: '#666666', fontSize: '12px', marginBottom: '12px' }}>
+            <p style={{ color: DS.colors.text.secondary, fontSize: '12px', marginBottom: '12px' }}>
               Clique na foto para alterar
             </p>
-            <p style={{ color: '#666666', fontSize: '12px' }}>
+            <p style={{ color: DS.colors.text.secondary, fontSize: '12px' }}>
               JPG, PNG, WebP — máximo 2MB
             </p>
             {uploadingAvatar && (
-              <p style={{ marginTop: '8px', fontSize: '13px', color: '#B8860B' }}>
+              <p style={{ marginTop: '8px', fontSize: '13px', color: DS.colors.primary.main }}>
                 ⏳ Enviando...
               </p>
             )}
@@ -322,7 +312,7 @@ async function handleSaveName() {
               <p style={{
                 marginTop: '8px',
                 fontSize: '13px',
-                color: avatarMsg.startsWith('✅') ? '#22C55E' : '#EF4444',
+                color: avatarMsg.startsWith('✅') ? DS.colors.secondary.success : DS.colors.secondary.error,
               }}>
                 {avatarMsg}
               </p>
@@ -342,10 +332,9 @@ async function handleSaveName() {
       {/* ── Conta ──────────────────────────────────────────────────── */}
       <Section title="Conta">
 
-        {/* Nome */}
-        <div style={{ padding: '16px 0', borderBottom: '1px solid #2a2a2a' }}>
+        <div style={{ padding: '16px 0', borderBottom: `1px solid ${DS.colors.neutral.light}` }}>
           <label style={{
-            color: '#999999', fontSize: '12px', fontWeight: '700',
+            color: DS.colors.text.secondary, fontSize: '12px', fontWeight: '700',
             textTransform: 'uppercase', letterSpacing: '0.5px',
           }}>
             Nome completo
@@ -357,23 +346,32 @@ async function handleSaveName() {
               onKeyDown={e => e.key === 'Enter' && handleSaveName()}
               placeholder="Ex: Seu Nome Completo"
               style={{
-                flex: 1, backgroundColor: '#111111', border: '1px solid #333333',
-                borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF',
-                fontSize: '14px', outline: 'none',
+                flex: 1, 
+                backgroundColor: DS.colors.bg.secondary, 
+                border: `1px solid ${DS.colors.neutral.light}`,
+                borderRadius: DS.borderRadius.md, 
+                padding: '10px 14px', 
+                color: DS.colors.text.dark,
+                fontSize: '14px', 
+                outline: 'none',
               }}
-              onFocus={e => (e.currentTarget.style.borderColor = '#B8860B')}
-              onBlur={e => (e.currentTarget.style.borderColor = '#333333')}
+              onFocus={e => (e.currentTarget.style.borderColor = DS.colors.primary.main)}
+              onBlur={e => (e.currentTarget.style.borderColor = DS.colors.neutral.light)}
             />
             <button
               onClick={handleSaveName}
               disabled={savingName || !fullName.trim()}
               style={{
-                backgroundColor: (fullName.trim()) ? '#B8860B' : '#333333',
-                color: 'white', border: 'none', borderRadius: '8px',
-                padding: '10px 18px', fontSize: '14px', fontWeight: '600',
+                backgroundColor: (fullName.trim()) ? DS.colors.primary.main : DS.colors.neutral.charcoal,
+                color: 'white', 
+                border: 'none', 
+                borderRadius: DS.borderRadius.md,
+                padding: '10px 18px', 
+                fontSize: '14px', 
+                fontWeight: '600',
                 cursor: savingName || !fullName.trim() ? 'not-allowed' : 'pointer',
                 opacity: savingName || !fullName.trim() ? 0.7 : 1,
-                transition: 'all 0.15s',
+                transition: DS.transitions.base,
               }}
             >
               {savingName ? 'Salvando...' : 'Salvar'}
@@ -381,42 +379,51 @@ async function handleSaveName() {
           </div>
           {nameMsg && (
             <p style={{
-              marginTop: '6px', fontSize: '13px',
-              color: nameMsg.startsWith('✅') ? '#22C55E' : '#EF4444',
+              marginTop: '6px', 
+              fontSize: '13px',
+              color: nameMsg.startsWith('✅') ? DS.colors.secondary.success : DS.colors.secondary.error,
             }}>
               {nameMsg}
             </p>
           )}
         </div>
 
-        {/* E-mail */}
-        <div style={{ padding: '16px 0', borderBottom: '1px solid #2a2a2a' }}>
+        <div style={{ padding: '16px 0', borderBottom: `1px solid ${DS.colors.neutral.light}` }}>
           <label style={{
-            color: '#999999', fontSize: '12px', fontWeight: '700',
+            color: DS.colors.text.secondary, fontSize: '12px', fontWeight: '700',
             textTransform: 'uppercase', letterSpacing: '0.5px',
           }}>
             E-mail
           </label>
           <div style={{
-            marginTop: '8px', backgroundColor: '#111111', border: '1px solid #2a2a2a',
-            borderRadius: '8px', padding: '10px 14px', color: '#555555',
-            fontSize: '14px', display: 'flex', alignItems: 'center', gap: '10px',
+            marginTop: '8px', 
+            backgroundColor: DS.colors.bg.secondary, 
+            border: `1px solid ${DS.colors.neutral.light}`,
+            borderRadius: DS.borderRadius.md, 
+            padding: '10px 14px', 
+            color: DS.colors.text.secondary,
+            fontSize: '14px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '10px',
           }}>
             {email}
             <span style={{
-              fontSize: '11px', color: '#B8860B',
-              backgroundColor: 'rgba(184,134,11,0.1)',
-              padding: '2px 8px', borderRadius: '9999px', flexShrink: 0,
+              fontSize: '11px', 
+              color: DS.colors.primary.main,
+              backgroundColor: DS.colors.primary.main + '15',
+              padding: '2px 8px', 
+              borderRadius: DS.borderRadius.full, 
+              flexShrink: 0,
             }}>
               Em breve
             </span>
           </div>
         </div>
 
-        {/* Nova senha */}
         <div style={{ padding: '16px 0' }}>
           <label style={{
-            color: '#999999', fontSize: '12px', fontWeight: '700',
+            color: DS.colors.text.secondary, fontSize: '12px', fontWeight: '700',
             textTransform: 'uppercase', letterSpacing: '0.5px',
           }}>
             Nova senha
@@ -428,24 +435,32 @@ async function handleSaveName() {
               onChange={e => setNewPwd(e.target.value)}
               placeholder="Nova senha (mín. 6 caracteres)"
               style={{
-                backgroundColor: '#111111', border: '1px solid #333333',
-                borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF',
-                fontSize: '14px', outline: 'none',
+                backgroundColor: DS.colors.bg.secondary, 
+                border: `1px solid ${DS.colors.neutral.light}`,
+                borderRadius: DS.borderRadius.md, 
+                padding: '10px 14px', 
+                color: DS.colors.text.dark,
+                fontSize: '14px', 
+                outline: 'none',
               }}
-              onFocus={e => (e.currentTarget.style.borderColor = '#B8860B')}
-              onBlur={e => (e.currentTarget.style.borderColor = '#333333')}
+              onFocus={e => (e.currentTarget.style.borderColor = DS.colors.primary.main)}
+              onBlur={e => (e.currentTarget.style.borderColor = DS.colors.neutral.light)}
             />
             <button
               onClick={handleChangePwd}
               disabled={savingPwd || newPwd.length < 6}
               style={{
                 alignSelf: 'flex-start',
-                backgroundColor: newPwd.length >= 6 ? '#B8860B' : '#333333',
-                color: 'white', border: 'none', borderRadius: '8px',
-                padding: '10px 18px', fontSize: '14px', fontWeight: '600',
+                backgroundColor: newPwd.length >= 6 ? DS.colors.primary.main : DS.colors.neutral.charcoal,
+                color: 'white', 
+                border: 'none', 
+                borderRadius: DS.borderRadius.md,
+                padding: '10px 18px', 
+                fontSize: '14px', 
+                fontWeight: '600',
                 cursor: savingPwd || newPwd.length < 6 ? 'not-allowed' : 'pointer',
                 opacity: savingPwd || newPwd.length < 6 ? 0.6 : 1,
-                transition: 'all 0.15s',
+                transition: DS.transitions.base,
               }}
             >
               {savingPwd ? 'Alterando...' : 'Alterar Senha'}
@@ -453,8 +468,9 @@ async function handleSaveName() {
           </div>
           {pwdMsg && (
             <p style={{
-              marginTop: '6px', fontSize: '13px',
-              color: pwdMsg.startsWith('✅') ? '#22C55E' : '#EF4444',
+              marginTop: '6px', 
+              fontSize: '13px',
+              color: pwdMsg.startsWith('✅') ? DS.colors.secondary.success : DS.colors.secondary.error,
             }}>
               {pwdMsg}
             </p>
@@ -469,12 +485,19 @@ async function handleSaveName() {
             onClick={handleSignOut}
             disabled={loggingOut}
             style={{
-              display: 'flex', alignItems: 'center', gap: '10px',
-              backgroundColor: 'transparent', border: '1.5px solid #EF4444',
-              color: '#EF4444', borderRadius: '10px', padding: '12px 20px',
-              fontSize: '15px', fontWeight: '600',
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '10px',
+              backgroundColor: 'transparent', 
+              border: `1.5px solid ${DS.colors.secondary.error}`,
+              color: DS.colors.secondary.error, 
+              borderRadius: DS.borderRadius.md, 
+              padding: '12px 20px',
+              fontSize: '15px', 
+              fontWeight: '600',
               cursor: loggingOut ? 'not-allowed' : 'pointer',
-              opacity: loggingOut ? 0.6 : 1, transition: 'opacity 0.2s',
+              opacity: loggingOut ? 0.6 : 1, 
+              transition: DS.transitions.base,
             }}
           >
             🚪 {loggingOut ? 'Saindo...' : 'Encerrar sessão'}
@@ -489,34 +512,45 @@ async function handleSaveName() {
             <button
               onClick={() => setConfirmDelete(true)}
               style={{
-                display: 'flex', alignItems: 'center', gap: '10px',
-                backgroundColor: 'rgba(239,68,68,0.05)',
-                border: '1.5px solid rgba(239,68,68,0.3)',
-                color: '#EF4444', borderRadius: '10px', padding: '12px 20px',
-                fontSize: '15px', fontWeight: '600', cursor: 'pointer',
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '10px',
+                backgroundColor: DS.colors.secondary.error + '08',
+                border: `1.5px solid ${DS.colors.secondary.error}30`,
+                color: DS.colors.secondary.error, 
+                borderRadius: DS.borderRadius.md, 
+                padding: '12px 20px',
+                fontSize: '15px', 
+                fontWeight: '600', 
+                cursor: 'pointer',
               }}
             >
               🗑️ Excluir minha conta
             </button>
           ) : (
             <div style={{
-              backgroundColor: 'rgba(239,68,68,0.05)',
-              border: '1px solid rgba(239,68,68,0.2)',
-              borderRadius: '12px', padding: '20px',
+              backgroundColor: DS.colors.secondary.error + '08',
+              border: `1px solid ${DS.colors.secondary.error}20`,
+              borderRadius: DS.borderRadius.lg, 
+              padding: '20px',
             }}>
-              <p style={{ color: '#FFFFFF', fontWeight: '600', marginBottom: '8px' }}>
+              <p style={{ color: DS.colors.text.dark, fontWeight: '600', marginBottom: '8px' }}>
                 Tem certeza? Esta ação não pode ser desfeita.
               </p>
-              <p style={{ color: '#666666', fontSize: '13px', marginBottom: '16px' }}>
+              <p style={{ color: DS.colors.text.secondary, fontSize: '13px', marginBottom: '16px' }}>
                 Todos os seus dados serão permanentemente removidos.
               </p>
               <div style={{ display: 'flex', gap: '12px' }}>
                 <button
                   onClick={() => setConfirmDelete(false)}
                   style={{
-                    backgroundColor: '#2a2a2a', border: '1px solid #444444',
-                    color: '#CCCCCC', borderRadius: '8px', padding: '8px 16px',
-                    fontSize: '14px', cursor: 'pointer',
+                    backgroundColor: DS.colors.neutral.charcoal, 
+                    border: `1px solid ${DS.colors.neutral.dark}`,
+                    color: DS.colors.text.secondary, 
+                    borderRadius: DS.borderRadius.md, 
+                    padding: '8px 16px',
+                    fontSize: '14px', 
+                    cursor: 'pointer',
                   }}
                 >
                   Cancelar
@@ -525,9 +559,15 @@ async function handleSaveName() {
                   disabled
                   title="Em breve"
                   style={{
-                    backgroundColor: '#EF4444', color: 'white', border: 'none',
-                    borderRadius: '8px', padding: '8px 16px', fontSize: '14px',
-                    fontWeight: '600', cursor: 'not-allowed', opacity: 0.6,
+                    backgroundColor: DS.colors.secondary.error, 
+                    color: 'white', 
+                    border: 'none',
+                    borderRadius: DS.borderRadius.md, 
+                    padding: '8px 16px', 
+                    fontSize: '14px',
+                    fontWeight: '600', 
+                    cursor: 'not-allowed', 
+                    opacity: 0.6,
                   }}
                 >
                   Sim, excluir conta
@@ -544,12 +584,19 @@ async function handleSaveName() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{
-      backgroundColor: '#1a1a1a', borderRadius: '16px', padding: '24px',
-      marginBottom: '16px', border: '1px solid #2a2a2a',
+      backgroundColor: DS.colors.bg.secondary, 
+      borderRadius: DS.borderRadius.lg, 
+      padding: '24px',
+      marginBottom: '16px', 
+      border: `1px solid ${DS.colors.neutral.light}`,
     }}>
       <h2 style={{
-        fontSize: '13px', fontWeight: '700', color: '#666666',
-        textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '16px',
+        fontSize: '13px', 
+        fontWeight: '700', 
+        color: DS.colors.text.secondary,
+        textTransform: 'uppercase', 
+        letterSpacing: '0.8px', 
+        marginBottom: '16px',
       }}>
         {title}
       </h2>

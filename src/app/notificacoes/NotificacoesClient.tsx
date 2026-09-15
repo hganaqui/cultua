@@ -1,46 +1,41 @@
-// src/app/notificacoes/NotificacoesClient.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import type { Notification } from '@/types'
-import Link from 'next/link'
 
 interface NotificacoesClientProps {
   userId: string
 }
 
 export default function NotificacoesClient({ userId }: NotificacoesClientProps) {
+  const router = useRouter()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
 
-  // ── Carregar notificações ────────────────────────────────────────
   async function loadNotifications() {
     try {
-      let query = supabase
+      const { data, error } = await supabase
         .from('notifications')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
 
-      const { data, error } = await query
-
       if (error) throw error
       setNotifications(data || [])
     } catch (err) {
-      console.error('Erro ao carregar notificações:', err)
+      console.error('Erro ao carregar notificacoes:', err)
     } finally {
       setLoading(false)
     }
   }
 
-  // ── Atualizar ao carregar ────────────────────────────────────────
   useEffect(() => {
     loadNotifications()
   }, [userId])
 
-  // ── Subscribe a notificações em tempo real ──────────────────────
   useEffect(() => {
     const channel = supabase
       .channel(`notifications:${userId}`)
@@ -63,15 +58,12 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
     }
   }, [userId])
 
-  // ── Marcar como lida ────────────────────────────────────────────
   async function markAsRead(notificationId: string) {
     try {
-      const { error } = await supabase
+      await supabase
         .from('notifications')
         .update({ read: true })
         .eq('id', notificationId)
-
-      if (error) throw error
 
       setNotifications((prev) =>
         prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
@@ -81,16 +73,13 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
     }
   }
 
-  // ── Marcar tudo como lido ───────────────────────────────────────
   async function markAllAsRead() {
     try {
-      const { error } = await supabase
+      await supabase
         .from('notifications')
         .update({ read: true })
         .eq('user_id', userId)
         .eq('read', false)
-
-      if (error) throw error
 
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
     } catch (err) {
@@ -98,65 +87,31 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
     }
   }
 
-  // ── Deletar notificação ──────────────────────────────────────────
   async function deleteNotification(notificationId: string) {
     try {
-      const { error } = await supabase
+      await supabase
         .from('notifications')
         .delete()
         .eq('id', notificationId)
 
-      if (error) throw error
-
       setNotifications((prev) => prev.filter((n) => n.id !== notificationId))
     } catch (err) {
-      console.error('Erro ao deletar notificação:', err)
+      console.error('Erro ao deletar notificacao:', err)
     }
   }
 
-  // ── Ícone por tipo ───────────────────────────────────────────────
-  function getNotificationIcon(type: string) {
-    switch (type) {
-      case 'content_approved':
-        return '✅'
-      case 'content_rejected':
-        return '❌'
-      case 'pending_content':
-        return '⏳'
-      default:
-        return '📢'
+  function handleNotificationClick(notification: Notification) {
+    if (!notification.read) {
+      markAsRead(notification.id)
+    }
+
+    if (notification.metadata?.content_id) {
+      router.push(`/content/${notification.metadata.content_id}`)
+    } else if (notification.type === 'pending_content') {
+      router.push('/admin')
     }
   }
 
-  // ── Cor por tipo ─────────────────────────────────────────────────
-  function getNotificationColor(type: string) {
-    switch (type) {
-      case 'content_approved':
-        return '#22C55E'
-      case 'content_rejected':
-        return '#EF4444'
-      case 'pending_content':
-        return '#F59E0B'
-      default:
-        return '#666666'
-    }
-  }
-
-  // ── Título por tipo ──────────────────────────────────────────────
-  function getNotificationLabel(type: string) {
-    switch (type) {
-      case 'content_approved':
-        return 'Conteúdo Aprovado'
-      case 'content_rejected':
-        return 'Conteúdo Rejeitado'
-      case 'pending_content':
-        return 'Conteúdo Pendente'
-      default:
-        return 'Notificação'
-    }
-  }
-
-  // ── Filtrar notificações ─────────────────────────────────────────
   const filteredNotifications =
     filter === 'unread'
       ? notifications.filter((n) => !n.read)
@@ -164,7 +119,6 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
 
   const unreadCount = notifications.filter((n) => !n.read).length
 
-  // ── Render ───────────────────────────────────────────────────────
   return (
     <main style={{
       minHeight: 'calc(100vh - 120px)',
@@ -172,7 +126,6 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
       padding: '40px 16px',
     }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        {/* Header */}
         <div
           style={{
             display: 'flex',
@@ -192,12 +145,12 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
                 fontWeight: '800',
               }}
             >
-              🔔 Notificações
+              Notificacoes
             </h1>
             <p style={{ color: '#CCCCCC', margin: 0, fontSize: '14px' }}>
               {unreadCount > 0
-                ? `${unreadCount} não lida${unreadCount > 1 ? 's' : ''}`
-                : 'Todas as notificações lidas'}
+                ? `${unreadCount} nao lida${unreadCount > 1 ? 's' : ''}`
+                : 'Todas as notificacoes lidas'}
             </p>
           </div>
           {unreadCount > 0 && (
@@ -221,12 +174,11 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
                 (e.currentTarget.style.backgroundColor = '#B8860B')
               }
             >
-              ✓ Marcar tudo como lido
+              Marcar tudo como lido
             </button>
           )}
         </div>
 
-        {/* Filtros */}
         <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
           {(['all', 'unread'] as const).map((f) => (
             <button
@@ -250,19 +202,17 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
                 if (filter !== f) e.currentTarget.style.backgroundColor = '#1a1a1a'
               }}
             >
-              {f === 'all' ? 'Todas' : 'Não lidas'}
+              {f === 'all' ? 'Todas' : 'Nao lidas'}
             </button>
           ))}
         </div>
 
-        {/* Loading */}
         {loading && (
           <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-            <p style={{ color: '#CCCCCC' }}>Carregando notificações...</p>
+            <p style={{ color: '#CCCCCC' }}>Carregando notificacoes...</p>
           </div>
         )}
 
-        {/* Vazio */}
         {!loading && filteredNotifications.length === 0 && (
           <div
             style={{
@@ -273,16 +223,15 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
               border: '1px solid #333333',
             }}
           >
-            <p style={{ fontSize: '48px', margin: '0 0 10px 0' }}>📭</p>
+            <p style={{ fontSize: '48px', margin: '0 0 10px 0' }}>Box</p>
             <p style={{ color: '#CCCCCC', margin: 0, fontSize: '14px' }}>
               {filter === 'unread'
-                ? 'Nenhuma notificação não lida'
-                : 'Nenhuma notificação'}
+                ? 'Nenhuma notificacao nao lida'
+                : 'Nenhuma notificacao'}
             </p>
           </div>
         )}
 
-        {/* Lista */}
         {!loading && filteredNotifications.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {filteredNotifications.map((notification) => (
@@ -293,7 +242,7 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
                   border: `1px solid ${
                     notification.read
                       ? '#333333'
-                      : getNotificationColor(notification.type)
+                      : '#B8860B'
                   }`,
                   borderRadius: '8px',
                   padding: '16px',
@@ -301,7 +250,7 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
                   gap: '16px',
                   alignItems: 'flex-start',
                   transition: 'all 0.2s ease',
-                  cursor: !notification.read ? 'pointer' : 'default',
+                  cursor: 'pointer',
                 }}
                 onMouseOver={(e) => {
                   e.currentTarget.style.backgroundColor = '#2a2a2a'
@@ -313,11 +262,10 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
                     : '#2a2a2a'
                   e.currentTarget.style.borderColor = notification.read
                     ? '#333333'
-                    : getNotificationColor(notification.type)
+                    : '#B8860B'
                 }}
-                onClick={() => !notification.read && markAsRead(notification.id)}
+                onClick={() => handleNotificationClick(notification)}
               >
-                {/* Ícone */}
                 <div
                   style={{
                     fontSize: '24px',
@@ -325,10 +273,12 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
                     textAlign: 'center',
                   }}
                 >
-                  {getNotificationIcon(notification.type)}
+                  {notification.type === 'content_approved' && 'Check'}
+                  {notification.type === 'content_rejected' && 'X'}
+                  {notification.type === 'pending_content' && 'Clock'}
+                  {!['content_approved', 'content_rejected', 'pending_content'].includes(notification.type) && 'Bell'}
                 </div>
 
-                {/* Conteúdo */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <h3
                     style={{
@@ -364,7 +314,6 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
                   </p>
                 </div>
 
-                {/* Status & Ações */}
                 <div
                   style={{
                     display: 'flex',
@@ -376,9 +325,7 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
                   {!notification.read && (
                     <span
                       style={{
-                        backgroundColor: getNotificationColor(
-                          notification.type
-                        ),
+                        backgroundColor: '#B8860B',
                         color: '#111111',
                         padding: '4px 10px',
                         borderRadius: '4px',
@@ -386,7 +333,7 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
                         fontWeight: 'bold',
                       }}
                     >
-                      {getNotificationLabel(notification.type)}
+                      Nova
                     </span>
                   )}
 
@@ -414,7 +361,7 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
                       e.currentTarget.style.color = '#EF4444'
                     }}
                   >
-                    ✕ Deletar
+                    X Deletar
                   </button>
                 </div>
               </div>

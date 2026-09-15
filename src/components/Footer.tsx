@@ -1,11 +1,15 @@
-// src/components/Footer.tsx
+'use client'
+
 import Link from 'next/link'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
+
+const DS = DESIGN_SYSTEM
 
 export default function Footer() {
   return (
     <footer style={{
-      backgroundColor: '#1A1A1A',
-      borderTop: '1px solid #333333',
+      backgroundColor: DS.colors.primary.main,
+      borderTop: `2px solid ${DS.colors.primary.accent}`,
       padding: '48px 16px 24px',
     }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
@@ -22,15 +26,15 @@ export default function Footer() {
           <div>
             <div style={{
               fontSize: '24px',
-              fontWeight: '900',
-              color: '#B8860B',
+              fontWeight: DS.typography.fontWeight.extrabold,
+              color: DS.colors.primary.accent,
               letterSpacing: '2px',
               marginBottom: '12px',
             }}>
               CULTUA
             </div>
             <p style={{
-              color: '#666666',
+              color: 'rgba(255, 255, 255, 0.7)',
               fontSize: '14px',
               lineHeight: 1.6,
               marginBottom: '16px',
@@ -43,11 +47,11 @@ export default function Footer() {
                 <span key={tag} style={{
                   fontSize: '11px',
                   fontWeight: '600',
-                  color: '#B8860B',
-                  backgroundColor: 'rgba(184,134,11,0.1)',
+                  color: DS.colors.primary.accent,
+                  backgroundColor: 'rgba(212, 175, 124, 0.2)',
                   padding: '3px 10px',
-                  borderRadius: '9999px',
-                  border: '1px solid rgba(184,134,11,0.2)',
+                  borderRadius: DS.borderRadius.full,
+                  border: `1px solid ${DS.colors.primary.accent}40`,
                 }}>
                   {tag}
                 </span>
@@ -57,7 +61,7 @@ export default function Footer() {
 
           {/* Categorias */}
           <div>
-            <h4 style={{ color: '#CCCCCC', fontSize: '14px', fontWeight: '700', marginBottom: '16px' }}>
+            <h4 style={{ color: DS.colors.primary.accent, fontSize: '14px', fontWeight: DS.typography.fontWeight.bold, marginBottom: '16px' }}>
               Categorias
             </h4>
             {[
@@ -70,12 +74,19 @@ export default function Footer() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                color: '#666666',
+                color: 'rgba(255, 255, 255, 0.7)',
                 textDecoration: 'none',
                 fontSize: '14px',
                 marginBottom: '10px',
-                transition: 'color 0.2s',
-              }}>
+                transition: DS.transitions.base,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = DS.colors.primary.accent
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)'
+              }}
+              >
                 {item.icon} {item.name}
               </Link>
             ))}
@@ -83,7 +94,7 @@ export default function Footer() {
 
           {/* Links */}
           <div>
-            <h4 style={{ color: '#CCCCCC', fontSize: '14px', fontWeight: '700', marginBottom: '16px' }}>
+            <h4 style={{ color: DS.colors.primary.accent, fontSize: '14px', fontWeight: DS.typography.fontWeight.bold, marginBottom: '16px' }}>
               Plataforma
             </h4>
             {[
@@ -95,11 +106,19 @@ export default function Footer() {
             ].map(item => (
               <Link key={item.name} href={item.href} style={{
                 display: 'block',
-                color: '#666666',
+                color: 'rgba(255, 255, 255, 0.7)',
                 textDecoration: 'none',
                 fontSize: '14px',
                 marginBottom: '10px',
-              }}>
+                transition: DS.transitions.base,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = DS.colors.primary.accent
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)'
+              }}
+              >
                 {item.name}
               </Link>
             ))}
@@ -108,7 +127,7 @@ export default function Footer() {
 
         {/* Bottom */}
         <div style={{
-          borderTop: '1px solid #333333',
+          borderTop: `1px solid ${DS.colors.primary.accent}40`,
           paddingTop: '24px',
           display: 'flex',
           justifyContent: 'space-between',
@@ -116,10 +135,10 @@ export default function Footer() {
           flexWrap: 'wrap',
           gap: '16px',
         }}>
-          <span style={{ color: '#444444', fontSize: '13px' }}>
+          <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '13px' }}>
             © 2026 CULTUA. Todos os direitos reservados.
           </span>
-          <span style={{ color: '#444444', fontSize: '13px' }}>
+          <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '13px' }}>
             Feito com 🙏 para a comunidade cristã
           </span>
         </div>

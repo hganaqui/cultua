@@ -16,8 +16,8 @@ export type User = {
   full_name: string | null
   avatar_url: string | null
   role: UserRole
-  managed_categories: string[] | null   // IDs de categorias (legado, substituído por admin_scopes)
-  managed_creators: string[] | null     // IDs de criadores  (legado, substituído por admin_scopes)
+  managed_categories: string[] | null
+  managed_creators: string[] | null
   created_at: string
   updated_at: string
 }
@@ -34,6 +34,26 @@ export type Category = {
   icon: string | null
   color: string | null
   created_at: string
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAGS / THEMES ✅ NOVO
+// ═══════════════════════════════════════════════════════════════════
+
+export type Tag = {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  color: string
+  icon: string
+  created_at: string
+}
+
+export type ContentTag = {
+  id: string
+  content_id: string
+  tag_id: string
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -58,9 +78,9 @@ export type Content = {
   view_count: number
   created_at: string
   updated_at: string
-  // ✅ joins — sempre Category completo (tem color, icon, slug, etc.)
   category?: Category | Category[] | null
   creator?: Pick<User, 'id' | 'full_name' | 'avatar_url'> | null
+  tags?: Tag[] | null  // ✅ NOVO
 }
 
 /** Shape mínimo usado em /meus-uploads */
@@ -72,6 +92,7 @@ export type ContentWithStatus = {
   created_at: string
   url_thumb: string | null
   category: Category | Category[] | null
+  tags?: Tag[] | null  // ✅ NOVO
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -140,17 +161,16 @@ export type AdminScope = {
   id: string
   admin_id: string
   scope_type: ScopeType
-  scope_value: string   // UUID da category ou do creator
+  scope_value: string
   granted_by: string | null
   created_at: string
 }
 
 export type AdminScopes = {
-  categories: string[]  // category IDs
-  creators: string[]    // creator/user IDs
+  categories: string[]
+  creators: string[]
 }
 
-/** Usuário com escopos resolvidos — usado no painel superadmin */
 export type AdminWithScopes = {
   id: string
   full_name: string | null
@@ -160,7 +180,6 @@ export type AdminWithScopes = {
   scopes: AdminScopes
 }
 
-/** Criador mínimo para selects/dropdowns */
 export type CreatorOption = {
   id: string
   full_name: string | null
@@ -170,14 +189,12 @@ export type CreatorOption = {
 // PROFILE (retorno do Supabase em joins)
 // ═══════════════════════════════════════════════════════════════════
 
-/** Shape que o Header server passa ao HeaderClient */
 export type HeaderProfile = {
   avatar_url: string | null
   role: UserRole
   full_name: string | null
 }
 
-/** Shape retornado por .from('profiles').select() */
 export type Profile = {
   id: string
   full_name: string | null
@@ -215,10 +232,8 @@ export function translateAuthError(message: string): string {
 // UTILITY TYPES
 // ═══════════════════════════════════════════════════════════════════
 
-/** Helper para acessar joins do Supabase com segurança */
 export type SupabaseJoin<T> = T | T[] | null
 
-/** Extrai nome de categoria de um join */
 export function getCategoryName(
   category: Category | Category[] | null | undefined
 ): string {
@@ -235,12 +250,33 @@ export function getCategory(
   return category
 }
 
-
-/** Extrai nome do criador de um join */
 export function getCreatorName(
   creator: Content['creator']
 ): string {
   if (!creator) return 'Desconhecido'
   if (Array.isArray(creator)) return creator[0]?.full_name ?? 'Desconhecido'
   return creator.full_name ?? 'Desconhecido'
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAG HELPERS ✅ NOVO
+// ═══════════════════════════════════════════════════════════════════
+
+export function getContentTags(
+  tags: Tag[] | null | undefined
+): Tag[] {
+  if (!tags) return []
+  if (Array.isArray(tags)) return tags
+  return []
+}
+
+export function formatTags(tags: Tag[] | null | undefined, maxDisplay: number = 3): {
+  display: Tag[]
+  remaining: number
+} {
+  const tagList = getContentTags(tags)
+  return {
+    display: tagList.slice(0, maxDisplay),
+    remaining: Math.max(0, tagList.length - maxDisplay),
+  }
 }

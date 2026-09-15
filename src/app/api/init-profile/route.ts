@@ -1,3 +1,4 @@
+// src/app/api/admin/initi-profile/route.ts
 import { createServerSupabase } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 

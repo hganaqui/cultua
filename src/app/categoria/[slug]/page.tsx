@@ -1,9 +1,11 @@
-// src/app/categoria/[slug]/page.tsx
 import { createServerSupabase } from '@/lib/supabase-server'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import CategoriaClient from './CategoriaClient'   // ← import correto
+import CategoriaClient from './CategoriaClient'
+import { DESIGN_SYSTEM } from '@/lib/design-system'
 import type { Metadata } from 'next'
+
+const DS = DESIGN_SYSTEM
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -29,9 +31,9 @@ export default async function CategoriaPage({ params }: Props) {
   const { slug } = await params
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#111111' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: DS.colors.bg.primary }}>
       <Header />
-      <CategoriaClient slug={slug} />   {/* ← prop correta */}
+      <CategoriaClient slug={slug} />
       <Footer />
     </div>
   )
