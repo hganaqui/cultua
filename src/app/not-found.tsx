@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import { DESIGN_SYSTEM } from '@/lib/design-system'
@@ -25,12 +24,9 @@ export default function NotFound() {
     }}>
       {/* Imagem 404 */}
       <div style={{ marginBottom: '32px', maxWidth: '240px' }}>
-        <Image
+        <img
           src="/404-not-found.jpg"
           alt="Conteúdo não encontrado"
-          width={240}
-          height={240}
-          priority
           style={{
             width: '100%',
             height: 'auto',
@@ -113,24 +109,24 @@ export default function NotFound() {
           🏠 Voltar ao Início
         </Link>
 
+        {/* ✅ NOVO: Segundo botão no padrão */}
         <Link
-          href="/explorar"
+          href="/"
           style={{
             padding: `${DS.spacing.md} ${DS.spacing.xl}`,
             borderRadius: DS.borderRadius.md,
-            fontWeight: DS.typography.fontWeight.semibold,
+            fontWeight: DS.typography.fontWeight.bold,
             fontSize: DS.typography.fontSize.base,
-            border: `2px solid ${hoveredBtn === 'explorar' ? DS.colors.primary.main : DS.colors.neutral.light}`,
-            backgroundColor: hoveredBtn === 'explorar' ? `${DS.colors.primary.main}15` : 'transparent',
+            transition: DS.transitions.base,
+            backgroundColor: hoveredBtn === 'explorar' ? `${DS.colors.primary.main}CC` : DS.colors.primary.main,
             color: '#FFFFFF',
             textDecoration: 'none',
             display: 'inline-block',
-            transition: DS.transitions.base,
           }}
           onMouseEnter={() => setHoveredBtn('explorar')}
           onMouseLeave={() => setHoveredBtn(null)}
         >
-          🔍 Explorar Conteúdos
+          🏠 Voltar para Home
         </Link>
       </div>
     </main>
