@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { UPLOAD_LIMITS, formatBytes } from '@/lib/r2'
 import { DESIGN_SYSTEM } from '@/lib/design-system'
-import { notifyAdminsOfPendingContent } from '@/lib/db' 
+import { notifyAdminsOfPendingContent } from '@/lib/db'
+import type { Tag } from '@/types'
 
 const DS = DESIGN_SYSTEM
 
@@ -32,9 +33,17 @@ export default function UploadClient() {
   const [step, setStep] = useState<UploadStep>('form')
   const [authorized, setAuth] = useState<boolean | null>(null)
   const [categories, setCats] = useState<{ id: string; name: string; icon: string | null }[]>([])
+  const [tags, setTags] = useState<Tag[]>([])
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+
   const [form, setForm] = useState<FormState>({
-    title: '', description: '', type: 'video', categoryId: '', duration: '',
+    title: '',
+    description: '',
+    type: 'video',
+    categoryId: '',
+    duration: '',
   })
+
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const [thumbFile, setThumbFile] = useState<File | null>(null)
   const [thumbPreview, setThumbPreview] = useState<string | null>(null)
@@ -49,9 +58,9 @@ export default function UploadClient() {
     async function check() {
       try {
         const { data: { user } } = await supabase.auth.getUser()
-        if (!user) { 
+        if (!user) {
           router.push('/auth/login')
-          return 
+          return
         }
 
         const { data: profile } = await supabase
@@ -68,15 +77,25 @@ export default function UploadClient() {
 
         setAuth(true)
 
+        // Carregar categorias
         const { data: cats } = await supabase
           .from('categories')
           .select('id, name, icon')
           .order('name')
-        
+
         setCats(cats ?? [])
         if (cats?.[0]) {
           setForm(f => ({ ...f, categoryId: cats[0].id }))
         }
+
+        // Carregar tags
+        const { data: tagsData } = await supabase
+          .from('tags')
+          .select('*')
+          .order('name')
+
+        setTags(tagsData ?? [])
+
       } catch (err) {
         console.error('Erro na verificação:', err)
         setAuth(false)
@@ -216,6 +235,22 @@ export default function UploadClient() {
 
       if (error) throw new Error(error.message)
 
+      // ✅ Inserir tags do conteúdo
+      if (selectedTags.length > 0) {
+        const contentTagsData = selectedTags.map(tagId => ({
+          content_id: content.id,
+          tag_id: tagId,
+        }))
+
+        const { error: tagsError } = await supabase
+          .from('content_tags')
+          .insert(contentTagsData)
+
+        if (tagsError) {
+          console.error('Erro ao vincular tags:', tagsError)
+        }
+      }
+
       await notifyAdminsOfPendingContent(content.id, form.title.trim())
 
       setContentId(content.id)
@@ -230,12 +265,12 @@ export default function UploadClient() {
   }
 
   if (authorized === null) return (
-    <div style={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      height: '60vh', 
-      color: DS.colors.text.secondary 
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: '60vh',
+      color: DS.colors.text.secondary
     }}>
       Verificando permissões...
     </div>
@@ -253,12 +288,12 @@ export default function UploadClient() {
       </p>
       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
         <a href="/admin" style={{
-          backgroundColor: DS.colors.primary.main, 
-          color: 'white', 
+          backgroundColor: DS.colors.primary.main,
+          color: 'white',
           textDecoration: 'none',
-          padding: '12px 24px', 
-          borderRadius: '10px', 
-          fontSize: '15px', 
+          padding: '12px 24px',
+          borderRadius: '10px',
+          fontSize: '15px',
           fontWeight: '700',
         }}>
           🛡️ Ir para Curadoria
@@ -268,15 +303,16 @@ export default function UploadClient() {
           setVideoFile(null)
           setThumbFile(null)
           setThumbPreview(null)
+          setSelectedTags([])
           setForm({ title: '', description: '', type: 'video', categoryId: categories[0]?.id ?? '', duration: '' })
         }} style={{
-          backgroundColor: DS.colors.neutral.charcoal, 
-          color: DS.colors.text.secondary, 
+          backgroundColor: DS.colors.neutral.charcoal,
+          color: DS.colors.text.secondary,
           border: `1px solid ${DS.colors.neutral.dark}`,
-          padding: '12px 24px', 
-          borderRadius: '10px', 
+          padding: '12px 24px',
+          borderRadius: '10px',
           fontSize: '15px',
-          fontWeight: '600', 
+          fontWeight: '600',
           cursor: 'pointer',
         }}>
           + Novo Upload
@@ -307,10 +343,10 @@ export default function UploadClient() {
           </div>
           <div style={{ backgroundColor: DS.colors.neutral.medium, borderRadius: '9999px', height: '8px', overflow: 'hidden' }}>
             <div style={{
-              height: '100%', 
-              backgroundColor: DS.colors.primary.main, 
+              height: '100%',
+              backgroundColor: DS.colors.primary.main,
               borderRadius: '9999px',
-              width: `${progress.video}%`, 
+              width: `${progress.video}%`,
               transition: 'width 0.3s ease',
             }} />
           </div>
@@ -327,10 +363,10 @@ export default function UploadClient() {
           </div>
           <div style={{ backgroundColor: DS.colors.neutral.medium, borderRadius: '9999px', height: '8px', overflow: 'hidden' }}>
             <div style={{
-              height: '100%', 
-              backgroundColor: DS.colors.primary.main, 
+              height: '100%',
+              backgroundColor: DS.colors.primary.main,
               borderRadius: '9999px',
-              width: `${progress.thumb}%`, 
+              width: `${progress.thumb}%`,
               transition: 'width 0.3s ease',
             }} />
           </div>
@@ -357,12 +393,12 @@ export default function UploadClient() {
 
       {errorMsg && (
         <div style={{
-          backgroundColor: `${DS.colors.secondary.error}15`, 
+          backgroundColor: `${DS.colors.secondary.error}15`,
           border: `1px solid ${DS.colors.secondary.error}30`,
-          borderRadius: '12px', 
-          padding: '14px 16px', 
+          borderRadius: '12px',
+          padding: '14px 16px',
           marginBottom: '24px',
-          color: DS.colors.secondary.error, 
+          color: DS.colors.secondary.error,
           fontSize: '14px',
         }}>
           ⚠️ {errorMsg}
@@ -381,11 +417,11 @@ export default function UploadClient() {
               <button key={opt.value} type="button"
                 onClick={() => setForm(f => ({ ...f, type: opt.value }))}
                 style={{
-                  padding: '10px 20px', 
-                  borderRadius: '9999px', 
+                  padding: '10px 20px',
+                  borderRadius: '9999px',
                   border: 'none',
-                  fontSize: '14px', 
-                  fontWeight: '600', 
+                  fontSize: '14px',
+                  fontWeight: '600',
                   cursor: 'pointer',
                   backgroundColor: form.type === opt.value ? DS.colors.primary.main : DS.colors.neutral.charcoal,
                   color: form.type === opt.value ? 'white' : DS.colors.text.secondary,
@@ -403,7 +439,7 @@ export default function UploadClient() {
           <div style={{ marginBottom: '16px' }}>
             <label style={labelStyle}>Título *</label>
             <input
-              type="text" 
+              type="text"
               required
               value={form.title}
               onChange={(e) => setForm(f => ({ ...f, title: e.target.value }))}
@@ -486,9 +522,9 @@ export default function UploadClient() {
               onClick={() => videoRef.current?.click()}
               style={{
                 border: `2px dashed ${videoFile ? DS.colors.primary.main : DS.colors.neutral.dark}`,
-                borderRadius: '12px', 
+                borderRadius: '12px',
                 padding: '32px',
-                textAlign: 'center', 
+                textAlign: 'center',
                 cursor: 'pointer',
                 backgroundColor: videoFile ? `${DS.colors.primary.main}08` : 'transparent',
                 transition: 'all 0.2s',
@@ -534,17 +570,17 @@ export default function UploadClient() {
           <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
 
             <div style={{
-              width: '120px', 
-              height: '68px', 
+              width: '120px',
+              height: '68px',
               flexShrink: 0,
-              backgroundColor: DS.colors.neutral.medium, 
-              borderRadius: '8px', 
+              backgroundColor: DS.colors.neutral.medium,
+              borderRadius: '8px',
               overflow: 'hidden',
-              display: 'flex', 
-              alignItems: 'center', 
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
               backgroundImage: thumbPreview ? `url(${thumbPreview})` : 'none',
-              backgroundSize: 'cover', 
+              backgroundSize: 'cover',
               backgroundPosition: 'center',
               fontSize: '28px',
             }}>
@@ -555,14 +591,14 @@ export default function UploadClient() {
               <button type="button"
                 onClick={() => thumbRef.current?.click()}
                 style={{
-                  backgroundColor: DS.colors.neutral.charcoal, 
+                  backgroundColor: DS.colors.neutral.charcoal,
                   color: DS.colors.text.secondary,
-                  border: `1px solid ${DS.colors.neutral.dark}`, 
+                  border: `1px solid ${DS.colors.neutral.dark}`,
                   borderRadius: '8px',
-                  padding: '10px 16px', 
-                  fontSize: '13px', 
+                  padding: '10px 16px',
+                  fontSize: '13px',
                   fontWeight: '600',
-                  cursor: 'pointer', 
+                  cursor: 'pointer',
                   marginBottom: '8px',
                 }}
               >
@@ -583,18 +619,64 @@ export default function UploadClient() {
           </div>
         </Card>
 
+        {/* ✅ NOVO CARD DE TAGS */}
+        <Card title="Temas (Opcional)">
+          <p style={{ color: DS.colors.text.secondary, fontSize: '13px', marginBottom: '12px' }}>
+            Selecione os temas relacionados ao conteúdo
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {tags.map(tag => (
+              <button
+                key={tag.id}
+                type="button"
+                onClick={() => {
+                  if (selectedTags.includes(tag.id)) {
+                    setSelectedTags(selectedTags.filter(id => id !== tag.id))
+                  } else {
+                    setSelectedTags([...selectedTags, tag.id])
+                  }
+                }}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: '9999px',
+                  border: `2px solid ${selectedTags.includes(tag.id) ? tag.color : DS.colors.neutral.light}`,
+                  backgroundColor: selectedTags.includes(tag.id) ? tag.color + '20' : 'transparent',
+                  color: selectedTags.includes(tag.id) ? tag.color : DS.colors.text.secondary,
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = tag.color + '30'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = selectedTags.includes(tag.id) ? tag.color + '20' : 'transparent'
+                }}
+              >
+                {tag.icon} {tag.name}
+              </button>
+            ))}
+          </div>
+          {selectedTags.length > 0 && (
+            <p style={{ color: DS.colors.primary.main, fontSize: '12px', marginTop: '12px', fontWeight: '600' }}>
+              ✓ {selectedTags.length} tema{selectedTags.length > 1 ? 's' : ''} selecionado{selectedTags.length > 1 ? 's' : ''}
+            </p>
+          )}
+        </Card>
+
         <button
           type="submit"
           disabled={!form.title || !form.categoryId || (form.type !== 'text' && !videoFile)}
           style={{
-            width: '100%', 
-            backgroundColor: DS.colors.primary.main, 
+            width: '100%',
+            backgroundColor: DS.colors.primary.main,
             color: 'white',
-            border: 'none', 
-            borderRadius: '12px', 
+            border: 'none',
+            borderRadius: '12px',
             padding: '16px',
-            fontSize: '16px', 
-            fontWeight: '700', 
+            fontSize: '16px',
+            fontWeight: '700',
             cursor: 'pointer',
             opacity: (!form.title || !form.categoryId || (form.type !== 'text' && !videoFile)) ? 0.5 : 1,
             transition: 'all 0.2s',
@@ -615,18 +697,18 @@ export default function UploadClient() {
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{
-      backgroundColor: DS.colors.bg.secondary, 
-      borderRadius: '16px', 
+      backgroundColor: DS.colors.bg.secondary,
+      borderRadius: '16px',
       padding: '24px',
-      marginBottom: '16px', 
+      marginBottom: '16px',
       border: `1px solid ${DS.colors.neutral.light}`,
     }}>
       <h2 style={{
-        fontSize: '13px', 
-        fontWeight: '700', 
+        fontSize: '13px',
+        fontWeight: '700',
         color: DS.colors.text.secondary,
-        textTransform: 'uppercase', 
-        letterSpacing: '0.8px', 
+        textTransform: 'uppercase',
+        letterSpacing: '0.8px',
         marginBottom: '16px',
       }}>
         {title}
@@ -637,22 +719,22 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 }
 
 const labelStyle: React.CSSProperties = {
-  display: 'block', 
-  color: DS.colors.text.secondary, 
+  display: 'block',
+  color: DS.colors.text.secondary,
   fontSize: '13px',
-  fontWeight: '600', 
+  fontWeight: '600',
   marginBottom: '8px',
 }
 
 const inputStyle: React.CSSProperties = {
-  width: '100%', 
-  backgroundColor: '#FFFFFF', 
+  width: '100%',
+  backgroundColor: '#FFFFFF',
   border: `2px solid ${DS.colors.neutral.light}`,
-  borderRadius: '10px', 
-  padding: '12px 16px', 
-  color: DS.colors.text.primary, 
+  borderRadius: '10px',
+  padding: '12px 16px',
+  color: DS.colors.text.primary,
   fontSize: '15px',
-  outline: 'none', 
-  boxSizing: 'border-box', 
+  outline: 'none',
+  boxSizing: 'border-box',
   transition: 'border-color 0.2s',
 }

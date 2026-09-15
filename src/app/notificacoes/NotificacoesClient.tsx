@@ -92,16 +92,24 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
 
   async function deleteNotification(notificationId: string) {
     try {
-      await supabase
+      // ✅ IMPORTANTE: Deletar do banco PRIMEIRO
+      const { error } = await supabase
         .from('notifications')
         .delete()
         .eq('id', notificationId)
 
+      if (error) {
+        console.error('Erro ao deletar:', error)
+        return
+      }
+
+      // ✅ Depois remover do estado local
       setNotifications((prev) => prev.filter((n) => n.id !== notificationId))
     } catch (err) {
-      console.error('Erro ao deletar notificacao:', err)
+      console.error('Erro:', err)
     }
   }
+
 
   function getNotificationIcon(type: string): string {
     switch (type) {
@@ -249,11 +257,10 @@ export default function NotificacoesClient({ userId }: NotificacoesClientProps) 
                 key={notification.id}
                 style={{
                   backgroundColor: notification.read ? DS.colors.bg.secondary : DS.colors.primary.accent + '15',
-                  border: `1px solid ${
-                    notification.read
+                  border: `1px solid ${notification.read
                       ? DS.colors.neutral.light
                       : DS.colors.primary.accent
-                  }`,
+                    }`,
                   borderRadius: '8px',
                   padding: '16px',
                   display: 'flex',

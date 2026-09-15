@@ -35,6 +35,13 @@ const USER_LINKS = [
   { href: '/configuracoes', label: '⚙️ Configurações' },
 ]
 
+// ✅ NOVO: Links de admin
+const ADMIN_LINKS = [
+  { href: '/admin', label: '🛡️ Painel de Curadoria' },
+  { href: '/admin/tags', label: '🏷️ Gerenciar Temas' },
+  { href: '/admin/usuarios', label: '👥 Gerenciar Usuários', superadminOnly: true },
+]
+
 export default function Header() {
   const router = useRouter()
   const dropRef = useRef<HTMLDivElement>(null)
@@ -388,6 +395,7 @@ export default function Header() {
                     zIndex: 200,
                   }}
                 >
+                  {/* Profile Info */}
                   <div
                     style={{
                       padding: '8px 12px 12px',
@@ -443,6 +451,7 @@ export default function Header() {
                     )}
                   </div>
 
+                  {/* USER LINKS */}
                   {USER_LINKS.map((item) => (
                     <DropItem
                       key={item.href}
@@ -452,24 +461,36 @@ export default function Header() {
                     />
                   ))}
 
+                  {/* ✅ ADMIN LINKS - Mostrar se for admin/superadmin */}
                   {isAdmin && (
                     <>
                       <div style={{ height: '1px', backgroundColor: DS.colors.neutral.light, margin: '6px 0' }} />
-                      <DropItem
-                        href="/admin"
-                        label="🛡️ Painel de Curadoria"
-                        onClick={() => setUserMenu(false)}
-                        highlight
-                      />
-                      {isSuperadmin && (
-                        <DropItem
-                          href="/admin/usuarios"
-                          label="⚡ Gerenciar Usuários"
-                          onClick={() => setUserMenu(false)}
-                          highlight
-                          color="#A855F7"
-                        />
-                      )}
+                      <div style={{
+                        padding: '6px 12px',
+                        fontSize: '11px',
+                        fontWeight: '700',
+                        color: DS.colors.text.secondary,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        margin: '4px 0',
+                      }}>
+                        Administração
+                      </div>
+                      {ADMIN_LINKS.map((item) => {
+                        // ✅ Se tiver superadminOnly e não for superadmin, não mostrar
+                        if (item.superadminOnly && !isSuperadmin) {
+                          return null
+                        }
+                        return (
+                          <DropItem
+                            key={item.href}
+                            href={item.href}
+                            label={item.label}
+                            onClick={() => setUserMenu(false)}
+                            highlight
+                          />
+                        )
+                      })}
                     </>
                   )}
 
@@ -658,6 +679,49 @@ export default function Header() {
                   </Link>
                 ))}
 
+                {/* ✅ ADMIN LINKS MOBILE */}
+                {isAdmin && (
+                  <>
+                    <div style={{
+                      height: '1px',
+                      backgroundColor: DS.colors.neutral.light,
+                      margin: '8px 0',
+                    }} />
+                    <div style={{
+                      padding: '8px 0',
+                      fontSize: '11px',
+                      fontWeight: '700',
+                      color: DS.colors.text.secondary,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      margin: '4px 0',
+                    }}>
+                      Administração
+                    </div>
+                    {ADMIN_LINKS.map((item) => {
+                      if (item.superadminOnly && !isSuperadmin) return null
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setMenuOpen(false)}
+                          style={{
+                            display: 'block',
+                            color: DS.colors.primary.main,
+                            textDecoration: 'none',
+                            fontSize: '15px',
+                            padding: '10px 0',
+                            borderBottom: `1px solid ${DS.colors.neutral.light}`,
+                            fontWeight: DS.typography.fontWeight.semibold,
+                          }}
+                        >
+                          {item.label}
+                        </Link>
+                      )
+                    })}
+                  </>
+                )}
+
                 <Link
                   href="/notificacoes"
                   onClick={() => setMenuOpen(false)}
@@ -693,50 +757,6 @@ export default function Header() {
                     </span>
                   )}
                 </Link>
-
-                {isAdmin && (
-                  <>
-                    <div
-                      style={{
-                        height: '1px',
-                        backgroundColor: DS.colors.neutral.light,
-                        margin: '8px 0',
-                      }}
-                    />
-                    <Link
-                      href="/admin"
-                      onClick={() => setMenuOpen(false)}
-                      style={{
-                        display: 'block',
-                        color: DS.colors.primary.main,
-                        textDecoration: 'none',
-                        fontSize: '15px',
-                        padding: '10px 0',
-                        borderBottom: `1px solid ${DS.colors.neutral.light}`,
-                        fontWeight: DS.typography.fontWeight.semibold,
-                      }}
-                    >
-                      🛡️ Painel de Curadoria
-                    </Link>
-                    {isSuperadmin && (
-                      <Link
-                        href="/admin/usuarios"
-                        onClick={() => setMenuOpen(false)}
-                        style={{
-                          display: 'block',
-                          color: '#A855F7',
-                          textDecoration: 'none',
-                          fontSize: '15px',
-                          padding: '10px 0',
-                          borderBottom: `1px solid ${DS.colors.neutral.light}`,
-                          fontWeight: DS.typography.fontWeight.semibold,
-                        }}
-                      >
-                        ⚡ Gerenciar Usuários
-                      </Link>
-                    )}
-                  </>
-                )}
 
                 <button
                   onClick={handleSignOut}
