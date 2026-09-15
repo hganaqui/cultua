@@ -26,22 +26,6 @@ export default function Hero() {
 
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
         
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '8px',
-          backgroundColor: DS.colors.primary.main + '20',
-          color: DS.colors.primary.main,
-          padding: '8px 16px',
-          borderRadius: DS.borderRadius.full,
-          fontSize: '13px',
-          fontWeight: DS.typography.fontWeight.semibold,
-          marginBottom: '24px',
-          border: `1px solid ${DS.colors.primary.main}40`,
-        }}>
-          ✨ Curadoria 100% humana
-        </div>
-
         <h1 className="hero-title" style={{
           fontWeight: DS.typography.fontWeight.extrabold,
           color: DS.colors.primary.main,
@@ -89,7 +73,7 @@ export default function Hero() {
             e.currentTarget.style.backgroundColor = DS.colors.primary.main
           }}
           >
-            🎵 Começar Gratuitamente
+            Começar Gratuitamente
           </Link>
 
           <Link href="#conteudo" style={{
@@ -126,25 +110,6 @@ export default function Hero() {
           gap: '60px',
           flexWrap: 'wrap',
         }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{
-              fontSize: '32px',
-              fontWeight: DS.typography.fontWeight.extrabold,
-              color: DS.colors.primary.main,
-              marginBottom: '4px',
-            }}>
-              100%
-            </div>
-            <div style={{
-              fontSize: '12px',
-              color: DS.colors.text.secondary,
-              fontWeight: DS.typography.fontWeight.semibold,
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-            }}>
-              Curadoria
-            </div>
-          </div>
         </div>
       </div>
     </section>
