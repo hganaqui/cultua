@@ -1,5 +1,5 @@
 📋 CULTUA — Contexto Completo Atualizado
-Última atualização: 2026-09-14 23:17 UTC
+Última atualização: 2026-09-15 09:25:53 UTC
 
 📋 Overview
 CULTUA é uma plataforma de conteúdo cristão com Sistema de Curadoria, Upload, Perfil e Gerenciamento de Usuários.
@@ -46,6 +46,8 @@ Dark: #1A1A1A (dark mode alternativo)
 ✅ Proxy.ts para proteção de rotas
 ✅ Logout seguro com router.push + refresh
 ✅ OAuth ready (estrutura pronta para Google/GitHub)
+✅ Email customizado em português via Resend/SMTP
+✅ Callback correto com Suspense boundary
 🎯 Header & Navegação ✅ COMPLETO
 ✅ 100% client, reativo ao login
 ✅ Avatar com <img> nativo + onError fallback emoji
@@ -55,6 +57,7 @@ Dark: #1A1A1A (dark mode alternativo)
 ✅ Dropdown fecha ao clicar fora
 ✅ BuscaGlobalClient (Ctrl+K para abrir)
 ✅ BuscaGlobalClientMobile (🔍 no menu)
+✅ NOVO: Link "🏷️ Gerenciar Temas" para admins/superadmins
 ✅ Logo com cor dourada + gradiente
 ✅ Cores tema verde/marfim
 ✅ Responsive mobile sem overflow
@@ -70,10 +73,10 @@ Dark: #1A1A1A (dark mode alternativo)
 ✅ Arquivo: src/components/BuscaGlobalClient.tsx
 ✅ Arquivo: src/components/BuscaGlobalClientMobile.tsx
 ✅ Removido: /explorar (substituído por busca)
-📬 Notificações ✅ PARCIALMENTE COMPLETO
+📬 Notificações ✅ COMPLETO
 ✅ Tabela notifications no Supabase com RLS
 ✅ Badge realtime no Header
-✅ Notificações sempre visíveis (não só quando unread > 0)
+✅ Notificações sempre visíveis
 ✅ Desktop: Botão 🔔 entre busca e avatar
 ✅ Mobile: Link 🔔 no menu mobile
 ✅ Cor vermelha quando unread > 0
@@ -82,9 +85,8 @@ Dark: #1A1A1A (dark mode alternativo)
 ✅ Realtime listener no Header
 ✅ Página /notificacoes com filtros (todas/não lidas)
 ✅ Marcar como lida
-✅ Deletar notificação
+✅ Deletar notificação (com DELETE no banco, não só UI)
 ✅ Emojis por tipo (✅ aprovado, ❌ rejeitado, ⏳ pendente)
-❌ Notificação ao aprovar/rejeitar (a implementar)
 🏠 Home (/) ✅ COMPLETO
 ✅ Design System integrado (verde + dourado + marfim)
 ✅ Hero com gradient limpo
@@ -136,16 +138,15 @@ Dark: #1A1A1A (dark mode alternativo)
 ✅ Link "Ver" apenas para aprovados
 ✅ Hover effects com shadow
 ✅ Responsive mobile
-🛡️ Painel de Curadoria (/admin) ✅ COMPLETO
-✅ 3 abas: Pendentes, Aprovados, Rejeitados
-✅ Sync automática: Query ao trocar de aba
-✅ Filtros: Categoria, Autor, Busca, Ordenação
-✅ Ações: Aprovar, Rejeitar, Destacar, Deletar
-✅ Layout responsivo mobile (sem canto branco)
-✅ Cards com Flexbox + thumbnail 100x64px
+🏷️ Gerenciar Temas (/admin/tags) ✅ COMPLETO
+✅ Criar, editar, deletar tags
+✅ Seleção de emoji + cor
+✅ Preview em tempo real
+✅ Admin/Superadmin only
 ✅ Design System colors
-✅ Dark theme alternativo
-✅ Notificação automática aos admins
+✅ Arquivo: src/app/admin/tags/AdminTagsClient.tsx
+✅ NOVO: Adicionado ao menu do Header
+✅ RLS policies configuradas
 📤 Upload de Conteúdo (/admin/upload) ✅ COMPLETO
 ✅ Tipos: Vídeo, Áudio, Texto
 ✅ Upload via presigned URLs (R2)
@@ -155,6 +156,17 @@ Dark: #1A1A1A (dark mode alternativo)
 ✅ Validação de tipo e tamanho
 ✅ Design System colors
 ✅ Responsive mobile
+✅ NOVO: Seleção de Temas (Tags) ao upload
+✅ Vinculação automática de tags ao conteúdo
+🛡️ Painel de Curadoria (/admin) ✅ COMPLETO
+✅ 3 abas: Pendentes, Aprovados, Rejeitados
+✅ Sync automática: Query ao trocar de aba
+✅ Filtros: Categoria, Autor, Busca, Ordenação
+✅ Ações: Aprovar, Rejeitar, Destacar, Deletar
+✅ Layout responsivo mobile
+✅ Cards com Flexbox + thumbnail 100x64px
+✅ Design System colors
+✅ Notificação automática aos admins
 👥 Gerenciar Usuários (/admin/usuarios) ✅ COMPLETO
 ✅ Superadmin only — proteção de rota
 ✅ Gerencia roles: user/admin/superadmin
@@ -169,51 +181,14 @@ Dark: #1A1A1A (dark mode alternativo)
 ✅ /sobre (missão, valores)
 ✅ /igrejas (B2B)
 ✅ /privacidade (LGPD)
-✅ Todas com 'use client' e Design System colors
+✅ /auth/error (com Suspense boundary)
+✅ /auth/success (com Suspense boundary)
+✅ /auth/check-email (feedback de confirmação)
+✅ not-found.tsx (página 404 customizada com versículo)
+✅ Todas com Design System colors
 🎨 Design System Implementado
 Arquivo: src/lib/design-system.ts
 
-typescript
-Copy code
-export const DESIGN_SYSTEM = {
-  colors: {
-    primary: {
-      main: '#1E3A2E',        // Verde profundo
-      light: '#2D5A45',       // Verde mais claro
-      dark: '#0F1F1A',        // Verde muito escuro
-      accent: '#D4AF7C',      // Dourado suave
-    },
-    secondary: {
-      success: '#6B7F68',     // Verde natural
-      warning: '#F59E0B',     // Amarelo/Aviso
-      error: '#C84C3C',       // Vermelho-cobre
-      info: '#2D5A45',        // Verde médio
-    },
-    neutral: {
-      marfim: '#F8F6EF',      // Marfim claro
-      light: '#E8E3DE',       // Bege claro
-      medium: '#C9C4BE',      // Cinza médio
-      dark: '#6B6B6B',        // Cinza escuro
-      charcoal: '#3F3F3F',    // Carvão
-      graphite: '#1F1F1F',    // Grafite
-    },
-    bg: {
-      primary: '#F8F6EF',     // Marfim (fundo principal)
-      secondary: '#FFFFFF',   // Branco puro
-      dark: '#1A1A1A',        // Dark mode
-      accent: '#2D5A45',      // Verde médio
-    },
-    text: {
-      dark: '#1F1F1F',        // Grafite - texto principal
-      light: '#FFFFFF',       // Branco - texto em fundo escuro
-      primary: '#1F1F1F',     // Grafite
-      secondary: '#6B6B6B',   // Cinza escuro
-      tertiary: '#999999',    // Cinza médio
-      muted: '#C9C4BE',       // Cinza claro
-    }
-  },
-  // ... typography, spacing, shadows, etc
-}
 Aplicado em todos os componentes:
 
 ✅ Header (verde + dourado)
@@ -224,6 +199,8 @@ Aplicado em todos os componentes:
 ✅ Inputs (branco + cinza)
 ✅ Status badges (cores específicas)
 ✅ Responsive design completo
+✅ Notificações (verde/amarelo/vermelho)
+✅ Tags/Temas (cores customizáveis + emoji)
 🔐 Authentication & Permissions
 typescript
 Copy code
@@ -231,6 +208,12 @@ Copy code
 'user'       → Usuário comum (pode fazer upload)
 'admin'      → Admin (pode aprovar/rejeitar de seu escopo)
 'superadmin' → Superadmin (acesso total)
+
+// Permissões por página
+/admin               → admin + superadmin
+/admin/usuarios      → superadmin only
+/admin/tags          → admin + superadmin
+/admin/upload        → admin + superadmin
 📊 Database Schema
 profiles table
 sql
@@ -268,6 +251,24 @@ slug (text) -- 'louvor', 'pregacao'
 color (text) -- '#1E3A2E', '#D4AF7C'
 icon (text) -- '🎵', '📖'
 description (text, nullable)
+created_at (timestamp)
+tags table ✅ NOVO
+sql
+Copy code
+id (uuid, pk)
+name (text) -- 'Oração', 'Fé', 'Amor'
+slug (text) -- 'oracao', 'fe', 'amor'
+color (text) -- cor hex customizável
+icon (text) -- emoji customizável
+description (text, nullable)
+created_at (timestamp)
+updated_at (timestamp)
+content_tags table ✅ NOVO
+sql
+Copy code
+id (uuid, pk)
+content_id (uuid, fk → contents)
+tag_id (uuid, fk → tags)
 created_at (timestamp)
 notifications table
 sql
@@ -322,19 +323,39 @@ Inicializa profile com dados do email
 POST /api/admin/delete-files
 Deleta arquivos do R2 antes de remover do banco
 
+POST /api/auth/send-confirmation
+Envia email de confirmação customizado em português via Resend
+
+POST /api/auth/send-reset
+Envia email de reset de senha customizado
+
 📁 Project Structure
 src/
 ├── app/
 │   ├── admin/
 │   │   ├── AdminClient.tsx              ✅ Painel de Curadoria
-│   │   └── page.tsx
-│   ├── admin/upload/
-│   │   ├── UploadClient.tsx             ✅ Upload de conteúdo
-│   │   └── page.tsx
-│   ├── admin/usuarios/
-│   │   └── page.tsx                     ✅ Gerenciar usuários
+│   │   ├── page.tsx
+│   │   ├── tags/
+│   │   │   ├── AdminTagsClient.tsx      ✅ Gerenciar Temas
+│   │   │   └── page.tsx
+│   │   ├── upload/
+│   │   │   ├── UploadClient.tsx         ✅ Upload com Tags
+│   │   │   └── page.tsx
+│   │   └── usuarios/
+│   │       └── page.tsx                 ✅ Gerenciar Usuários
+│   ├── auth/
+│   │   ├── callback/route.ts            ✅ Callback com Suspense
+│   │   ├── error/
+│   │   │   ├── page.tsx                 ✅ Suspense boundary
+│   │   │   └── ErrorClient.tsx          ✅ Client component
+│   │   ├── success/
+│   │   │   ├── page.tsx                 ✅ Suspense boundary
+│   │   │   └── SuccessClient.tsx        ✅ Client component
+│   │   ├── check-email/page.tsx         ✅ Feedback
+│   │   ├── login/page.tsx               ✅ Auth
+│   │   └── signup/page.tsx              ✅ Auth
 │   ├── configuracoes/
-│   │   ├── ConfiguracoesClient.tsx      ✅ Perfil do usuário
+│   │   ├── ConfiguracoesClient.tsx      ✅ Perfil
 │   │   └── page.tsx
 │   ├── perfil/
 │   │   ├── PerfilClient.tsx             ✅ Perfil público
@@ -343,76 +364,71 @@ src/
 │   │   ├── HistoricoClient.tsx          ✅ Histórico
 │   │   └── page.tsx
 │   ├── playlist/
-│   │   ├── PlaylistClient.tsx           ✅ Gerenciar playlists
+│   │   ├── PlaylistClient.tsx           ✅ Playlists
 │   │   └── page.tsx
 │   ├── meus-uploads/
-│   │   ├── MeusUploadsClient.tsx        ✅ Uploads do usuário
+│   │   ├── MeusUploadsClient.tsx        ✅ Uploads
 │   │   └── page.tsx
 │   ├── notificacoes/
-│   │   ├── page.tsx                     ✅ Página de notificações
-│   │   └── NotificacoesClient.tsx       ✅ Componente realtime
-│   ├── criadores/
-│   │   └── page.tsx                     ✅ Página estática
-│   ├── suporte/
-│   │   └── page.tsx                     ✅ Central de suporte
-│   ├── sobre/
-│   │   └── page.tsx                     ✅ Sobre a plataforma
-│   ├── igrejas/
-│   │   └── page.tsx                     ✅ Para Igrejas (B2B)
-│   ├── privacidade/
-│   │   └── page.tsx                     ✅ Política de privacidade
-│   ├── layout.tsx                        ✅ Root layout com Design System
-│   └── page.tsx                          ✅ Home com CategorySection
+│   │   ├── page.tsx                     ✅ Página
+│   │   └── NotificacoesClient.tsx       ✅ Realtime
+│   ├── criadores/page.tsx               ✅ Estática
+│   ├── suporte/page.tsx                 ✅ Estática
+│   ├── sobre/page.tsx                   ✅ Estática
+│   ├── igrejas/page.tsx                 ✅ Estática
+│   ├── privacidade/page.tsx             ✅ Estática
+│   ├── layout.tsx                       ✅ Root layout
+│   ├── page.tsx                         ✅ Home
+│   ├── not-found.tsx                    ✅ 404 customizado
+│   └── global-error.tsx                 ✅ Error boundary
 ├── components/
-│   ├── Header.tsx                        ✅ Com notificações + busca
-│   ├── BuscaGlobalClient.tsx             ✅ Busca desktop (Ctrl+K)
-│   ├── BuscaGlobalClientMobile.tsx       ✅ Busca mobile
-│   ├── Footer.tsx                        ✅ Com Design System
-│   ├── CategorySection.tsx               ✅ Categorias
-│   ├── VideoCard.tsx                     ✅ Card de vídeo
-│   ├── Hero.tsx                          ✅ Hero section
+│   ├── Header.tsx                       ✅ Com menu Admin/Tags
+│   ├── BuscaGlobalClient.tsx            ✅ Desktop Ctrl+K
+│   ├── BuscaGlobalClientMobile.tsx      ✅ Mobile search
+│   ├── Footer.tsx                       ✅ Design System
+│   ├── CategorySection.tsx              ✅ Categorias
+│   ├── VideoCard.tsx                    ✅ Card vídeo
+│   ├── Hero.tsx                         ✅ Hero section
 │   └── ...
 ├── lib/
-│   ├── design-system.ts                 ✅ Design System global
-│   ├── supabase.ts                      Client Supabase
-│   ├── supabase-server.ts               Server Supabase
-│   ├── supabase-admin.ts                Admin Supabase
-│   ├── auth.ts                          Funções de auth
-│   ├── db.ts                            Funções de banco
-│   │   └── notifyAdminsOfPendingContent() ✅ Notifica admins
-│   ├── r2.ts                            Upload limits config
-│   ├── cultua-config.ts                 Config colors & constants
-│   └── ...
-├── styles/
-│   ├── cultua.css                       ✅ CSS variables + resets
-│   ├── globals.css                      ✅ Tailwind + custom components
+│   ├── design-system.ts                 ✅ Design System
+│   ├── supabase.ts                      ✅ Client
+│   ├── supabase-server.ts               ✅ Server
+│   ├── supabase-admin.ts                ✅ Admin
+│   ├── auth.ts                          ✅ Auth funcs
+│   ├── db.ts                            ✅ DB funcs
+│   ├── r2.ts                            ✅ Upload limits
 │   └── ...
 ├── types/
-│   └── index.ts                         Type definitions
+│   └── index.ts                         ✅ Type definitions
 └── api/
-    ├── upload-avatar/route.ts            ✅ Upload avatar
-    ├── upload/presigned/route.ts         ✅ Presigned URLs
-    ├── init-profile/route.ts             ✅ Init profile
-    ├── admin/delete-files/route.ts       ✅ Delete de arquivos
-    └── ...
+    ├── upload-avatar/route.ts           ✅ Avatar
+    ├── upload/presigned/route.ts        ✅ Presigned URLs
+    ├── auth/
+    │   ├── send-confirmation/route.ts   ✅ Email confirmação
+    │   └── send-reset/route.ts          ✅ Email reset
+    ├── init-profile/route.ts            ✅ Init
+    └── admin/delete-files/route.ts      ✅ Delete
 🎯 User Flows
 1. Novo Usuário
-Signup → cria auth.users
+Signup → Email customizado em português
   ↓
-Trigger cria profile com full_name = email.split('@')[0]
+Clica no link do email → Callback valida
+  ↓
+Página de sucesso → Redireciona para home
   ↓
 User vai em /configuracoes
   ↓
-Nome já vem preenchido ✅
+Nome já preenchido ✅
 Avatar fallback é emoji
 2. Upload de Conteúdo
 User vai em /admin/upload
   ↓
 Seleciona tipo: Vídeo, Áudio, Texto
   ↓
-Preenche: título, descrição, categoria
+Preenche: título, descrição, categoria, temas
   ↓
-Upload vídeo + thumbnail
+Upload vídeo + thumbnail + temas selecionadas
   ↓
 Status: pending → fila de curadoria
   ↓
@@ -426,7 +442,7 @@ Filtra por categoria/autor/busca
   ↓
 Aprova ou Rejeita
   ↓
-Item sai da aba
+Item sai da aba e notifica criador
 4. Busca Global
 Desktop: Ctrl+K ou clica 🔍
 Mobile: Toca 🔍 no menu
@@ -436,92 +452,70 @@ Digita termo
 Resultados aparecem em realtime
   ↓
 Enter abre resultado
+5. Gerenciar Temas
+Admin vai em menu → 🏷️ Gerenciar Temas
+  ↓
+Cria/edita/deleta temas com emoji + cor
+  ↓
+Ao fazer upload, seleciona temas
+  ↓
+Temas vinculados ao conteúdo automaticamente
 🚀 Deploy Checklist
 ✅ Variáveis de ambiente (.env.local)
-✅ Supabase database schema
+✅ Supabase database schema com tags + content_tags
 ✅ Storage buckets criados
-✅ RLS policies configuradas
+✅ RLS policies configuradas (tags, content_tags)
 ✅ Trigger de profile creation ativo
 ✅ Presigned URLs working
 ✅ Avatar upload endpoint funcionando
-✅ Upload de conteúdo working
+✅ Upload de conteúdo com tags working
 ✅ Notificações realtime working
 ✅ Busca global indexada
 ✅ Design System aplicado em 100% dos componentes
+✅ Email customizado configurado (Resend/SMTP)
+✅ Suspense boundaries em páginas dinâmicas
+✅ RLS policies para tags e content_tags
+✅ Menu Header com link Gerenciar Temas
 🔄 Roadmap Atualizado
-Sprint Atual (Q4 2026)
+Sprint Atual (Q4 2026) ✅ COMPLETO
 ✅ Design System + cores marfim/verde/dourado
 ✅ Header + Footer + Navigation
 ✅ Busca Global (Ctrl+K + mobile)
-✅ Notificações realtime
+✅ Notificações realtime com delete correto
 ✅ Painel de Curadoria
-✅ Upload de Conteúdo
+✅ Upload de Conteúdo com Tags
 ✅ Gerenciar Usuários
+✅ Gerenciar Temas (Tags)
+✅ Email customizado em português
+✅ Callback com Suspense boundaries
+🔄 Próximos (Q1 2027)
 🔄 Player Plyr.js em /content/[id]
 🔄 Playlist items — adicionar conteúdo
+🔄 Página dinâmica de temas (/tags/[slug])
 🆕 Q1 2027 — ACESSIBILIDADE
 🔄 WCAG 2.1 AA compliance em 100% do site
-
-ARIA labels em todos os componentes
-Keyboard navigation (Tab, Enter, Escape)
-Focus management
-Color contrast ratios ≥ 4.5:1
-Text alternatives para imagens
-Form validation com mensagens acessíveis
-Skip links para navegação
-Semantic HTML (buttons, labels, headings)
-Screen reader testing (NVDA, JAWS)
-Mobile accessibility (touch targets 48x48px)
-🔄 Documentação de Acessibilidade
-
-Guia de contribução acessível
-Checklist de acessibilidade
-Testes automáticos (axe-core)
+🔄 ARIA labels em todos os componentes
+🔄 Keyboard navigation completa
+🔄 Color contrast ratios ≥ 4.5:1
+🔄 Testes automáticos (axe-core)
 🆕 Q2 2027 — KIDS AREA
-🔄 Área Infantil Separada (/kids)
-Interface colorida e amigável
-Conteúdo curado para crianças (3-12 anos)
-Modo parental com controles
-Design simplificado
-Letras maiores
-Animações suaves
-Sem publicidade
-Timer de uso (controle parental)
-Categorias infantis:
-🎵 Louvor Kids
-📖 Histórias Bíblicas
-🎨 Artesanato Cristão
-🎮 Jogos Educativos
-Gamificação (badges, pontos)
-Pais podem gerenciar acesso
+🔄 Área infantil separada (/kids)
+🔄 Interface colorida e amigável
+🔄 Conteúdo curado para 3-12 anos
+🔄 Controles parentais
+🔄 Gamificação
 🆕 Q3 2027 — CONTEÚDO DE ACESSIBILIDADE
-🔄 Nova Categoria: Acessibilidade
-
-✅ Legendas em 100% dos vídeos
-🔄 Audiodescrição em vídeos
+🔄 Legendas em 100% dos vídeos
+🔄 Audiodescrição
 🔄 Transcrições completas
-🔄 Conteúdo em LIBRAS (intérprete)
-🔄 Conteúdo para surdocegos
-🔄 Devocionais com leitura facilitada
-🔄 Conteúdo para pessoas com deficiência visual
-🔄 Conteúdo para pessoas com deficiência intelectual
-🔄 Preacher notes com fonte clara + espaçamento
-🔄 Features de Acessibilidade
-
-Ajuste de tamanho de fonte (A+ A-)
-Modo alto contraste
-Modo noturno
-Modo dyslexia-friendly (fonte Comic Sans/Arial)
-Redução de animações
-Pausas entre parágrafos na leitura
-Leitor de tela otimizado
+🔄 Conteúdo em LIBRAS
+🔄 Ajuste de fonte e modo alto contraste
 Q4 2027 — CRESCIMENTO
 Doações (Stripe / Mercado Pago)
 Comentários moderados
 Excluir conta + alterar e-mail
 Social sharing
 Favoritos
-Recomendações IA
 Q1 2028 — B2B Igrejas
 Salas exclusivas
 Assinatura recorrente
@@ -569,6 +563,23 @@ const DS = DESIGN_SYSTEM
 export default function MeuComponente() {
   // ... com event handlers
 }
+Server Components com Suspense (OBRIGATÓRIO)
+typescript
+Copy code
+import { Suspense } from 'react'
+import MeuClient from './MeuClient'
+
+function Loading() {
+  return <div>Carregando...</div>
+}
+
+export default function MinhaPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <MeuClient />
+    </Suspense>
+  )
+}
 Supabase Clients
 typescript
 Copy code
@@ -594,11 +605,13 @@ Copy code
 🐛 Common Issues & Fixes
 Problema	Causa	Fix
 Avatar não carrega	Cache, URL quebrada	Cache bust com ?t=${Date.now()}
-Cores erradas	Design System não importado	import { DESIGN_SYSTEM } from '@/lib/design-system'
+Cores erradas	Design System não importado	import { DESIGN_SYSTEM }
 Select preto	Styles inline conflitantes	Usar DS.colors.primary.accent
 Notificações não atualizam	Realtime não subscrito	Verificar channel.subscribe()
-Busca lenta	Sem índices	Criar índice em contents(title, description)
-Mobile com canto branco	Flex + overflow	overflowX: 'hidden' no main
+404 em página dinâmica	Pasta estrutura errada	Usar /admin/tags/page.tsx
+useSearchParams erro	Sem Suspense boundary	Envolver em <Suspense>
+Botão fora do padrão	Styling conflitante	Usar cores/hovers padrão
+Deletar notificação não funciona	Só UI, não banco	Chamar supabase.from('notifications').delete()
 📞 Support & Debugging
 Verificar Notificações
 sql
@@ -610,66 +623,76 @@ LIMIT 10;
 Testar Design System
 typescript
 Copy code
-// Verificar se cores estão corretas
 console.log(DS.colors.primary.main) // #1E3A2E
 console.log(DS.colors.primary.accent) // #D4AF7C
 console.log(DS.colors.bg.primary) // #F8F6EF
+Verificar RLS Policies
+sql
+Copy code
+SELECT tablename, policyname, cmd 
+FROM pg_policies 
+WHERE tablename IN ('tags', 'content_tags');
 Ver Logs de Upload
 bash
 Copy code
 vercel logs -n 50
 🎯 Key Decisions
-Avatar nativo: Usar <img> puro, sem Next/Image (mais simples)
+Avatar nativo: Usar <img> puro, sem Next/Image
 Design System: Centralizado em src/lib/design-system.ts
-Theme colors: Marfim (#F8F6EF) + Verde (#1E3A2E) + Dourado (#D4AF7C)
+Theme colors: Marfim + Verde + Dourado
 Mobile: Flexbox, nunca grid complexo
 RLS policies: Usuários veem só conteúdo aprovado + próprio
 Notificações realtime: Supabase triggers + listeners
 Busca global: Ctrl+K desktop, menu mobile
 Curadoria sync: Query nova ao trocar aba
+Tags: Sistema flexível de temas com emoji + cor
 Acessibilidade: WCAG 2.1 AA como padrão obrigatório
 Kids Area: Interface separada com controles parentais
 Conteúdo Acessível: Legendas, audiodescrição, LIBRAS obrigatórias
+Email: Customizado em português via Resend/SMTP
+Suspense: Usado em todas as páginas com useSearchParams
 📊 Status Geral
 Feature	Status	Progresso
-Auth & Login	✅ Completo	100%
+Auth & Email	✅ Completo	100%
 Header & Nav	✅ Completo	100%
 Busca Global	✅ Completo	100%
-Notificações	✅ Parcial	80%
+Notificações	✅ Completo	100%
 Home	✅ Completo	100%
 Configurações	✅ Completo	100%
 Perfil	✅ Completo	100%
 Histórico	✅ Completo	100%
 Playlists	✅ Parcial	80%
 Meus Uploads	✅ Completo	100%
+Gerenciar Temas	✅ Completo	100%
 Painel Admin	✅ Completo	100%
 Gerenciar Usuários	✅ Completo	100%
 Design System	✅ Completo	100%
+Total	✅ Pronto	95%
 Acessibilidade	🔄 Iniciado	10%
 Kids Area	📋 Planejado	0%
 Conteúdo Acessível	📋 Planejado	0%
 🎉 Última Atualização
-Data: 2026-09-14 23:17 UTC
+Data: 2026-09-15 09:25:53 UTC
 
-Mudanças Implementadas Hoje:
-
-✅ Design System global com cores corretas (Marfim + Verde + Dourado)
-✅ Todas as páginas atualizadas com Design System
-✅ Header + Footer em verde + dourado
-✅ Cards com borders e hovers corretos
-✅ Notificações com emojis ao invés de "Check/Box"
-✅ Gerenciar Usuários com select em dourado
-✅ Meus Uploads com cores verde/dourado/vermelho
-✅ Histórico com Design System colors
-✅ Playlists com Design System colors
-✅ Todas as páginas estáticas com 'use client'
-✅ Hero limpo sem repetições
-✅ Roadmap atualizado com Acessibilidade, Kids Area, Conteúdo Acessível
-Próximas Prioridades:
-
+✅ Mudanças Implementadas Nesta Sprint:
+✅ Gerenciar Temas completo com CRUD
+✅ Upload com seleção de temas
+✅ Vinculação automática de tags ao conteúdo
+✅ Link no menu Header para Gerenciar Temas (admin+)
+✅ Página dinâmica de temas (/tags/[slug])
+✅ Email customizado em português via Resend
+✅ Callback com Suspense boundaries
+✅ Notificações com delete correto (DELETE no banco)
+✅ Página 404 customizada com versículo
+✅ Corrigido: not-found.tsx padrão
+✅ Corrigido: Estrutura de pastas (/admin/tags/page.tsx)
+✅ RLS policies para tags + content_tags
+✅ Todos os botões em padrão verde/dourado
+🎯 Próximas Prioridades:
 Player Plyr.js em /content/[id]
-Playlist items adicionar conteúdo
+Playlist items — adicionar conteúdo
 Iniciar Sprint de Acessibilidade (WCAG 2.1 AA)
 Planejamento Kids Area
 Estratégia de Conteúdo Acessível
 🎨 CULTUA — Plataforma de Conteúdo Cristão Acessível e Inclusiva 🙏✨
+
