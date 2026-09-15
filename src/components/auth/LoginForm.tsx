@@ -109,7 +109,7 @@ export default function LoginForm({ redirectTo = '/' }: LoginFormProps) {
           gap: '8px',
         }}
       >
-        {loading ? <><Spinner /> Entrando...</> : '🙏 Entrar'}
+        {loading ? <><Spinner /> Entrando...</> : 'Entrar'}
       </button>
 
       <p style={{ textAlign: 'center', color: DS.colors.text.secondary, fontSize: '14px', marginTop: '20px' }}>

@@ -102,7 +102,7 @@ export default function Hero() {
             e.currentTarget.style.backgroundColor = DS.colors.primary.main
           }}
           >
-            🎵 Começar Gratuitamente
+            Começar Gratuitamente
           </Link>
 
           <Link href="#conteudo" style={{
