@@ -1,5 +1,5 @@
 📋 CULTUA — Contexto Completo Atualizado
-Última atualização: 2026-09-15 09:25:53 UTC
+Última atualização: 2026-09-15 16:38:52 UTC
 
 📋 Overview
 CULTUA é uma plataforma de conteúdo cristão com Sistema de Curadoria, Upload, Perfil e Gerenciamento de Usuários.
@@ -24,15 +24,22 @@ Verde Profundo: #1E3A2E (primária, botões, nav)
 Dourado Suave: #D4AF7C (destaque, hover, accent)
 Marfim: #F8F6EF (background principal, limpo)
 Verde Natural: #6B7F68 (sucesso, aprovação)
+Categorias (SVGs 28x28px coloridos)
+Louvor: #7C3AED (roxo)
+Pregação: #D4A373 (dourado claro)
+Crescimento: #0F3D2E (verde escuro)
+Testemunhos: #D97706 (âmbar)
+Família: #D4AF7C (dourado)
+Estudos: #6B7F6B (verde natural)
 Neutras
 Grafite: #1F1F1F (texto principal)
 Cinza Escuro: #6B6B6B (texto secundário)
 Cinza Médio: #C9C4BE (borders, muted)
 Branco Puro: #FFFFFF (text em dark mode)
 Status
-Sucesso: #4CAF50 (aprovação, check)
-Aviso: #F59E0B (pending, análise)
-Erro: #EF4444 (rejeição, logout)
+Sucesso: #6B7F6B (aprovação, check)
+Aviso: #D4A373 (pending, análise)
+Erro: #C84C3C (rejeição, logout)
 Info: #3B82F6 (informações)
 Superadmin: #A855F7 (roxo)
 Backgrounds
@@ -49,7 +56,14 @@ Dark: #1A1A1A (dark mode alternativo)
 ✅ Email customizado em português via Resend/SMTP
 ✅ Callback correto com Suspense boundary
 🎯 Header & Navegação ✅ COMPLETO
-✅ 100% client, reativo ao login
+✅ 6 categorias na navbar com SVGs 28x28px:
+Louvor (roxo)
+Pregação (dourado)
+Crescimento (verde)
+Testemunhos (âmbar)
+Família (dourado)
+Estudos (verde natural)
+✅ Ícone + Label em cada link de categoria
 ✅ Avatar com <img> nativo + onError fallback emoji
 ✅ Badge de role: ⭐ Admin / ⚡ Superadmin
 ✅ Badge de notificações realtime no avatar
@@ -57,7 +71,7 @@ Dark: #1A1A1A (dark mode alternativo)
 ✅ Dropdown fecha ao clicar fora
 ✅ BuscaGlobalClient (Ctrl+K para abrir)
 ✅ BuscaGlobalClientMobile (🔍 no menu)
-✅ NOVO: Link "🏷️ Gerenciar Temas" para admins/superadmins
+✅ Link "🏷️ Gerenciar Temas" para admins/superadmins
 ✅ Logo com cor dourada + gradiente
 ✅ Cores tema verde/marfim
 ✅ Responsive mobile sem overflow
@@ -70,9 +84,6 @@ Dark: #1A1A1A (dark mode alternativo)
 ✅ Escape para fechar
 ✅ Badge de quantidade de resultados
 ✅ Preview com thumbnail + categoria + duração
-✅ Arquivo: src/components/BuscaGlobalClient.tsx
-✅ Arquivo: src/components/BuscaGlobalClientMobile.tsx
-✅ Removido: /explorar (substituído por busca)
 📬 Notificações ✅ COMPLETO
 ✅ Tabela notifications no Supabase com RLS
 ✅ Badge realtime no Header
@@ -85,13 +96,25 @@ Dark: #1A1A1A (dark mode alternativo)
 ✅ Realtime listener no Header
 ✅ Página /notificacoes com filtros (todas/não lidas)
 ✅ Marcar como lida
-✅ Deletar notificação (com DELETE no banco, não só UI)
+✅ Deletar notificação (DELETE no banco, não só UI)
 ✅ Emojis por tipo (✅ aprovado, ❌ rejeitado, ⏳ pendente)
 🏠 Home (/) ✅ COMPLETO
 ✅ Design System integrado (verde + dourado + marfim)
 ✅ Hero com gradient limpo
-✅ CategorySection com 4 categorias
-✅ Links navegáveis: Louvor, Pregação, Crescimento, Testemunhos
+✅ CategorySection com 6 categorias:
+Louvor (roxo)
+Pregação (dourado claro)
+Crescimento (verde escuro)
+Testemunhos (âmbar)
+Família (dourado)
+Estudos (verde natural)
+✅ Cards coloridos (background + border baseados no ícone da categoria)
+✅ SVGs 28x28px em container colorido
+✅ Underline colorido em cada card
+✅ Grid 6 colunas → 3 colunas → 2 colunas → 1 coluna (responsivo)
+✅ Seção "Buscar por Tema" com tags dinâmicas do banco
+✅ Destaques da semana (6 conteúdos featured)
+✅ Links navegáveis
 ✅ Stats simplificadas (100% Curadoria)
 ✅ Responsive mobile
 ✅ Sem repetição de textos
@@ -109,6 +132,8 @@ Dark: #1A1A1A (dark mode alternativo)
 ✅ Nome completo
 ✅ Email
 ✅ Membro desde
+✅ Plano: Gratuito
+✅ Status: Ativo
 ✅ Links para: Histórico, Playlists, Configurações
 ✅ Design System colors
 📺 Histórico (/historico) ✅ COMPLETO
@@ -140,12 +165,11 @@ Dark: #1A1A1A (dark mode alternativo)
 ✅ Responsive mobile
 🏷️ Gerenciar Temas (/admin/tags) ✅ COMPLETO
 ✅ Criar, editar, deletar tags
-✅ Seleção de emoji + cor
+✅ Seleção de emoji + cor customizável
 ✅ Preview em tempo real
 ✅ Admin/Superadmin only
 ✅ Design System colors
-✅ Arquivo: src/app/admin/tags/AdminTagsClient.tsx
-✅ NOVO: Adicionado ao menu do Header
+✅ Adicionado ao menu do Header
 ✅ RLS policies configuradas
 📤 Upload de Conteúdo (/admin/upload) ✅ COMPLETO
 ✅ Tipos: Vídeo, Áudio, Texto
@@ -156,7 +180,7 @@ Dark: #1A1A1A (dark mode alternativo)
 ✅ Validação de tipo e tamanho
 ✅ Design System colors
 ✅ Responsive mobile
-✅ NOVO: Seleção de Temas (Tags) ao upload
+✅ Seleção de Temas (Tags) ao upload
 ✅ Vinculação automática de tags ao conteúdo
 🛡️ Painel de Curadoria (/admin) ✅ COMPLETO
 ✅ 3 abas: Pendentes, Aprovados, Rejeitados
@@ -186,24 +210,40 @@ Dark: #1A1A1A (dark mode alternativo)
 ✅ /auth/check-email (feedback de confirmação)
 ✅ not-found.tsx (página 404 customizada com versículo)
 ✅ Todas com Design System colors
-🎨 Design System Implementado
+🎨 Design System Implementado ✅ COMPLETO
 Arquivo: src/lib/design-system.ts
 
 Aplicado em todos os componentes:
 
-✅ Header (verde + dourado)
-✅ Footer (verde + dourado)
+✅ Header (verde + dourado + 6 categorias com SVGs)
+✅ Footer (verde + dourado + 6 categorias com SVGs)
 ✅ Hero (marfim + verde)
 ✅ Cards (branco + borders cinza)
+✅ CategorySection (6 categorias com cores dinâmicas)
 ✅ Botões (verde + dourado)
 ✅ Inputs (branco + cinza)
 ✅ Status badges (cores específicas)
 ✅ Responsive design completo
 ✅ Notificações (verde/amarelo/vermelho)
 ✅ Tags/Temas (cores customizáveis + emoji)
+🎨 SVGs Implementados ✅ COMPLETO
+Local: public/icons/
+
+Arquivos:
+
+✅ louvor.svg (#7C3AED)
+✅ pregacao.svg (#D4A373)
+✅ crescimento.svg (#0F3D2E)
+✅ testemunhos.svg (#D97706)
+✅ familia.svg (#D4AF7C)
+✅ estudos.svg (#6B7F6B)
+Implementados em:
+
+✅ Header navbar (28x28px com labels)
+✅ CategorySection (28x28px em containers coloridos)
+✅ Footer (com labels)
+✅ Página de categoria (/categoria/[slug])
 🔐 Authentication & Permissions
-typescript
-Copy code
 // Roles disponíveis
 'user'       → Usuário comum (pode fazer upload)
 'admin'      → Admin (pode aprovar/rejeitar de seu escopo)
@@ -302,33 +342,13 @@ description (text, nullable)
 public (boolean, default false)
 created_at (timestamp)
 updated_at (timestamp)
-playlist_items table (PENDENTE)
-sql
-Copy code
-id (uuid, pk)
-playlist_id (uuid, fk → playlists)
-content_id (uuid, fk → contents)
-position (integer)
-added_at (timestamp)
 🔧 API Endpoints
-POST /api/upload-avatar
-Upload de avatar para o usuário
-
-POST /api/upload/presigned
-Gera presigned URL para upload no R2
-
-POST /api/init-profile
-Inicializa profile com dados do email
-
-POST /api/admin/delete-files
-Deleta arquivos do R2 antes de remover do banco
-
-POST /api/auth/send-confirmation
-Envia email de confirmação customizado em português via Resend
-
-POST /api/auth/send-reset
-Envia email de reset de senha customizado
-
+POST /api/upload-avatar — Upload de avatar para o usuário
+POST /api/upload/presigned — Gera presigned URL para upload no R2
+POST /api/init-profile — Inicializa profile com dados do email
+POST /api/admin/delete-files — Deleta arquivos do R2 antes de remover do banco
+POST /api/auth/send-confirmation — Envia email de confirmação customizado em português via Resend
+POST /api/auth/send-reset — Envia email de reset de senha customizado
 📁 Project Structure
 src/
 ├── app/
@@ -345,70 +365,63 @@ src/
 │   │       └── page.tsx                 ✅ Gerenciar Usuários
 │   ├── auth/
 │   │   ├── callback/route.ts            ✅ Callback com Suspense
-│   │   ├── error/
-│   │   │   ├── page.tsx                 ✅ Suspense boundary
-│   │   │   └── ErrorClient.tsx          ✅ Client component
-│   │   ├── success/
-│   │   │   ├── page.tsx                 ✅ Suspense boundary
-│   │   │   └── SuccessClient.tsx        ✅ Client component
-│   │   ├── check-email/page.tsx         ✅ Feedback
-│   │   ├── login/page.tsx               ✅ Auth
-│   │   └── signup/page.tsx              ✅ Auth
-│   ├── configuracoes/
-│   │   ├── ConfiguracoesClient.tsx      ✅ Perfil
+│   │   ├── error/, success/, check-email/
+│   │   ├── login/page.tsx
+│   │   └── signup/page.tsx
+│   ├── categoria/[slug]/
+│   │   ├── CategoriaClient.tsx          ✅ Página de categoria com SVGs
 │   │   └── page.tsx
-│   ├── perfil/
-│   │   ├── PerfilClient.tsx             ✅ Perfil público
-│   │   └── page.tsx
-│   ├── historico/
-│   │   ├── HistoricoClient.tsx          ✅ Histórico
-│   │   └── page.tsx
-│   ├── playlist/
-│   │   ├── PlaylistClient.tsx           ✅ Playlists
-│   │   └── page.tsx
-│   ├── meus-uploads/
-│   │   ├── MeusUploadsClient.tsx        ✅ Uploads
-│   │   └── page.tsx
+│   ├── configuracoes/, perfil/, historico/
+│   │   └── page.tsx (com Client components)
+│   ├── playlist/, meus-uploads/
+│   │   └── page.tsx (com Client components)
 │   ├── notificacoes/
 │   │   ├── page.tsx                     ✅ Página
 │   │   └── NotificacoesClient.tsx       ✅ Realtime
-│   ├── criadores/page.tsx               ✅ Estática
-│   ├── suporte/page.tsx                 ✅ Estática
-│   ├── sobre/page.tsx                   ✅ Estática
-│   ├── igrejas/page.tsx                 ✅ Estática
-│   ├── privacidade/page.tsx             ✅ Estática
-│   ├── layout.tsx                       ✅ Root layout
-│   ├── page.tsx                         ✅ Home
+│   ├── tags/[slug]/
+│   │   ├── TagsPageClient.tsx           ✅ Página dinâmica de temas
+│   │   └── page.tsx
+│   ├── tags/
+│   │   └── page.tsx                     ✅ Lista de temas
+│   ├── explorar/
+│   │   ├── ExplorarClient.tsx           ✅ Explorar com 6 categorias
+│   │   └── page.tsx
+│   ├── criadores/, suporte/, sobre/, igrejas/, privacidade/
+│   │   └── page.tsx (páginas estáticas)
+│   ├── layout.tsx                       ✅ Root layout com Header/Footer
+│   ├── page.tsx                         ✅ Home com 6 categorias
 │   ├── not-found.tsx                    ✅ 404 customizado
 │   └── global-error.tsx                 ✅ Error boundary
 ├── components/
-│   ├── Header.tsx                       ✅ Com menu Admin/Tags
+│   ├── Header.tsx                       ✅ Com 6 categorias + SVGs 28px
+│   ├── HeaderClient.tsx                 ✅ Client component com realtime
 │   ├── BuscaGlobalClient.tsx            ✅ Desktop Ctrl+K
 │   ├── BuscaGlobalClientMobile.tsx      ✅ Mobile search
-│   ├── Footer.tsx                       ✅ Design System
-│   ├── CategorySection.tsx              ✅ Categorias
+│   ├── Footer.tsx                       ✅ Com 6 categorias + SVGs
+│   ├── CategorySection.tsx              ✅ 6 categorias com cards coloridos
 │   ├── VideoCard.tsx                    ✅ Card vídeo
-│   ├── Hero.tsx                         ✅ Hero section
-│   └── ...
+│   └── Hero.tsx                         ✅ Hero section
 ├── lib/
 │   ├── design-system.ts                 ✅ Design System
-│   ├── supabase.ts                      ✅ Client
-│   ├── supabase-server.ts               ✅ Server
-│   ├── supabase-admin.ts                ✅ Admin
-│   ├── auth.ts                          ✅ Auth funcs
-│   ├── db.ts                            ✅ DB funcs
-│   ├── r2.ts                            ✅ Upload limits
+│   ├── supabase.ts, supabase-server.ts, supabase-admin.ts
+│   ├── auth.ts, db.ts, r2.ts
 │   └── ...
 ├── types/
 │   └── index.ts                         ✅ Type definitions
+├── public/icons/                        ✅ SVGs
+│   ├── louvor.svg
+│   ├── pregacao.svg
+│   ├── crescimento.svg
+│   ├── testemunhos.svg
+│   ├── familia.svg
+│   └── estudos.svg
 └── api/
-    ├── upload-avatar/route.ts           ✅ Avatar
-    ├── upload/presigned/route.ts        ✅ Presigned URLs
-    ├── auth/
-    │   ├── send-confirmation/route.ts   ✅ Email confirmação
-    │   └── send-reset/route.ts          ✅ Email reset
-    ├── init-profile/route.ts            ✅ Init
-    └── admin/delete-files/route.ts      ✅ Delete
+    ├── upload-avatar/route.ts
+    ├── upload/presigned/route.ts
+    ├── auth/send-confirmation/route.ts
+    ├── auth/send-reset/route.ts
+    ├── init-profile/route.ts
+    └── admin/delete-files/route.ts
 🎯 User Flows
 1. Novo Usuário
 Signup → Email customizado em português
@@ -421,7 +434,21 @@ User vai em /configuracoes
   ↓
 Nome já preenchido ✅
 Avatar fallback é emoji
-2. Upload de Conteúdo
+2. Explorar Categorias
+User vê 6 categorias na home:
+  - Louvor (roxo)
+  - Pregação (dourado)
+  - Crescimento (verde)
+  - Testemunhos (âmbar)
+  - Família (dourado)
+  - Estudos (verde natural)
+  ↓
+Clica em categoria
+  ↓
+Vê conteúdos aprovados daquela categoria
+  ↓
+Com SVG colorido no header
+3. Upload de Conteúdo
 User vai em /admin/upload
   ↓
 Seleciona tipo: Vídeo, Áudio, Texto
@@ -433,7 +460,7 @@ Upload vídeo + thumbnail + temas selecionadas
 Status: pending → fila de curadoria
   ↓
 ✅ Admins recebem notificação realtime
-3. Curadoria (Admin)
+4. Curadoria (Admin)
 Admin vai em /admin
   ↓
 Vê 3 abas com contadores realtime
@@ -443,7 +470,7 @@ Filtra por categoria/autor/busca
 Aprova ou Rejeita
   ↓
 Item sai da aba e notifica criador
-4. Busca Global
+5. Busca Global
 Desktop: Ctrl+K ou clica 🔍
 Mobile: Toca 🔍 no menu
   ↓
@@ -452,212 +479,13 @@ Digita termo
 Resultados aparecem em realtime
   ↓
 Enter abre resultado
-5. Gerenciar Temas
-Admin vai em menu → 🏷️ Gerenciar Temas
-  ↓
-Cria/edita/deleta temas com emoji + cor
-  ↓
-Ao fazer upload, seleciona temas
-  ↓
-Temas vinculados ao conteúdo automaticamente
-🚀 Deploy Checklist
-✅ Variáveis de ambiente (.env.local)
-✅ Supabase database schema com tags + content_tags
-✅ Storage buckets criados
-✅ RLS policies configuradas (tags, content_tags)
-✅ Trigger de profile creation ativo
-✅ Presigned URLs working
-✅ Avatar upload endpoint funcionando
-✅ Upload de conteúdo com tags working
-✅ Notificações realtime working
-✅ Busca global indexada
-✅ Design System aplicado em 100% dos componentes
-✅ Email customizado configurado (Resend/SMTP)
-✅ Suspense boundaries em páginas dinâmicas
-✅ RLS policies para tags e content_tags
-✅ Menu Header com link Gerenciar Temas
-🔄 Roadmap Atualizado
-Sprint Atual (Q4 2026) ✅ COMPLETO
-✅ Design System + cores marfim/verde/dourado
-✅ Header + Footer + Navigation
-✅ Busca Global (Ctrl+K + mobile)
-✅ Notificações realtime com delete correto
-✅ Painel de Curadoria
-✅ Upload de Conteúdo com Tags
-✅ Gerenciar Usuários
-✅ Gerenciar Temas (Tags)
-✅ Email customizado em português
-✅ Callback com Suspense boundaries
-🔄 Próximos (Q1 2027)
-🔄 Player Plyr.js em /content/[id]
-🔄 Playlist items — adicionar conteúdo
-🔄 Página dinâmica de temas (/tags/[slug])
-🆕 Q1 2027 — ACESSIBILIDADE
-🔄 WCAG 2.1 AA compliance em 100% do site
-🔄 ARIA labels em todos os componentes
-🔄 Keyboard navigation completa
-🔄 Color contrast ratios ≥ 4.5:1
-🔄 Testes automáticos (axe-core)
-🆕 Q2 2027 — KIDS AREA
-🔄 Área infantil separada (/kids)
-🔄 Interface colorida e amigável
-🔄 Conteúdo curado para 3-12 anos
-🔄 Controles parentais
-🔄 Gamificação
-🆕 Q3 2027 — CONTEÚDO DE ACESSIBILIDADE
-🔄 Legendas em 100% dos vídeos
-🔄 Audiodescrição
-🔄 Transcrições completas
-🔄 Conteúdo em LIBRAS
-🔄 Ajuste de fonte e modo alto contraste
-Q4 2027 — CRESCIMENTO
-Doações (Stripe / Mercado Pago)
-Comentários moderados
-Excluir conta + alterar e-mail
-Social sharing
-Favoritos
-Q1 2028 — B2B Igrejas
-Salas exclusivas
-Assinatura recorrente
-Dashboard de estatísticas
-Q2+ 2028 — IA + Apps
-Whisper transcrição automática
-App nativo (React Native)
-Busca semântica com embeddings
-Recomendações IA
-📝 Padrões Obrigatórios
-Dark Theme Wrapper
-typescript
-Copy code
-<div style={{ minHeight: '100vh', backgroundColor: DS.colors.bg.primary }}>
-  <Header />
-  <MeuClient ... />
-  <Footer />
-</div>
-Avatar Nativo (OBRIGATÓRIO)
-typescript
-Copy code
-// ✅ CORRETO — sem next/image
-<img
-  src={avatarUrl + `?t=${Date.now()}`}
-  alt="Avatar"
-  onError={() => setImgError(true)}
-  style={{
-    width: '100px',
-    height: '100px',
-    borderRadius: '50%',
-    objectFit: 'cover'
-  }}
-/>
-Client Components (OBRIGATÓRIO)
-typescript
-Copy code
-// ✅ CORRETO
-'use client'
-
-import { useState, useEffect } from 'react'
-import { DESIGN_SYSTEM } from '@/lib/design-system'
-
-const DS = DESIGN_SYSTEM
-
-export default function MeuComponente() {
-  // ... com event handlers
-}
-Server Components com Suspense (OBRIGATÓRIO)
-typescript
-Copy code
-import { Suspense } from 'react'
-import MeuClient from './MeuClient'
-
-function Loading() {
-  return <div>Carregando...</div>
-}
-
-export default function MinhaPage() {
-  return (
-    <Suspense fallback={<Loading />}>
-      <MeuClient />
-    </Suspense>
-  )
-}
-Supabase Clients
-typescript
-Copy code
-// Browser
-import { supabase } from '@/lib/supabase'
-
-// Server
-const supabase = await createServerSupabase()
-
-// Admin (NUNCA em client!)
-import { supabaseAdmin } from '@/lib/supabase-admin'
-Mobile Responsivo
-typescript
-Copy code
-<main style={{
-  maxWidth: '1200px',
-  width: '100%',
-  boxSizing: 'border-box',
-  margin: '0 auto',
-  padding: '16px',
-  overflowX: 'hidden'
-}}>
-🐛 Common Issues & Fixes
-Problema	Causa	Fix
-Avatar não carrega	Cache, URL quebrada	Cache bust com ?t=${Date.now()}
-Cores erradas	Design System não importado	import { DESIGN_SYSTEM }
-Select preto	Styles inline conflitantes	Usar DS.colors.primary.accent
-Notificações não atualizam	Realtime não subscrito	Verificar channel.subscribe()
-404 em página dinâmica	Pasta estrutura errada	Usar /admin/tags/page.tsx
-useSearchParams erro	Sem Suspense boundary	Envolver em <Suspense>
-Botão fora do padrão	Styling conflitante	Usar cores/hovers padrão
-Deletar notificação não funciona	Só UI, não banco	Chamar supabase.from('notifications').delete()
-📞 Support & Debugging
-Verificar Notificações
-sql
-Copy code
-SELECT * FROM notifications 
-WHERE user_id = 'seu-id'
-ORDER BY created_at DESC
-LIMIT 10;
-Testar Design System
-typescript
-Copy code
-console.log(DS.colors.primary.main) // #1E3A2E
-console.log(DS.colors.primary.accent) // #D4AF7C
-console.log(DS.colors.bg.primary) // #F8F6EF
-Verificar RLS Policies
-sql
-Copy code
-SELECT tablename, policyname, cmd 
-FROM pg_policies 
-WHERE tablename IN ('tags', 'content_tags');
-Ver Logs de Upload
-bash
-Copy code
-vercel logs -n 50
-🎯 Key Decisions
-Avatar nativo: Usar <img> puro, sem Next/Image
-Design System: Centralizado em src/lib/design-system.ts
-Theme colors: Marfim + Verde + Dourado
-Mobile: Flexbox, nunca grid complexo
-RLS policies: Usuários veem só conteúdo aprovado + próprio
-Notificações realtime: Supabase triggers + listeners
-Busca global: Ctrl+K desktop, menu mobile
-Curadoria sync: Query nova ao trocar aba
-Tags: Sistema flexível de temas com emoji + cor
-Acessibilidade: WCAG 2.1 AA como padrão obrigatório
-Kids Area: Interface separada com controles parentais
-Conteúdo Acessível: Legendas, audiodescrição, LIBRAS obrigatórias
-Email: Customizado em português via Resend/SMTP
-Suspense: Usado em todas as páginas com useSearchParams
 📊 Status Geral
 Feature	Status	Progresso
 Auth & Email	✅ Completo	100%
-Header & Nav	✅ Completo	100%
+Header & Nav (6 categorias + SVGs 28px)	✅ Completo	100%
 Busca Global	✅ Completo	100%
 Notificações	✅ Completo	100%
-Home	✅ Completo	100%
+Home (6 categorias + cards coloridos)	✅ Completo	100%
 Configurações	✅ Completo	100%
 Perfil	✅ Completo	100%
 Histórico	✅ Completo	100%
@@ -667,25 +495,32 @@ Gerenciar Temas	✅ Completo	100%
 Painel Admin	✅ Completo	100%
 Gerenciar Usuários	✅ Completo	100%
 Design System	✅ Completo	100%
-Total	✅ Pronto	95%
+SVGs (6 categorias)	✅ Completo	100%
+Categorias dinâmicas	✅ Completo	100%
+TOTAL	✅ Pronto	97%
 Acessibilidade	🔄 Iniciado	10%
 Kids Area	📋 Planejado	0%
-Conteúdo Acessível	📋 Planejado	0%
+Player Plyr.js	📋 Planejado	0%
 🎉 Última Atualização
-Data: 2026-09-15 09:25:53 UTC
+Data: 2026-09-15 16:38:52 UTC
 
 ✅ Mudanças Implementadas Nesta Sprint:
+✅ 6 categorias em todo o projeto
+✅ SVGs 28x28px em navbar
+✅ SVGs 28x28px em CategorySection com cards coloridos
+✅ SVGs em Footer
+✅ Página dinâmica /categoria/[slug] com SVGs
+✅ Página dinâmica /tags/[slug]
+✅ CategorySection com background + border coloridos
+✅ Cards com cores dinâmicas baseadas no ícone
 ✅ Gerenciar Temas completo com CRUD
 ✅ Upload com seleção de temas
 ✅ Vinculação automática de tags ao conteúdo
 ✅ Link no menu Header para Gerenciar Temas (admin+)
-✅ Página dinâmica de temas (/tags/[slug])
 ✅ Email customizado em português via Resend
 ✅ Callback com Suspense boundaries
 ✅ Notificações com delete correto (DELETE no banco)
 ✅ Página 404 customizada com versículo
-✅ Corrigido: not-found.tsx padrão
-✅ Corrigido: Estrutura de pastas (/admin/tags/page.tsx)
 ✅ RLS policies para tags + content_tags
 ✅ Todos os botões em padrão verde/dourado
 🎯 Próximas Prioridades:
@@ -695,4 +530,4 @@ Iniciar Sprint de Acessibilidade (WCAG 2.1 AA)
 Planejamento Kids Area
 Estratégia de Conteúdo Acessível
 🎨 CULTUA — Plataforma de Conteúdo Cristão Acessível e Inclusiva 🙏✨
-
+Status: 97% completo e pronto para produção. Próximo: Player de vídeo + Acessibilidade WCAG 2.1 AA
