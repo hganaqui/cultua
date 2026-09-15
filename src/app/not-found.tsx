@@ -108,26 +108,6 @@ export default function NotFound() {
         >
           🏠 Voltar ao Início
         </Link>
-
-        {/* ✅ NOVO: Segundo botão no padrão */}
-        <Link
-          href="/"
-          style={{
-            padding: `${DS.spacing.md} ${DS.spacing.xl}`,
-            borderRadius: DS.borderRadius.md,
-            fontWeight: DS.typography.fontWeight.bold,
-            fontSize: DS.typography.fontSize.base,
-            transition: DS.transitions.base,
-            backgroundColor: hoveredBtn === 'explorar' ? `${DS.colors.primary.main}CC` : DS.colors.primary.main,
-            color: '#FFFFFF',
-            textDecoration: 'none',
-            display: 'inline-block',
-          }}
-          onMouseEnter={() => setHoveredBtn('explorar')}
-          onMouseLeave={() => setHoveredBtn(null)}
-        >
-          🏠 Voltar para Home
-        </Link>
       </div>
     </main>
   )
