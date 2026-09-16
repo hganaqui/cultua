@@ -37,7 +37,7 @@ export default function TagBadge({
           key={tag.id}
           style={{
             backgroundColor: `${tag.color}20`,
-            color: tag.color,
+            color: DS.colors.text.primary, // ✅ SEMPRE Grafite do projeto
             fontSize,
             fontFamily: DS.typography.fontFamily.body,
             fontWeight: DS.typography.fontWeight.semibold,
@@ -46,9 +46,13 @@ export default function TagBadge({
             border: `1px solid ${tag.color}35`,
             whiteSpace: 'nowrap' as const,
             lineHeight: '1.4',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
           }}
         >
-          {tag.icon} {tag.name}
+          <span style={{ fontSize: '16px', lineHeight: 1 }}>{tag.icon}</span>
+          <span>{tag.name}</span>
         </span>
       ))}
       {remaining > 0 && (

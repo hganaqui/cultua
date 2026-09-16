@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
@@ -304,17 +305,28 @@ export default function BuscaGlobalClientMobile() {
                         {result.duration}
                       </span>
                     )}
+                    {/* Tags com SVGs */}
                     {result.tags.slice(0, 1).map(tag => (
                       <span key={tag.id} style={{
                         fontSize: '10px',
                         fontFamily: DS.typography.fontFamily.body,
                         backgroundColor: `${tag.color}22`,
-                        color: tag.color,
+                        color: tag.text_color || tag.color,
                         padding: '2px 7px',
                         borderRadius: DS.borderRadius.full,
                         fontWeight: DS.typography.fontWeight.semibold,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '3px',
                       }}>
-                        {tag.icon} {tag.name}
+                        <Image
+                          src={tag.icon}
+                          alt={tag.name}
+                          width={10}
+                          height={10}
+                          style={{ objectFit: 'contain' }}
+                        />
+                        {tag.name}
                       </span>
                     ))}
                   </div>

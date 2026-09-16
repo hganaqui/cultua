@@ -18,9 +18,9 @@ interface VideoCardProps {
   duration: string
   isFeatured?: boolean
   isNew?: boolean
-  isCurated?: boolean        // ← selo de curadoria
+  isCurated?: boolean
   thumbnail?: string
-  tags?: Tag[]               // ← tags opcionais
+  tags?: Tag[]
   type?: 'video' | 'audio' | 'text'
 }
 
@@ -40,7 +40,6 @@ export default function VideoCard({
 }: VideoCardProps) {
   const [hovered, setHovered] = useState(false)
 
-  // Ícone por tipo
   const typeEmoji = { video: '🎬', audio: '🎵', text: '📄' }[type] ?? '🎵'
 
   return (
@@ -184,7 +183,7 @@ export default function VideoCard({
             </div>
           )}
 
-          {/* Selo curadoria — canto inferior esquerdo */}
+          {/* Selo curadoria */}
           {isCurated && !isFeatured && !isNew && (
             <div style={{ position: 'absolute', top: '8px', left: '8px' }}>
               <SeloCuradoria variant="compact" />

@@ -6,9 +6,9 @@ const DS = DESIGN_SYSTEM
 // ── Aliases de status (substituem DS.colors.secondary.*) ──────────
 const STATUS = {
   success: '#6B7F6B',
-  warning: DS.colors.primary.accent,  // dourado
+  warning: DS.colors.primary.accent,
   error:   '#C84C3C',
-  info:    DS.colors.primary.light,   // verde médio
+  info:    DS.colors.primary.light,
 } as const
 
 // ═══════════════════════════════════════════════════════════════
@@ -543,16 +543,12 @@ export function Badge({
   )
 }
 
-// ═══════════════════════════════════════════════════════════════
-// STATUS BADGES — para painel admin
-// ═══════════════════════════════════════════════════════════════
-
 export function StatusBadge({ status }: { status: 'pending' | 'approved' | 'rejected' }) {
   const map = {
-    pending:  { label: '⏳ Pendente',  variant: 'warning' },
-    approved: { label: '✅ Aprovado',  variant: 'success' },
-    rejected: { label: '❌ Rejeitado', variant: 'error'   },
-  } as const
+    pending:  { label: '⏳ Pendente',  variant: 'warning' as const },
+    approved: { label: '✅ Aprovado',  variant: 'success' as const },
+    rejected: { label: '❌ Rejeitado', variant: 'error' as const },
+  }
   const { label, variant } = map[status]
   return <Badge variant={variant}>{label}</Badge>
 }

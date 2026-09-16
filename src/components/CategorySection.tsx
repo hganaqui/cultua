@@ -18,6 +18,15 @@ const CATEGORIES = [
   { id: 'estudos',     name: 'Estudos',     icon: '/icons/estudos.svg',     color: '#6B7F6B' },
 ]
 
+/**
+ * isValidImageUrl — Verifica se string é URL válida
+ * Se for emoji ou inválida, retorna false
+ */
+function isValidImageUrl(url: string): boolean {
+  if (!url) return false
+  return url.startsWith('/') || url.startsWith('http')
+}
+
 export default function CategorySection() {
   const [tags, setTags] = useState<Tag[]>([])
   const [loadingTags, setLoadingTags] = useState(true)
@@ -49,9 +58,9 @@ export default function CategorySection() {
 
         .cat-card {
           text-decoration: none;
-          background-color: var(--cat-bg); /* ✅ MUDOU */
+          background-color: var(--cat-bg);
           border-radius: ${DS.borderRadius.xl};
-          border: 1px solid var(--cat-border); /* ✅ MUDOU */
+          border: 1px solid var(--cat-border);
           padding: 28px 12px 20px;
           display: flex;
           flex-direction: column;
@@ -126,8 +135,8 @@ export default function CategorySection() {
                 href={`/categoria/${cat.id}`}
                 className="cat-card"
                 style={{
-                  '--cat-bg': `${cat.color}15`,        /* ✅ MUDOU */
-                  '--cat-border': `${cat.color}40`,    /* ✅ MUDOU */
+                  '--cat-bg': `${cat.color}15`,
+                  '--cat-border': `${cat.color}40`,
                 } as React.CSSProperties}
               >
                 <div style={{
@@ -203,10 +212,29 @@ export default function CategorySection() {
                   onMouseEnter={e => (e.currentTarget.style.backgroundColor = `${tag.color}38`)}
                   onMouseLeave={e => (e.currentTarget.style.backgroundColor = `${tag.color}20`)}
                 >
-                  <div style={{ fontSize: '32px' }}>{tag.icon}</div>
+                  {/* ✅ NOVO: Verificar se é URL ou emoji */}
+                  {isValidImageUrl(tag.icon) ? (
+                    <Image
+                      src={tag.icon}
+                      alt={tag.name}
+                      width={32}
+                      height={32}
+                      style={{ objectFit: 'contain' }}
+                    />
+                  ) : (
+                    // ✅ Se for emoji, renderizar como texto
+                    <span style={{
+                      fontSize: '32px',
+                      lineHeight: 1,
+                      display: 'block',
+                    }}>
+                      {tag.icon}
+                    </span>
+                  )}
+
                   <div style={{
                     fontFamily: DS.typography.fontFamily.body,
-                    color: tag.color,
+                    color: tag.text_color || tag.color,
                     fontSize: '14px',
                     fontWeight: DS.typography.fontWeight.semibold,
                   }}>

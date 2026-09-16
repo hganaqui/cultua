@@ -89,12 +89,12 @@ export default function AdminTagsClient() {
     try {
       if (editing) {
         const { error } = await supabase.from('tags')
-          .update({ name: form.name.trim(), description: form.description.trim(), color: form.color, icon: form.icon })
+          .update({ name: form.name.trim(), description: form.description.trim(), color: form.color, icon: form.icon, text_color: '#1F1F1F' })
           .eq('id', editing.id)
         if (error) throw error
       } else {
         const { error } = await supabase.from('tags')
-          .insert({ name: form.name.trim(), slug: generateSlug(form.name), description: form.description.trim(), color: form.color, icon: form.icon })
+          .insert({ name: form.name.trim(), slug: generateSlug(form.name), description: form.description.trim(), color: form.color, icon: form.icon, text_color: '#1F1F1F' })
         if (error) throw error
       }
       await loadTags()
@@ -260,7 +260,7 @@ export default function AdminTagsClient() {
               <div style={{ fontFamily: DS.typography.fontFamily.body, color: DS.colors.text.secondary, fontSize: '13px' }}>
                 {form.description || 'Descrição da tag'}
               </div>
-              <div style={{ display: 'inline-block', marginTop: '6px', backgroundColor: `${form.color}20`, color: form.color, fontSize: '11px', fontFamily: DS.typography.fontFamily.body, fontWeight: DS.typography.fontWeight.semibold, padding: '2px 8px', borderRadius: DS.borderRadius.full, border: `1px solid ${form.color}40` }}>
+              <div style={{ display: 'inline-block', marginTop: '6px', backgroundColor: `${form.color}20`, color: DS.colors.text.primary, fontSize: '11px', fontFamily: DS.typography.fontFamily.body, fontWeight: DS.typography.fontWeight.semibold, padding: '2px 8px', borderRadius: DS.borderRadius.full, border: `1px solid ${form.color}40` }}>
                 {form.icon} {form.name || 'tag'}
               </div>
             </div>

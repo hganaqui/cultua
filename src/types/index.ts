@@ -48,6 +48,7 @@ export type Tag = {
   color: string
   icon: string
   created_at: string
+  text_color?: string | null
 }
 
 export type ContentTag = {
@@ -61,7 +62,7 @@ export type ContentTag = {
 // ═══════════════════════════════════════════════════════════════════
 
 export type ContentStatus = 'pending' | 'approved' | 'rejected'
-export type ContentType   = 'video' | 'audio' | 'text'
+export type ContentType = 'video' | 'audio' | 'text'
 
 export type Content = {
   id: string
@@ -215,13 +216,13 @@ export type AuthError = {
 }
 
 export const AUTH_ERROR_MAP: Record<string, string> = {
-  'Invalid login credentials':                  'E-mail ou senha incorretos.',
-  'Email not confirmed':                        'Confirme seu e-mail antes de entrar.',
-  'Too many requests':                          'Muitas tentativas. Aguarde alguns minutos.',
-  'User already registered':                    'Esse e-mail já está cadastrado.',
-  'Password should be at least 6 characters':  'A senha deve ter pelo menos 6 caracteres.',
-  'Unable to validate email address':           'E-mail inválido.',
-  'User not found':                             'Nenhuma conta encontrada com esse e-mail.',
+  'Invalid login credentials': 'E-mail ou senha incorretos.',
+  'Email not confirmed': 'Confirme seu e-mail antes de entrar.',
+  'Too many requests': 'Muitas tentativas. Aguarde alguns minutos.',
+  'User already registered': 'Esse e-mail já está cadastrado.',
+  'Password should be at least 6 characters': 'A senha deve ter pelo menos 6 caracteres.',
+  'Unable to validate email address': 'E-mail inválido.',
+  'User not found': 'Nenhuma conta encontrada com esse e-mail.',
 }
 
 export function translateAuthError(message: string): string {
@@ -279,4 +280,9 @@ export function formatTags(tags: Tag[] | null | undefined, maxDisplay: number = 
     display: tagList.slice(0, maxDisplay),
     remaining: Math.max(0, tagList.length - maxDisplay),
   }
+}
+
+export function getTagTextColor(tag: Tag | null | undefined): string {
+  if (!tag) return '#FFFFFF'
+  return tag.text_color || tag.color || '#FFFFFF'
 }

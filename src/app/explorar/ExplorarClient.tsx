@@ -10,14 +10,37 @@ import { getCategory } from '@/types'
 
 const DS = DESIGN_SYSTEM
 
-const CATEGORIES = [
-  { slug: 'louvor',      label: 'Louvor',      icon: '/icons/louvor.svg' },
-  { slug: 'pregacao',    label: 'Pregação',    icon: '/icons/pregacao.svg' },
-  { slug: 'crescimento', label: 'Crescimento', icon: '/icons/crescimento.svg' },
-  { slug: 'testemunhos', label: 'Testemunhos', icon: '/icons/testemunhos.svg' },
-  { slug: 'familia',     label: 'Família',     icon: '/icons/familia.svg' },
-  { slug: 'estudos',     label: 'Estudos',     icon: '/icons/estudos.svg' },
-]
+// ✅ Mapeamento de slug para ícone SVG de /public/icons (CATEGORIAS)
+const CATEGORY_ICONS: Record<string, string> = {
+  'louvor': '/icons/louvor.svg',
+  'pregacao': '/icons/pregacao.svg',
+  'crescimento': '/icons/crescimento.svg',
+  'testemunhos': '/icons/testemunhos.svg',
+  'familia': '/icons/familia.svg',
+  'estudos': '/icons/estudos.svg',
+}
+
+// ✅ Mapeamento de slug para ícone SVG de /public/icons (TAGS)
+const TAG_ICONS: Record<string, string> = {
+  'alegria': '/icons/alegria.svg',
+  'ansiedade': '/icons/ansiedade.svg',
+  'autoestima': '/icons/autoestima.svg',
+  'crescimento': '/icons/crescimento.svg',
+  'depressao': '/icons/depressao.svg',
+  'esperanca': '/icons/esperanca.svg',
+  'espiritualidade': '/icons/espiritualidade.svg',
+  'estudos': '/icons/estudos.svg',
+  'explorar': '/icons/explorar.svg',
+  'familia': '/icons/familia.svg',
+  'louvor': '/icons/louvor.svg',
+  'oracao': '/icons/oracao.svg',
+  'paz': '/icons/paz.svg',
+  'perdao': '/icons/perdao.svg',
+  'pregacao': '/icons/pregacao.svg',
+  'relacionamentos': '/icons/relacionamentos.svg',
+  'saude': '/icons/saude.svg',
+  'testemunhos': '/icons/testemunhos.svg',
+}
 
 // ── Estilo base dos botões de filtro ────────────────────────────────
 function filterBtnStyle(active: boolean): React.CSSProperties {
@@ -38,12 +61,38 @@ function filterBtnStyle(active: boolean): React.CSSProperties {
   }
 }
 
+interface Category {
+  id: string
+  name: string
+  slug: string
+  icon: string
+  color?: string
+  description?: string | null
+}
+
 export default function ExplorarClient() {
-  const [contents, setContents]       = useState<Content[]>([])
-  const [tags, setTags]               = useState<Tag[]>([])
+  const [contents, setContents] = useState<Content[]>([])
+  const [tags, setTags] = useState<Tag[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
-  const [activeTags, setActiveTags]   = useState<string[]>([])
-  const [loading, setLoading]         = useState(true)
+  const [activeTags, setActiveTags] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // ── Carregar categorias do banco ───────────────────────────────────
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const { data } = await supabase
+          .from('categories')
+          .select('id, name, slug, icon, color, description')
+          .order('name')
+        setCategories(data ?? [])
+      } catch (err) {
+        console.error('[ExplorarClient] categories:', err)
+      }
+    }
+    loadCategories()
+  }, [])
 
   // ── Carregar tags ao montar ────────────────────────────────────────
   useEffect(() => {
@@ -98,7 +147,6 @@ export default function ExplorarClient() {
             const tag = ct.tag ?? ct
             return typeof tag === 'object' ? tag.slug : tag
           })
-          // ✅ Conteúdo PRECISA ter TODAS as tags selecionadas
           return activeTags.every(tagSlug => itemTagSlugs.includes(tagSlug))
         })
       }
@@ -161,10 +209,11 @@ export default function ExplorarClient() {
             Categorias
           </div>
           <div style={{
-            display: 'flex', gap: '8px',
+            display: 'flex',
+            gap: '8px',
             flexWrap: 'wrap' as const,
           }}>
-            {/* Botão "Todos" */}
+            {/* Botão "Todas" */}
             <button
               onClick={() => setActiveCategory(null)}
               style={filterBtnStyle(activeCategory === null)}
@@ -184,34 +233,40 @@ export default function ExplorarClient() {
               Todas
             </button>
 
-            {/* Botões de categoria */}
-            {CATEGORIES.map(cat => (
-              <button
-                key={cat.slug}
-                onClick={() => setActiveCategory(cat.slug)}
-                style={filterBtnStyle(activeCategory === cat.slug)}
-                onMouseEnter={e => {
-                  if (activeCategory !== cat.slug) {
-                    e.currentTarget.style.borderColor = DS.colors.primary.main
-                    e.currentTarget.style.color = DS.colors.primary.main
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (activeCategory !== cat.slug) {
-                    e.currentTarget.style.borderColor = DS.colors.neutral.medium
-                    e.currentTarget.style.color = DS.colors.text.secondary
-                  }
-                }}
-              >
-                <Image
-                  src={cat.icon}
-                  alt={cat.label}
-                  width={14}
-                  height={14}
-                />
-                {cat.label}
-              </button>
-            ))}
+            {/* ✅ Botões de categoria com SVG do /public/icons */}
+            {categories.map(cat => {
+              const iconPath = CATEGORY_ICONS[cat.slug] || '/icons/estudos.svg'
+
+              return (
+                <button
+                  key={cat.slug}
+                  onClick={() => setActiveCategory(cat.slug)}
+                  style={filterBtnStyle(activeCategory === cat.slug)}
+                  onMouseEnter={e => {
+                    if (activeCategory !== cat.slug) {
+                      e.currentTarget.style.borderColor = DS.colors.primary.main
+                      e.currentTarget.style.color = DS.colors.primary.main
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (activeCategory !== cat.slug) {
+                      e.currentTarget.style.borderColor = DS.colors.neutral.medium
+                      e.currentTarget.style.color = DS.colors.text.secondary
+                    }
+                  }}
+                >
+                  {/* ✅ SVG sempre de /public/icons */}
+                  <Image
+                    src={iconPath}
+                    alt={cat.name}
+                    width={14}
+                    height={14}
+                    style={{ display: 'block' }}
+                  />
+                  {cat.name}
+                </button>
+              )
+            })}
           </div>
         </div>
 
@@ -230,30 +285,51 @@ export default function ExplorarClient() {
               Temas (Selecione múltiplas para filtrar)
             </div>
             <div style={{
-              display: 'flex', gap: '8px',
+              display: 'flex',
+              gap: '8px',
               flexWrap: 'wrap' as const,
             }}>
-              {tags.map(tag => (
-                <button
-                  key={tag.id}
-                  onClick={() => toggleTag(tag.slug)}
-                  style={filterBtnStyle(activeTags.includes(tag.slug))}
-                  onMouseEnter={e => {
-                    if (!activeTags.includes(tag.slug)) {
-                      e.currentTarget.style.borderColor = tag.color
-                      e.currentTarget.style.color = tag.color
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    if (!activeTags.includes(tag.slug)) {
-                      e.currentTarget.style.borderColor = DS.colors.neutral.medium
-                      e.currentTarget.style.color = DS.colors.text.secondary
-                    }
-                  }}
-                >
-                  {tag.icon} {tag.name}
-                </button>
-              ))}
+              {tags.map(tag => {
+                // ✅ Usar mapeamento para pegar SVG correto baseado no slug
+                const iconPath = TAG_ICONS[tag.slug] || '/icons/explorar.svg'
+
+                return (
+                  <button
+                    key={tag.id}
+                    onClick={() => toggleTag(tag.slug)}
+                    style={{
+                      ...filterBtnStyle(activeTags.includes(tag.slug)),
+                      backgroundColor: activeTags.includes(tag.slug) ? tag.color : DS.colors.bg.secondary,
+                      borderColor: activeTags.includes(tag.slug) ? tag.color : DS.colors.neutral.medium,
+                      color: activeTags.includes(tag.slug) ? DS.colors.text.primary : tag.color,
+                    }}
+                    onMouseEnter={e => {
+                      if (!activeTags.includes(tag.slug)) {
+                        e.currentTarget.style.borderColor = tag.color
+                        e.currentTarget.style.backgroundColor = `${tag.color}12`
+                      }
+                    }}
+                    onMouseLeave={e => {
+                      if (!activeTags.includes(tag.slug)) {
+                        e.currentTarget.style.borderColor = DS.colors.neutral.medium
+                        e.currentTarget.style.backgroundColor = DS.colors.bg.secondary
+                      }
+                    }}
+                  >
+                    {/* ✅ SVG das tags de /public/icons */}
+                    <Image
+                      src={iconPath}
+                      alt={tag.name}
+                      width={14}
+                      height={14}
+                      style={{ display: 'block' }}
+                    />
+                    <span style={{ display: 'inline' }}>
+                      {tag.name}
+                    </span>
+                  </button>
+                )
+              })}
             </div>
           </div>
         )}

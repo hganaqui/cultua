@@ -9,7 +9,6 @@ export const metadata: Metadata = {
   description: 'Descubra conteúdos cristãos curados para edificar sua fé.',
 }
 
-// ✅ SEM <Header /> e SEM <Footer /> — já vêm do layout.tsx
 export default function ExplorarPage() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: DS.colors.bg.primary }}>

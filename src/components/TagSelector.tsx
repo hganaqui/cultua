@@ -55,7 +55,7 @@ export default function TagSelector({
         fontSize: '13px',
         padding: '8px 0',
       }}>
-        Carregando temas...
+        ⏳ Carregando temas...
       </div>
     )
   }
@@ -77,7 +77,7 @@ export default function TagSelector({
 
   return (
     <div style={{ marginBottom: '24px' }}>
-      {/* Label */}
+      {/* Label com Badge */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -89,9 +89,25 @@ export default function TagSelector({
           color: DS.colors.text.primary,
           fontSize: '13px',
           fontWeight: DS.typography.fontWeight.semibold,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
         }}>
-          Temas
+          🏷️ Temas
+          {selectedTags.length > 0 && (
+            <span style={{
+              backgroundColor: DS.colors.primary.main,
+              color: '#FFFFFF',
+              borderRadius: DS.borderRadius.full,
+              padding: '2px 8px',
+              fontSize: '11px',
+              fontWeight: DS.typography.fontWeight.bold,
+            }}>
+              {selectedTags.length}
+            </span>
+          )}
         </label>
+
         <span style={{
           fontFamily: DS.typography.fontFamily.body,
           fontSize: '12px',
@@ -102,8 +118,8 @@ export default function TagSelector({
         </span>
       </div>
 
-      {/* Tags */}
-      <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '8px' }}>
+      {/* Tags Grid */}
+      <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '10px' }}>
         {tags.map(tag => {
           const isSelected  = selectedTags.includes(tag.id)
           const isDisabled  = !isSelected && atLimit
@@ -115,16 +131,12 @@ export default function TagSelector({
               disabled={isDisabled}
               title={isDisabled ? `Máximo de ${maxTags} temas atingido` : undefined}
               style={{
-                backgroundColor: isSelected
-                  ? tag.color
-                  : DS.colors.bg.secondary,
-                color: isSelected
-                  ? '#FFFFFF'
-                  : DS.colors.text.secondary,
-                border: `1.5px solid ${isSelected ? tag.color : DS.colors.neutral.medium}`,
+                backgroundColor: isSelected ? tag.color : 'transparent',
+                color: isSelected ? DS.colors.text.primary : tag.color, // ✅ SEMPRE Grafite do projeto
+                border: `2px solid ${tag.color}${isSelected ? 'FF' : '50'}`,
                 borderRadius: DS.borderRadius.full,
-                padding: '7px 14px',
-                fontSize: '12px',
+                padding: '10px 16px',
+                fontSize: '13px',
                 fontFamily: DS.typography.fontFamily.body,
                 fontWeight: DS.typography.fontWeight.semibold,
                 cursor: isDisabled ? 'not-allowed' : 'pointer',
@@ -132,38 +144,50 @@ export default function TagSelector({
                 transition: DS.transitions.fast,
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
-                boxShadow: isSelected ? `0 2px 8px ${tag.color}40` : 'none',
+                gap: '8px',
+                boxShadow: isSelected ? `0 4px 12px ${tag.color}40` : 'none',
               }}
               onMouseEnter={e => {
                 if (!isDisabled && !isSelected) {
+                  e.currentTarget.style.backgroundColor = `${tag.color}12`
                   e.currentTarget.style.borderColor = tag.color
-                  e.currentTarget.style.color = tag.color
-                  e.currentTarget.style.backgroundColor = `${tag.color}10`
                 }
               }}
               onMouseLeave={e => {
                 if (!isDisabled && !isSelected) {
-                  e.currentTarget.style.borderColor = DS.colors.neutral.medium
-                  e.currentTarget.style.color = DS.colors.text.secondary
-                  e.currentTarget.style.backgroundColor = DS.colors.bg.secondary
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.borderColor = `${tag.color}50`
                 }
               }}
             >
-              <span style={{ fontSize: '14px', lineHeight: 1 }}>{tag.icon}</span>
-              {tag.name}
+              {/* Ícone Grande */}
+              <span style={{
+                fontSize: '18px',
+                lineHeight: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                {tag.icon}
+              </span>
+
+              {/* Texto */}
+              <span>{tag.name}</span>
+
+              {/* Checkmark */}
               {isSelected && (
                 <span style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: '14px',
-                  height: '14px',
+                  width: '16px',
+                  height: '16px',
                   backgroundColor: 'rgba(255,255,255,0.3)',
                   borderRadius: '50%',
-                  fontSize: '9px',
-                  marginLeft: '2px',
+                  fontSize: '10px',
+                  marginLeft: '4px',
                   fontWeight: DS.typography.fontWeight.bold,
+                  flexShrink: 0,
                 }}>
                   ✓
                 </span>
@@ -173,18 +197,21 @@ export default function TagSelector({
         })}
       </div>
 
-      {/* Hint */}
+      {/* Status Hint */}
       {selectedTags.length > 0 && (
         <p style={{
           fontFamily: DS.typography.fontFamily.body,
           color: DS.colors.text.secondary,
           fontSize: '12px',
-          marginTop: '10px',
-          margin: '10px 0 0',
+          margin: '12px 0 0',
         }}>
           {selectedTags.length} tema{selectedTags.length > 1 ? 's' : ''} selecionado{selectedTags.length > 1 ? 's' : ''}
           {atLimit && (
-            <span style={{ color: DS.colors.primary.accent, marginLeft: '6px', fontWeight: DS.typography.fontWeight.semibold }}>
+            <span style={{
+              color: DS.colors.primary.accent,
+              marginLeft: '8px',
+              fontWeight: DS.typography.fontWeight.semibold,
+            }}>
               · Limite atingido
             </span>
           )}

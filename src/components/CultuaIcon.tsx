@@ -33,6 +33,7 @@ interface CultuaIconProps {
   strokeWidth?: number
   style?: React.CSSProperties
   'aria-hidden'?: boolean
+  className?: string
 }
 
 const ICONS: Record<CultuaIconName, (sw: number) => React.ReactNode> = {
@@ -198,6 +199,7 @@ export default function CultuaIcon({
   strokeWidth = 1.5,
   style,
   'aria-hidden': ariaHidden = true,
+  className,
 }: CultuaIconProps) {
   const paths = ICONS[name]
 
@@ -215,6 +217,7 @@ export default function CultuaIcon({
       xmlns="http://www.w3.org/2000/svg"
       style={{ color, flexShrink: 0, ...style }}
       aria-hidden={ariaHidden}
+      className={className}
     >
       {paths(strokeWidth)}
     </svg>
