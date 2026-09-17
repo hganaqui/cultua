@@ -17,6 +17,7 @@ export default function NotificacoesClient({ userId }: Props) {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading]             = useState(true)
   const [filter, setFilter]               = useState<'all' | 'unread'>('all')
+  const [deleting, setDeleting]           = useState<string | null>(null)
 
   async function loadNotifications() {
     try {
@@ -51,19 +52,59 @@ export default function NotificacoesClient({ userId }: Props) {
   }, [userId])
 
   async function markAsRead(id: string) {
-    await supabase.from('notifications').update({ read: true }).eq('id', id)
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('id', id)
+      
+      if (error) throw error
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+    } catch (err) {
+      console.error('[Notificacoes] markAsRead:', err)
+    }
   }
 
   async function markAllAsRead() {
-    await supabase.from('notifications').update({ read: true }).eq('user_id', userId).eq('read', false)
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('user_id', userId)
+        .eq('read', false)
+      
+      if (error) throw error
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+    } catch (err) {
+      console.error('[Notificacoes] markAllAsRead:', err)
+    }
   }
 
+  // ✅ CORRIGIDO: await + tratamento de erro
   async function deleteNotification(id: string) {
-    const { error } = await supabase.from('notifications').delete().eq('id', id)
-    if (error) { console.error('[Notificacoes] delete:', error); return }
-    setNotifications(prev => prev.filter(n => n.id !== id))
+    try {
+      setDeleting(id)
+      
+      const { error } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('id', id)
+      
+      if (error) {
+        console.error('[Notificacoes] delete error:', error)
+        alert('Erro ao deletar notificação. Tente novamente.')
+        setDeleting(null)
+        return
+      }
+
+      console.log('[Notificacoes] notificação deletada:', id)
+      setNotifications(prev => prev.filter(n => n.id !== id))
+      setDeleting(null)
+    } catch (err) {
+      console.error('[Notificacoes] delete exception:', err)
+      alert('Erro ao deletar notificação')
+      setDeleting(null)
+    }
   }
 
   function getIcon(type: string) {
@@ -193,16 +234,21 @@ export default function NotificacoesClient({ userId }: Props) {
                   borderRadius: DS.borderRadius.lg, padding: '16px',
                   display: 'flex', gap: '16px', alignItems: 'flex-start',
                   transition: DS.transitions.fast, cursor: 'pointer',
+                  opacity: deleting === n.id ? 0.5 : 1,
                 }}
                 onMouseEnter={e => {
                   const el = e.currentTarget as HTMLElement
-                  el.style.backgroundColor = `${DS.colors.primary.accent}22`
-                  el.style.borderColor = DS.colors.primary.accent
+                  if (deleting !== n.id) {
+                    el.style.backgroundColor = `${DS.colors.primary.accent}22`
+                    el.style.borderColor = DS.colors.primary.accent
+                  }
                 }}
                 onMouseLeave={e => {
                   const el = e.currentTarget as HTMLElement
-                  el.style.backgroundColor = n.read ? DS.colors.bg.secondary : `${DS.colors.primary.accent}15`
-                  el.style.borderColor = n.read ? DS.colors.neutral.light : DS.colors.primary.accent
+                  if (deleting !== n.id) {
+                    el.style.backgroundColor = n.read ? DS.colors.bg.secondary : `${DS.colors.primary.accent}15`
+                    el.style.borderColor = n.read ? DS.colors.neutral.light : DS.colors.primary.accent
+                  }
                 }}
                 onClick={() => handleClick(n)}
               >
@@ -256,17 +302,25 @@ export default function NotificacoesClient({ userId }: Props) {
                   )}
                   <button
                     onClick={e => { e.stopPropagation(); deleteNotification(n.id) }}
+                    disabled={deleting === n.id}
                     style={{
                       backgroundColor: 'transparent', color: ERROR_COLOR,
-                      border: 'none', cursor: 'pointer', fontSize: '13px',
-                      fontFamily: DS.typography.fontFamily.body,
+                      border: 'none', cursor: deleting === n.id ? 'not-allowed' : 'pointer',
+                      fontSize: '13px', fontFamily: DS.typography.fontFamily.body,
                       padding: '4px 8px', borderRadius: DS.borderRadius.sm,
                       transition: DS.transitions.fast,
+                      opacity: deleting === n.id ? 0.6 : 1,
                     }}
-                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = `${ERROR_COLOR}15`)}
-                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                    onMouseEnter={e => {
+                      if (deleting !== n.id) {
+                        e.currentTarget.style.backgroundColor = `${ERROR_COLOR}15`
+                      }
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
                   >
-                    ✕ Deletar
+                    {deleting === n.id ? '⏳ Deletando...' : '✕ Deletar'}
                   </button>
                 </div>
               </div>

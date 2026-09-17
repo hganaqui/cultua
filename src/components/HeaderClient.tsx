@@ -10,11 +10,8 @@ import type { User as SupabaseUser } from '@supabase/supabase-js'
 import type { UserRole } from '@/types'
 
 const DS = DESIGN_SYSTEM
-
-// ── Constantes locais — substitui DS.colors.secondary.* inexistentes ──
 const ERROR_COLOR = '#C84C3C'
 
-// Instância única fora do componente — evita recriar a cada render
 const supabaseBrowser = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -48,32 +45,49 @@ export default function HeaderClient({ user, profile }: HeaderClientProps) {
   const isAdmin = role === 'admin' || role === 'superadmin'
   const isSuperadmin = role === 'superadmin'
 
-  // ── fetchUnread memoizado ────────────────────────────────────────
+  // ✅ fetchUnread com debug
   const fetchUnread = useCallback(async () => {
-    if (!user) return
+    if (!user) {
+      console.log('[Header] Sem user, pulando fetch')
+      return
+    }
     try {
-      const { count } = await supabaseBrowser
+      const { count, error } = await supabaseBrowser
         .from('notifications')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
         .eq('read', false)
-      setUnreadCount(count ?? 0)
-    } catch {
-      // silencia erros de rede
+
+      if (error) {
+        console.error('[Header] Erro ao buscar notificações:', error)
+        return
+      }
+
+      const finalCount = count ?? 0
+      console.log('[Header] Notificações não lidas:', finalCount)
+      setUnreadCount(finalCount)
+    } catch (err) {
+      console.error('[Header] Exceção ao buscar notificações:', err)
     }
   }, [user])
 
-  // ── Realtime notifications ───────────────────────────────────────
+  // ✅ Realtime com debug e retry
   useEffect(() => {
-    if (!user) return
+    if (!user) {
+      console.log('[Header] Sem user, pulando setup realtime')
+      return
+    }
 
+    console.log('[Header] Setup realtime para user:', user.id)
     fetchUnread()
 
+    // Limpar canal anterior
     if (channelRef.current) {
       supabaseBrowser.removeChannel(channelRef.current)
       channelRef.current = null
     }
 
+    // ✅ Criar novo canal
     const channel = supabaseBrowser
       .channel(`header-notifs-${user.id}`)
       .on('postgres_changes', {
@@ -81,8 +95,13 @@ export default function HeaderClient({ user, profile }: HeaderClientProps) {
         schema: 'public',
         table: 'notifications',
         filter: `user_id=eq.${user.id}`,
-      }, () => fetchUnread())
-      .subscribe()
+      }, (payload) => {
+        console.log('[Header] Nova notificação:', payload)
+        fetchUnread()
+      })
+      .subscribe((status) => {
+        console.log('[Header] Status do canal:', status)
+      })
 
     channelRef.current = channel
 
@@ -159,7 +178,7 @@ export default function HeaderClient({ user, profile }: HeaderClientProps) {
     { href: '/categoria/pregacao', label: 'Pregação' },
     { href: '/categoria/crescimento', label: 'Crescimento' },
     { href: '/categoria/testemunhos', label: 'Testemunhos' },
-    { href: '/categoria/familia', label: 'Família' }, // ✅ adicionar
+    { href: '/categoria/familia', label: 'Família' },
     { href: '/categoria/estudos', label: 'Estudos' },
   ]
 
@@ -212,6 +231,24 @@ export default function HeaderClient({ user, profile }: HeaderClientProps) {
           border-color: ${DS.colors.primary.main};
           background-color: rgba(15,61,46,0.04);
         }
+        .hdr-notif-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 36px;
+          height: 36px;
+          border-radius: ${DS.borderRadius.full};
+          background-color: transparent;
+          border: 1.5px solid ${DS.colors.neutral.medium};
+          cursor: pointer;
+          transition: ${DS.transitions.fast};
+          position: relative;
+          text-decoration: none;
+        }
+        .hdr-notif-btn:hover {
+          border-color: ${DS.colors.primary.main};
+          background-color: rgba(15,61,46,0.04);
+        }
         .hdr-dropdown-link {
           display: block;
           color: ${DS.colors.text.secondary};
@@ -251,122 +288,122 @@ export default function HeaderClient({ user, profile }: HeaderClientProps) {
       `}</style>
 
       {/* ── Desktop Nav ── */}
-      <div className="hdr-desktop" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+      <div className="hdr-desktop" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         {user ? (
-          <div ref={dropdownRef} style={{ position: 'relative' }}>
-            <button
-              className="hdr-avatar-btn"
-              onClick={() => setUserMenuOpen(v => !v)}
-              aria-expanded={userMenuOpen}
-              aria-haspopup="true"
-            >
-              <Avatar size={28} />
-              <span>{displayName}</span>
+          <>
+            {/* ✅ Ícone de notificação SEMPRE visível */}
+            <Link href="/notificacoes" className="hdr-notif-btn">
+              <span style={{ fontSize: '18px' }}>🔔</span>
 
+              {/* ✅ Badge só aparece se tiver notificações */}
               {unreadCount > 0 && (
                 <span style={{
-                  position: 'absolute', top: '-4px', right: '26px',
-                  backgroundColor: ERROR_COLOR, color: '#FFF',
-                  fontSize: '10px', fontWeight: DS.typography.fontWeight.bold,
+                  position: 'absolute',
+                  top: '-4px',
+                  right: '-4px',
+                  backgroundColor: ERROR_COLOR,
+                  color: '#FFF',
+                  fontSize: '10px',
+                  fontWeight: DS.typography.fontWeight.bold,
                   borderRadius: DS.borderRadius.full,
-                  minWidth: '16px', height: '16px',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  minWidth: '18px',
+                  height: '18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   padding: '0 4px',
+                  zIndex: 10,
+                  border: `2px solid ${DS.colors.bg.primary}`,
                 }}>
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
+            </Link>
 
-              <span style={{ fontSize: '10px', color: DS.colors.text.muted, marginLeft: '2px' }}>▾</span>
-            </button>
+            {/* Avatar com dropdown */}
+            <div ref={dropdownRef} style={{ position: 'relative' }}>
+              <button
+                className="hdr-avatar-btn"
+                onClick={() => setUserMenuOpen(v => !v)}
+                aria-expanded={userMenuOpen}
+                aria-haspopup="true"
+              >
+                <Avatar size={28} />
+                <span>{displayName}</span>
+                <span style={{ fontSize: '10px', color: DS.colors.text.muted, marginLeft: '2px' }}>▾</span>
+              </button>
 
-            {/* Dropdown */}
-            {userMenuOpen && (
-              <div style={{
-                position: 'absolute', top: 'calc(100% + 10px)', right: 0,
-                backgroundColor: DS.colors.bg.secondary,
-                border: `1px solid ${DS.colors.neutral.light}`,
-                borderRadius: DS.borderRadius.xl, padding: '8px',
-                minWidth: '210px', boxShadow: DS.shadows['2xl'], zIndex: 200,
-              }}>
-                {/* Cabeçalho */}
-                <div style={{ padding: '8px 12px 12px', borderBottom: `1px solid ${DS.colors.neutral.light}`, marginBottom: '4px' }}>
-                  <div style={{ fontFamily: DS.typography.fontFamily.heading, fontSize: '13px', fontWeight: DS.typography.fontWeight.bold, color: DS.colors.text.primary }}>
-                    {displayName}
-                  </div>
-                  <div style={{ fontFamily: DS.typography.fontFamily.body, fontSize: '11px', color: DS.colors.text.secondary, marginTop: '2px' }}>
-                    {user.email}
-                  </div>
-                  {isAdmin && (
-                    <span style={{
-                      display: 'inline-block', marginTop: '8px', fontSize: '10px',
-                      fontWeight: DS.typography.fontWeight.bold,
-                      fontFamily: DS.typography.fontFamily.body,
-                      backgroundColor: isSuperadmin ? 'rgba(168,85,247,0.12)' : 'rgba(15,61,46,0.10)',
-                      color: isSuperadmin ? '#A855F7' : DS.colors.primary.main,
-                      border: `1px solid ${isSuperadmin ? 'rgba(168,85,247,0.3)' : 'rgba(15,61,46,0.2)'}`,
-                      borderRadius: DS.borderRadius.full, padding: '2px 10px', letterSpacing: '0.4px',
-                    }}>
-                      {isSuperadmin ? '⚡ SUPERADMIN' : '⭐ ADMIN'}
-                    </span>
-                  )}
-                </div>
-
-                {/* Links usuário */}
-                {userMenuItems.map(item => (
-                  <a key={item.href} href={item.href} className="hdr-dropdown-link" onClick={() => setUserMenuOpen(false)}>
-                    {item.label}
-                  </a>
-                ))}
-
-                {/* Links admin */}
-                {isAdmin && (
-                  <>
-                    <div style={{ height: '1px', backgroundColor: DS.colors.neutral.light, margin: '6px 0' }} />
-                    <a href="/admin" className="hdr-dropdown-link hdr-dropdown-link--highlight"
-                      style={{ color: DS.colors.primary.main, fontWeight: DS.typography.fontWeight.semibold }}
-                      onClick={() => setUserMenuOpen(false)}>
-                      🛡️ Painel de Curadoria
-                    </a>
-                    <a href="/admin/tags" className="hdr-dropdown-link hdr-dropdown-link--highlight"
-                      style={{ color: DS.colors.primary.main, fontWeight: DS.typography.fontWeight.semibold }}
-                      onClick={() => setUserMenuOpen(false)}>
-                      🏷️ Gerenciar Temas
-                    </a>
-                    {isSuperadmin && (
-                      <a href="/admin/usuarios" className="hdr-dropdown-link"
-                        style={{ color: '#A855F7', fontWeight: DS.typography.fontWeight.semibold }}
-                        onClick={() => setUserMenuOpen(false)}>
-                        ⚡ Gerenciar Usuários
-                      </a>
-                    )}
-                  </>
-                )}
-
-                {/* Notificações */}
-                {unreadCount > 0 && (
-                  <>
-                    <div style={{ height: '1px', backgroundColor: DS.colors.neutral.light, margin: '6px 0' }} />
-                    <a href="/notificacoes" className="hdr-dropdown-link" onClick={() => setUserMenuOpen(false)}>
-                      🔔 Notificações{' '}
+              {/* Dropdown */}
+              {userMenuOpen && (
+                <div style={{
+                  position: 'absolute', top: 'calc(100% + 10px)', right: 0,
+                  backgroundColor: DS.colors.bg.secondary,
+                  border: `1px solid ${DS.colors.neutral.light}`,
+                  borderRadius: DS.borderRadius.xl, padding: '8px',
+                  minWidth: '210px', boxShadow: DS.shadows['2xl'], zIndex: 200,
+                }}>
+                  {/* Cabeçalho */}
+                  <div style={{ padding: '8px 12px 12px', borderBottom: `1px solid ${DS.colors.neutral.light}`, marginBottom: '4px' }}>
+                    <div style={{ fontFamily: DS.typography.fontFamily.heading, fontSize: '13px', fontWeight: DS.typography.fontWeight.bold, color: DS.colors.text.primary }}>
+                      {displayName}
+                    </div>
+                    <div style={{ fontFamily: DS.typography.fontFamily.body, fontSize: '11px', color: DS.colors.text.secondary, marginTop: '2px' }}>
+                      {user.email}
+                    </div>
+                    {isAdmin && (
                       <span style={{
-                        backgroundColor: ERROR_COLOR, color: '#FFF',
-                        fontSize: '10px', borderRadius: DS.borderRadius.full,
-                        padding: '1px 6px', marginLeft: '4px',
+                        display: 'inline-block', marginTop: '8px', fontSize: '10px',
+                        fontWeight: DS.typography.fontWeight.bold,
+                        fontFamily: DS.typography.fontFamily.body,
+                        backgroundColor: isSuperadmin ? 'rgba(168,85,247,0.12)' : 'rgba(15,61,46,0.10)',
+                        color: isSuperadmin ? '#A855F7' : DS.colors.primary.main,
+                        border: `1px solid ${isSuperadmin ? 'rgba(168,85,247,0.3)' : 'rgba(15,61,46,0.2)'}`,
+                        borderRadius: DS.borderRadius.full, padding: '2px 10px', letterSpacing: '0.4px',
                       }}>
-                        {unreadCount}
+                        {isSuperadmin ? '⚡ SUPERADMIN' : '⭐ ADMIN'}
                       </span>
-                    </a>
-                  </>
-                )}
+                    )}
+                  </div>
 
-                <div style={{ height: '1px', backgroundColor: DS.colors.neutral.light, margin: '6px 0' }} />
-                <button className="hdr-signout-btn" onClick={handleSignOut}>
-                  🚪 Sair
-                </button>
-              </div>
-            )}
-          </div>
+                  {/* Links usuário */}
+                  {userMenuItems.map(item => (
+                    <a key={item.href} href={item.href} className="hdr-dropdown-link" onClick={() => setUserMenuOpen(false)}>
+                      {item.label}
+                    </a>
+                  ))}
+
+                  {/* Links admin */}
+                  {isAdmin && (
+                    <>
+                      <div style={{ height: '1px', backgroundColor: DS.colors.neutral.light, margin: '6px 0' }} />
+                      <a href="/admin" className="hdr-dropdown-link hdr-dropdown-link--highlight"
+                        style={{ color: DS.colors.primary.main, fontWeight: DS.typography.fontWeight.semibold }}
+                        onClick={() => setUserMenuOpen(false)}>
+                        🛡️ Painel de Curadoria
+                      </a>
+                      <a href="/admin/tags" className="hdr-dropdown-link hdr-dropdown-link--highlight"
+                        style={{ color: DS.colors.primary.main, fontWeight: DS.typography.fontWeight.semibold }}
+                        onClick={() => setUserMenuOpen(false)}>
+                        🏷️ Gerenciar Temas
+                      </a>
+                      {isSuperadmin && (
+                        <a href="/admin/usuarios" className="hdr-dropdown-link"
+                          style={{ color: '#A855F7', fontWeight: DS.typography.fontWeight.semibold }}
+                          onClick={() => setUserMenuOpen(false)}>
+                          ⚡ Gerenciar Usuários
+                        </a>
+                      )}
+                    </>
+                  )}
+
+                  <div style={{ height: '1px', backgroundColor: DS.colors.neutral.light, margin: '6px 0' }} />
+                  <button className="hdr-signout-btn" onClick={handleSignOut}>
+                    🚪 Sair
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
         ) : (
           <>
             <Link href="/auth/login"
@@ -436,6 +473,7 @@ export default function HeaderClient({ user, profile }: HeaderClientProps) {
 
                 {[
                   ...userMenuItems,
+                  { href: '/notificacoes', label: '🔔 Notificações' },
                   ...(isAdmin ? [{ href: '/admin', label: '🛡️ Painel de Curadoria' }] : []),
                   ...(isSuperadmin ? [{ href: '/admin/usuarios', label: '⚡ Gerenciar Usuários' }] : []),
                 ].map(item => (
