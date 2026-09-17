@@ -7,7 +7,6 @@ import { DESIGN_SYSTEM } from '@/lib/design-system'
 import type { Notification } from '@/types'
 
 const DS = DESIGN_SYSTEM
-
 const ERROR_COLOR = '#C84C3C'
 
 interface Props { userId: string }
@@ -27,24 +26,31 @@ export default function NotificacoesClient({ userId }: Props) {
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
       if (error) throw error
+      console.log('[Notificacoes] Carregadas:', data?.length, 'notificações')
       setNotifications(data ?? [])
     } catch (err) {
-      console.error('[Notificacoes] load:', err)
+      console.error('[Notificacoes] load error:', err)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => { loadNotifications() }, [userId])
+  useEffect(() => { 
+    console.log('[Notificacoes] useEffect loadNotifications')
+    loadNotifications() 
+  }, [userId])
 
   // Realtime
   useEffect(() => {
     const channel = supabase
       .channel(`notificacoes-page-${userId}`)
       .on('postgres_changes', {
-        event: 'INSERT', schema: 'public', table: 'notifications',
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'notifications',
         filter: `user_id=eq.${userId}`,
       }, payload => {
+        console.log('[Notificacoes] Nova notificação via realtime:', payload.new)
         setNotifications(prev => [payload.new as Notification, ...prev])
       })
       .subscribe()
@@ -61,7 +67,7 @@ export default function NotificacoesClient({ userId }: Props) {
       if (error) throw error
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
     } catch (err) {
-      console.error('[Notificacoes] markAsRead:', err)
+      console.error('[Notificacoes] markAsRead error:', err)
     }
   }
 
@@ -76,32 +82,59 @@ export default function NotificacoesClient({ userId }: Props) {
       if (error) throw error
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))
     } catch (err) {
-      console.error('[Notificacoes] markAllAsRead:', err)
+      console.error('[Notificacoes] markAllAsRead error:', err)
     }
   }
 
-  // ✅ CORRIGIDO: await + tratamento de erro
+  // ✅ CORRIGIDO: Verificação detalhada de erro
   async function deleteNotification(id: string) {
     try {
+      console.log('[Notificacoes] Iniciando delete para:', id)
       setDeleting(id)
       
-      const { error } = await supabase
+      // ✅ Verificar se a notificação existe
+      const { data: notif, error: checkError } = await supabase
         .from('notifications')
-        .delete()
+        .select('id')
         .eq('id', id)
+        .single()
       
-      if (error) {
-        console.error('[Notificacoes] delete error:', error)
-        alert('Erro ao deletar notificação. Tente novamente.')
+      if (checkError || !notif) {
+        console.error('[Notificacoes] Notificação não encontrada:', checkError)
+        alert('Notificação não encontrada')
+        setNotifications(prev => prev.filter(n => n.id !== id))
         setDeleting(null)
         return
       }
 
-      console.log('[Notificacoes] notificação deletada:', id)
-      setNotifications(prev => prev.filter(n => n.id !== id))
+      console.log('[Notificacoes] Notificação encontrada, deletando...')
+
+      // ✅ Deletar com verificação
+      const { data, error, count } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('id', id)
+        .select()
+
+      console.log('[Notificacoes] Delete response:', { data, error, count })
+
+      if (error) {
+        console.error('[Notificacoes] Delete error:', error)
+        alert(`Erro ao deletar: ${error.message}`)
+        setDeleting(null)
+        return
+      }
+
+      console.log('[Notificacoes] Deletada com sucesso, removendo do state')
+      setNotifications(prev => {
+        const updated = prev.filter(n => n.id !== id)
+        console.log('[Notificacoes] State atualizado. Restantes:', updated.length)
+        return updated
+      })
       setDeleting(null)
+
     } catch (err) {
-      console.error('[Notificacoes] delete exception:', err)
+      console.error('[Notificacoes] Delete exception:', err)
       alert('Erro ao deletar notificação')
       setDeleting(null)
     }
