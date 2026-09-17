@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
@@ -28,6 +29,28 @@ interface UploadProgress {
   video:   number
   thumb:   number
   current: 'video' | 'thumb' | 'saving' | 'done'
+}
+
+// ✅ Mapeamento de slug para ícone SVG de /public/icons (TAGS)
+const TAG_ICONS: Record<string, string> = {
+  'alegria': '/icons/alegria.svg',
+  'ansiedade': '/icons/ansiedade.svg',
+  'autoestima': '/icons/autoestima.svg',
+  'crescimento': '/icons/crescimento.svg',
+  'depressao': '/icons/depressao.svg',
+  'esperanca': '/icons/esperanca.svg',
+  'espiritualidade': '/icons/espiritualidade.svg',
+  'estudos': '/icons/estudos.svg',
+  'explorar': '/icons/explorar.svg',
+  'familia': '/icons/familia.svg',
+  'louvor': '/icons/louvor.svg',
+  'oracao': '/icons/oracao.svg',
+  'paz': '/icons/paz.svg',
+  'perdao': '/icons/perdao.svg',
+  'pregacao': '/icons/pregacao.svg',
+  'relacionamentos': '/icons/relacionamentos.svg',
+  'saude': '/icons/saude.svg',
+  'testemunhos': '/icons/testemunhos.svg',
 }
 
 export default function UploadClient() {
@@ -462,6 +485,9 @@ export default function UploadClient() {
           <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '8px' }}>
             {tags.map(tag => {
               const isSelected = selectedTags.includes(tag.id)
+              // ✅ Usar mapeamento para pegar SVG correto baseado no slug
+              const iconPath = TAG_ICONS[tag.slug] || '/icons/explorar.svg'
+
               return (
                 <button key={tag.id} type="button"
                   onClick={() => {
@@ -476,11 +502,22 @@ export default function UploadClient() {
                     fontFamily: DS.typography.fontFamily.body,
                     fontSize: '13px', fontWeight: DS.typography.fontWeight.semibold,
                     cursor: 'pointer', transition: DS.transitions.fast,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
                   }}
                   onMouseEnter={e => (e.currentTarget.style.backgroundColor = `${tag.color}30`)}
                   onMouseLeave={e => (e.currentTarget.style.backgroundColor = isSelected ? `${tag.color}20` : 'transparent')}
                 >
-                  {tag.icon} {tag.name}
+                  {/* ✅ SVG em vez de {tag.icon} */}
+                  <Image
+                    src={iconPath}
+                    alt={tag.name}
+                    width={14}
+                    height={14}
+                    style={{ display: 'block' }}
+                  />
+                  {tag.name}
                 </button>
               )
             })}
