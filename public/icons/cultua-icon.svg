@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#173F31"/>
+      <stop offset="1" stop-color="#0F3D2E"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#E4B77E"/>
+      <stop offset="0.52" stop-color="#D4A373"/>
+      <stop offset="1" stop-color="#C18C58"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1024" height="1024" rx="170" fill="url(#green)"/>
+
+  <!-- C -->
+  <path d="M 715 315 A 285 285 0 1 0 715 709"
+        fill="none"
+        stroke="url(#gold)"
+        stroke-width="104"
+        stroke-linecap="butt"/>
+
+  <!-- Pessoa em adoração -->
+  <circle cx="512" cy="455" r="38" fill="#D4A373"/>
+  <path d="M512 500 L512 805" stroke="#D4A373" stroke-width="72" stroke-linecap="butt"/>
+  <path d="M512 545 C462 545 420 505 390 430"
+        fill="none" stroke="#D4A373" stroke-width="32" stroke-linecap="round"/>
+  <path d="M512 545 C562 545 604 505 634 430"
+        fill="none" stroke="#D4A373" stroke-width="32" stroke-linecap="round"/>
+  <circle cx="390" cy="430" r="17" fill="#D4A373"/>
+  <circle cx="634" cy="430" r="17" fill="#D4A373"/>
+</svg>
