@@ -1,3 +1,5 @@
+// ✅ app/components/CategorySection.tsx (ÍCONES COM COR + FUNDO PADRÃO)
+
 'use client'
 
 import Link from 'next/link'
@@ -10,18 +12,14 @@ import type { Tag } from '@/types'
 const DS = DESIGN_SYSTEM
 
 const CATEGORIES = [
-  { id: 'louvor',      name: 'Louvor',      icon: '/icons/louvor.svg',      color: '#7C3AED' },
-  { id: 'pregacao',    name: 'Pregação',    icon: '/icons/pregacao.svg',    color: '#D4A373' },
-  { id: 'crescimento', name: 'Crescimento', icon: '/icons/crescimento.svg', color: DS.colors.primary.main },
-  { id: 'testemunhos', name: 'Testemunhos', icon: '/icons/testemunhos.svg', color: '#D97706' },
-  { id: 'familia',     name: 'Família',     icon: '/icons/familia.svg',     color: DS.colors.primary.accent },
-  { id: 'estudos',     name: 'Estudos',     icon: '/icons/estudos.svg',     color: '#6B7F6B' },
+  { id: 'louvor',      name: 'Louvor',      icon: '/icons/louvor.svg' },
+  { id: 'pregacao',    name: 'Pregação',    icon: '/icons/pregacao.svg' },
+  { id: 'crescimento', name: 'Crescimento', icon: '/icons/crescimento.svg' },
+  { id: 'testemunhos', name: 'Testemunhos', icon: '/icons/testemunhos.svg' },
+  { id: 'familia',     name: 'Família',     icon: '/icons/familia.svg' },
+  { id: 'estudos',     name: 'Estudos',     icon: '/icons/estudos.svg' },
 ]
 
-/**
- * isValidImageUrl — Verifica se string é URL válida
- * Se for emoji ou inválida, retorna false
- */
 function isValidImageUrl(url: string): boolean {
   if (!url) return false
   return url.startsWith('/') || url.startsWith('http')
@@ -58,9 +56,9 @@ export default function CategorySection() {
 
         .cat-card {
           text-decoration: none;
-          background-color: var(--cat-bg);
+          background-color: ${DS.colors.bg.secondary};
           border-radius: ${DS.borderRadius.xl};
-          border: 1px solid var(--cat-border);
+          border: 1px solid ${DS.colors.neutral.light};
           padding: 28px 12px 20px;
           display: flex;
           flex-direction: column;
@@ -75,7 +73,7 @@ export default function CategorySection() {
         .cat-card:hover {
           transform: translateY(-4px);
           box-shadow: ${DS.shadows.lg};
-          border-color: rgba(15,61,46,0.2);
+          border-color: ${DS.colors.primary.main}80;
         }
 
         .tags-grid {
@@ -97,11 +95,13 @@ export default function CategorySection() {
           align-items: center;
           justify-content: center;
           gap: 8px;
-          border: 2px solid;
+          border: 1px solid ${DS.colors.neutral.light};
+          background-color: ${DS.colors.bg.secondary};
         }
         .tag-card:hover {
           transform: translateY(-4px);
           box-shadow: ${DS.shadows.md};
+          border-color: ${DS.colors.primary.main};
         }
       `}</style>
 
@@ -128,22 +128,15 @@ export default function CategorySection() {
             </p>
           </div>
 
+          {/* ✅ CATEGORIAS - ÍCONES COM COR */}
           <div className="cat-grid">
             {CATEGORIES.map(cat => (
               <Link
                 key={cat.id}
                 href={`/categoria/${cat.id}`}
                 className="cat-card"
-                style={{
-                  '--cat-bg': `${cat.color}15`,
-                  '--cat-border': `${cat.color}40`,
-                } as React.CSSProperties}
               >
                 <div style={{
-                  width: '56px',
-                  height: '56px',
-                  backgroundColor: `${cat.color}15`,
-                  borderRadius: DS.borderRadius.lg,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -152,8 +145,11 @@ export default function CategorySection() {
                   <Image
                     src={cat.icon}
                     alt={cat.name}
-                    width={28}
-                    height={28}
+                    width={40}
+                    height={40}
+                    style={{
+                      display: 'block',
+                    }}
                   />
                 </div>
 
@@ -165,13 +161,6 @@ export default function CategorySection() {
                 }}>
                   {cat.name}
                 </div>
-
-                <div style={{
-                  width: '24px',
-                  height: '3px',
-                  backgroundColor: cat.color,
-                  borderRadius: '2px',
-                }} />
               </Link>
             ))}
           </div>
@@ -199,20 +188,15 @@ export default function CategorySection() {
               </p>
             </div>
 
+            {/* ✅ TAGS - ÍCONES COM COR + FUNDO PADRÃO */}
             <div className="tags-grid">
               {tags.map(tag => (
                 <Link
                   key={tag.id}
                   href={`/tags/${tag.slug}`}
                   className="tag-card"
-                  style={{
-                    backgroundColor: `${tag.color}20`,
-                    borderColor: tag.color,
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = `${tag.color}38`)}
-                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = `${tag.color}20`)}
                 >
-                  {/* ✅ NOVO: Verificar se é URL ou emoji */}
+                  {/* ✅ ÍCONE COM COR */}
                   {isValidImageUrl(tag.icon) ? (
                     <Image
                       src={tag.icon}
@@ -222,7 +206,6 @@ export default function CategorySection() {
                       style={{ objectFit: 'contain' }}
                     />
                   ) : (
-                    // ✅ Se for emoji, renderizar como texto
                     <span style={{
                       fontSize: '32px',
                       lineHeight: 1,
@@ -232,9 +215,10 @@ export default function CategorySection() {
                     </span>
                   )}
 
+                  {/* ✅ TEXTO SEMPRE GRAFITE */}
                   <div style={{
                     fontFamily: DS.typography.fontFamily.body,
-                    color: tag.text_color || tag.color,
+                    color: DS.colors.text.primary,
                     fontSize: '14px',
                     fontWeight: DS.typography.fontWeight.semibold,
                   }}>

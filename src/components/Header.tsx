@@ -1,3 +1,5 @@
+// ✅ app/components/Header.tsx
+
 import { createServerSupabase } from '@/lib/supabase-server'
 import HeaderClient from './HeaderClient'
 import BuscaGlobalClient from './BuscaGlobalClient'
@@ -57,17 +59,30 @@ export default async function Header() {
         gap: '8px',
       }}>
 
-        {/* Logo */}
+        {/* ✅ Logo SVG em vez de texto */}
         <Link href="/" style={{
-          fontFamily: DS.typography.fontFamily.heading,
-          fontSize: '20px',
-          fontWeight: DS.typography.fontWeight.bold,
-          color: DS.colors.primary.main,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
           textDecoration: 'none',
-          letterSpacing: '2px',
           flexShrink: 0,
         }}>
-          CULTUA
+          <Image
+            src="/icons/cultua-icon.svg"
+            alt="CULTUA"
+            width={32}
+            height={32}
+            style={{ display: 'block' }}
+          />
+          <span style={{
+            fontFamily: DS.typography.fontFamily.heading,
+            fontSize: '18px',
+            fontWeight: DS.typography.fontWeight.bold,
+            color: DS.colors.primary.main,
+            letterSpacing: '1px',
+          }}>
+            CULTUA
+          </span>
         </Link>
 
         {/* ✅ Nav com SVGs EXTRA GRANDES (28x28) + labels */}
@@ -93,7 +108,7 @@ export default async function Header() {
                 whiteSpace: 'nowrap' as const,
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '8px', // ✅ aumentado de 6px para 8px (mais espaço para ícone maior)
+                gap: '8px',
               }}
             >
               {/* ✅ ÍCONE EXTRA GRANDE: 28x28 */}

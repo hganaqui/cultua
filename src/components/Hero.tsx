@@ -166,7 +166,7 @@ export default function Hero() {
               cursor: 'pointer',
             }}
           >
-            Começar Gratuitamente
+            Acessar Agora
           </Link>
 
           <Link
