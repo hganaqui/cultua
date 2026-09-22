@@ -1,4 +1,4 @@
-// src/types/index.ts
+// ✅ src/types/index.ts (CORRIGIDO)
 
 // ═══════════════════════════════════════════════════════════════════
 // ROLES
@@ -37,7 +37,7 @@ export type Category = {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// TAGS / THEMES ✅ NOVO
+// TAGS / THEMES
 // ═══════════════════════════════════════════════════════════════════
 
 export type Tag = {
@@ -47,21 +47,22 @@ export type Tag = {
   description: string | null
   color: string
   icon: string
-  created_at: string
   text_color?: string | null
+  created_at: string
 }
 
 export type ContentTag = {
   id: string
   content_id: string
   tag_id: string
+  tag?: Tag // ✅ ADICIONADO: referência completa à tag
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // CONTENT
 // ═══════════════════════════════════════════════════════════════════
 
-export type ContentStatus = 'pending' | 'approved' | 'rejected'
+export type ContentStatus = 'pending' | 'published' | 'rejected' // ✅ CORRIGIDO: 'approved' → 'published'
 export type ContentType = 'video' | 'audio' | 'text'
 
 export type Content = {
@@ -79,21 +80,22 @@ export type Content = {
   view_count: number
   created_at: string
   updated_at: string
-  category?: Category | Category[] | null
+  published_at?: string | null
+  category?: Category | null // ✅ SIMPLIFICADO: removido Category[]
   creator?: Pick<User, 'id' | 'full_name' | 'avatar_url'> | null
-  tags?: Tag[] | null  // ✅ NOVO
+  content_tags?: ContentTag[] | null // ✅ CORRIGIDO: nome da relação correto
 }
 
 /** Shape mínimo usado em /meus-uploads */
 export type ContentWithStatus = {
   id: string
   title: string
-  status: string
+  status: ContentStatus
   creator_id: string | null
   created_at: string
   url_thumb: string | null
-  category: Category | Category[] | null
-  tags?: Tag[] | null  // ✅ NOVO
+  category: Category | null // ✅ SIMPLIFICADO: removido Category[]
+  content_tags?: ContentTag[] | null // ✅ CORRIGIDO: nome da relação correto
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -104,7 +106,7 @@ export type WatchHistory = {
   id: string
   user_id: string
   content_id: string
-  progress_sec: number
+  progress_seconds: number // ✅ CORRIGIDO: progress_sec → progress_seconds
   completed: boolean
   watched_at: string
   content?: Content
@@ -117,18 +119,31 @@ export type WatchHistory = {
 export type Playlist = {
   id: string
   user_id: string
-  title: string
+  name: string // ✅ CORRIGIDO: title → name
   description: string | null
-  public: boolean
+  is_public: boolean // ✅ CORRIGIDO: public → is_public
   created_at: string
   updated_at: string
 }
 
 export type PlaylistItem = {
+  id: string // ✅ ADICIONADO: id (chave primária)
   playlist_id: string
   content_id: string
-  position: number
-  added_at: string
+  order: number // ✅ CORRIGIDO: position → order
+  created_at: string
+  content?: Content
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FAVORITES
+// ═══════════════════════════════════════════════════════════════════
+
+export type Favorite = {
+  id: string
+  user_id: string
+  content_id: string
+  created_at: string
   content?: Content
 }
 
@@ -230,24 +245,20 @@ export function translateAuthError(message: string): string {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// UTILITY TYPES
+// UTILITY FUNCTIONS
 // ═══════════════════════════════════════════════════════════════════
 
-export type SupabaseJoin<T> = T | T[] | null
-
 export function getCategoryName(
-  category: Category | Category[] | null | undefined
+  category: Category | null | undefined
 ): string {
   if (!category) return 'Sem categoria'
-  if (Array.isArray(category)) return category[0]?.name ?? 'Sem categoria'
   return category.name ?? 'Sem categoria'
 }
 
 export function getCategory(
-  category: Category | Category[] | null | undefined
+  category: Category | null | undefined
 ): Category | null {
   if (!category) return null
-  if (Array.isArray(category)) return category[0] ?? null
   return category
 }
 
@@ -255,27 +266,28 @@ export function getCreatorName(
   creator: Content['creator']
 ): string {
   if (!creator) return 'Desconhecido'
-  if (Array.isArray(creator)) return creator[0]?.full_name ?? 'Desconhecido'
   return creator.full_name ?? 'Desconhecido'
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// TAG HELPERS ✅ NOVO
-// ═══════════════════════════════════════════════════════════════════
+// ✅ TAG HELPERS
 
 export function getContentTags(
-  tags: Tag[] | null | undefined
+  contentTags: ContentTag[] | null | undefined
 ): Tag[] {
-  if (!tags) return []
-  if (Array.isArray(tags)) return tags
-  return []
+  if (!contentTags) return []
+  return contentTags
+    .map(ct => ct.tag)
+    .filter((tag): tag is Tag => tag !== undefined && tag !== null)
 }
 
-export function formatTags(tags: Tag[] | null | undefined, maxDisplay: number = 3): {
+export function formatTags(
+  contentTags: ContentTag[] | null | undefined,
+  maxDisplay: number = 3
+): {
   display: Tag[]
   remaining: number
 } {
-  const tagList = getContentTags(tags)
+  const tagList = getContentTags(contentTags)
   return {
     display: tagList.slice(0, maxDisplay),
     remaining: Math.max(0, tagList.length - maxDisplay),
@@ -283,6 +295,6 @@ export function formatTags(tags: Tag[] | null | undefined, maxDisplay: number = 
 }
 
 export function getTagTextColor(tag: Tag | null | undefined): string {
-  if (!tag) return '#FFFFFF'
-  return tag.text_color || tag.color || '#FFFFFF'
+  if (!tag) return '#1F1F1F' // Grafite padrão
+  return tag.text_color || '#1F1F1F'
 }

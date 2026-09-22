@@ -1,3 +1,6 @@
+// ✅ ExplorarClient.tsx (CORRIGIDO)
+// Caminho: app/explorar/ExplorarClient.tsx
+
 'use client'
 
 import Image from 'next/image'
@@ -5,8 +8,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { DESIGN_SYSTEM } from '@/lib/design-system'
 import VideoCard from '@/components/VideoCard'
-import type { Content, Tag } from '@/types'
-import { getCategory } from '@/types'
+import type { Content, Tag, ContentTag } from '@/types'
+import { getCategory, getContentTags } from '@/types'
 
 const DS = DESIGN_SYSTEM
 
@@ -120,10 +123,10 @@ export default function ExplorarClient() {
         .select(`
           *,
           category:categories(id, name, slug, color, icon, description, created_at),
-          creator:profiles(full_name),
-          tags:content_tags(tag:tags(*))
+          creator:profiles(id, full_name, avatar_url),
+          content_tags(tag:tags(id, name, slug, color, icon, text_color))
         `)
-        .eq('status', 'approved')
+        .eq('status', 'published') // ✅ CORRIGIDO: 'approved' → 'published'
         .order('created_at', { ascending: false })
         .limit(24)
 
@@ -143,10 +146,9 @@ export default function ExplorarClient() {
       // ── Filtro por tags (client-side — AND logic) ──────────────────
       if (activeTags.length > 0) {
         contentList = contentList.filter(item => {
-          const itemTagSlugs = (item.tags ?? []).map((ct: any) => {
-            const tag = ct.tag ?? ct
-            return typeof tag === 'object' ? tag.slug : tag
-          })
+          // ✅ CORRIGIDO: Usar getContentTags() helper
+          const itemTags = getContentTags(item.content_tags)
+          const itemTagSlugs = itemTags.map(tag => tag.slug)
           return activeTags.every(tagSlug => itemTagSlugs.includes(tagSlug))
         })
       }
@@ -167,63 +169,73 @@ export default function ExplorarClient() {
   }
 
   return (
-    <main style={{
-      minHeight: 'calc(100vh - 60px)',
-      backgroundColor: DS.colors.bg.primary,
-      padding: '40px 16px',
-    }}>
+    <main
+      style={{
+        minHeight: 'calc(100vh - 60px)',
+        backgroundColor: DS.colors.bg.primary,
+        padding: '40px 16px',
+      }}
+    >
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
         {/* Cabeçalho */}
         <div style={{ marginBottom: '32px' }}>
-          <h1 style={{
-            fontFamily: DS.typography.fontFamily.heading,
-            color: DS.colors.text.primary,
-            fontSize: DS.typography.fontSize['5xl'],
-            fontWeight: DS.typography.fontWeight.bold,
-            marginBottom: '8px',
-            letterSpacing: '-0.5px',
-          }}>
+          <h1
+            style={{
+              fontFamily: DS.typography.fontFamily.heading,
+              color: DS.colors.text.primary,
+              fontSize: '32px', // ✅ CORRIGIDO: DS.typography.fontSize['5xl'] não existe
+              fontWeight: DS.typography.fontWeight.bold,
+              marginBottom: '8px',
+              letterSpacing: '-0.5px',
+            }}
+          >
             Explorar
           </h1>
-          <p style={{
-            fontFamily: DS.typography.fontFamily.body,
-            color: DS.colors.text.secondary,
-            fontSize: DS.typography.fontSize.xl,
-          }}>
+          <p
+            style={{
+              fontFamily: DS.typography.fontFamily.body,
+              color: DS.colors.text.secondary,
+              fontSize: '15px', // ✅ CORRIGIDO: DS.typography.fontSize.xl não existe
+            }}
+          >
             Descubra conteúdos para edificar sua fé
           </p>
         </div>
 
         {/* ── FILTRO DE CATEGORIAS ── */}
         <div style={{ marginBottom: '24px' }}>
-          <div style={{
-            fontFamily: DS.typography.fontFamily.body,
-            fontSize: '12px',
-            fontWeight: DS.typography.fontWeight.semibold,
-            color: DS.colors.text.secondary,
-            textTransform: 'uppercase' as const,
-            marginBottom: '12px',
-            letterSpacing: '0.5px',
-          }}>
+          <div
+            style={{
+              fontFamily: DS.typography.fontFamily.body,
+              fontSize: '12px',
+              fontWeight: DS.typography.fontWeight.semibold,
+              color: DS.colors.text.secondary,
+              textTransform: 'uppercase' as const,
+              marginBottom: '12px',
+              letterSpacing: '0.5px',
+            }}
+          >
             Categorias
           </div>
-          <div style={{
-            display: 'flex',
-            gap: '8px',
-            flexWrap: 'wrap' as const,
-          }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '8px',
+              flexWrap: 'wrap' as const,
+            }}
+          >
             {/* Botão "Todas" */}
             <button
               onClick={() => setActiveCategory(null)}
               style={filterBtnStyle(activeCategory === null)}
-              onMouseEnter={e => {
+              onMouseEnter={(e) => {
                 if (activeCategory !== null) {
                   e.currentTarget.style.borderColor = DS.colors.primary.main
                   e.currentTarget.style.color = DS.colors.primary.main
                 }
               }}
-              onMouseLeave={e => {
+              onMouseLeave={(e) => {
                 if (activeCategory !== null) {
                   e.currentTarget.style.borderColor = DS.colors.neutral.medium
                   e.currentTarget.style.color = DS.colors.text.secondary
@@ -242,13 +254,13 @@ export default function ExplorarClient() {
                   key={cat.slug}
                   onClick={() => setActiveCategory(cat.slug)}
                   style={filterBtnStyle(activeCategory === cat.slug)}
-                  onMouseEnter={e => {
+                  onMouseEnter={(e) => {
                     if (activeCategory !== cat.slug) {
                       e.currentTarget.style.borderColor = DS.colors.primary.main
                       e.currentTarget.style.color = DS.colors.primary.main
                     }
                   }}
-                  onMouseLeave={e => {
+                  onMouseLeave={(e) => {
                     if (activeCategory !== cat.slug) {
                       e.currentTarget.style.borderColor = DS.colors.neutral.medium
                       e.currentTarget.style.color = DS.colors.text.secondary
@@ -273,22 +285,26 @@ export default function ExplorarClient() {
         {/* ── FILTRO DE TAGS ── */}
         {tags.length > 0 && (
           <div style={{ marginBottom: '32px' }}>
-            <div style={{
-              fontFamily: DS.typography.fontFamily.body,
-              fontSize: '12px',
-              fontWeight: DS.typography.fontWeight.semibold,
-              color: DS.colors.text.secondary,
-              textTransform: 'uppercase' as const,
-              marginBottom: '12px',
-              letterSpacing: '0.5px',
-            }}>
+            <div
+              style={{
+                fontFamily: DS.typography.fontFamily.body,
+                fontSize: '12px',
+                fontWeight: DS.typography.fontWeight.semibold,
+                color: DS.colors.text.secondary,
+                textTransform: 'uppercase' as const,
+                marginBottom: '12px',
+                letterSpacing: '0.5px',
+              }}
+            >
               Temas (Selecione múltiplas para filtrar)
             </div>
-            <div style={{
-              display: 'flex',
-              gap: '8px',
-              flexWrap: 'wrap' as const,
-            }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '8px',
+                flexWrap: 'wrap' as const,
+              }}
+            >
               {tags.map(tag => {
                 // ✅ Usar mapeamento para pegar SVG correto baseado no slug
                 const iconPath = TAG_ICONS[tag.slug] || '/icons/explorar.svg'
@@ -299,17 +315,23 @@ export default function ExplorarClient() {
                     onClick={() => toggleTag(tag.slug)}
                     style={{
                       ...filterBtnStyle(activeTags.includes(tag.slug)),
-                      backgroundColor: activeTags.includes(tag.slug) ? tag.color : DS.colors.bg.secondary,
-                      borderColor: activeTags.includes(tag.slug) ? tag.color : DS.colors.neutral.medium,
-                      color: activeTags.includes(tag.slug) ? DS.colors.text.primary : tag.color,
+                      backgroundColor: activeTags.includes(tag.slug)
+                        ? tag.color
+                        : DS.colors.bg.secondary,
+                      borderColor: activeTags.includes(tag.slug)
+                        ? tag.color
+                        : DS.colors.neutral.medium,
+                      color: activeTags.includes(tag.slug)
+                        ? DS.colors.text.primary
+                        : tag.color,
                     }}
-                    onMouseEnter={e => {
+                    onMouseEnter={(e) => {
                       if (!activeTags.includes(tag.slug)) {
                         e.currentTarget.style.borderColor = tag.color
                         e.currentTarget.style.backgroundColor = `${tag.color}12`
                       }
                     }}
-                    onMouseLeave={e => {
+                    onMouseLeave={(e) => {
                       if (!activeTags.includes(tag.slug)) {
                         e.currentTarget.style.borderColor = DS.colors.neutral.medium
                         e.currentTarget.style.backgroundColor = DS.colors.bg.secondary
@@ -336,35 +358,43 @@ export default function ExplorarClient() {
 
         {/* ── GRID ── */}
         {loading ? (
-          <div style={{
-            fontFamily: DS.typography.fontFamily.body,
-            color: DS.colors.text.secondary,
-            textAlign: 'center',
-            padding: '48px',
-          }}>
+          <div
+            style={{
+              fontFamily: DS.typography.fontFamily.body,
+              color: DS.colors.text.secondary,
+              textAlign: 'center',
+              padding: '48px',
+            }}
+          >
             Carregando...
           </div>
         ) : contents.length === 0 ? (
-          <div style={{
-            backgroundColor: DS.colors.bg.secondary,
-            borderRadius: DS.borderRadius.xl,
-            padding: '64px 32px',
-            textAlign: 'center',
-            border: `1px solid ${DS.colors.neutral.light}`,
-          }}>
+          <div
+            style={{
+              backgroundColor: DS.colors.bg.secondary,
+              borderRadius: DS.borderRadius.xl,
+              padding: '64px 32px',
+              textAlign: 'center',
+              border: `1px solid ${DS.colors.neutral.light}`,
+            }}
+          >
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>📭</div>
-            <h2 style={{
-              fontFamily: DS.typography.fontFamily.heading,
-              fontSize: DS.typography.fontSize['3xl'],
-              color: DS.colors.text.primary,
-              marginBottom: '8px',
-            }}>
+            <h2
+              style={{
+                fontFamily: DS.typography.fontFamily.heading,
+                fontSize: '20px', // ✅ CORRIGIDO: DS.typography.fontSize['3xl'] não existe
+                color: DS.colors.text.primary,
+                marginBottom: '8px',
+              }}
+            >
               Nenhum conteúdo encontrado
             </h2>
-            <p style={{
-              fontFamily: DS.typography.fontFamily.body,
-              color: DS.colors.text.secondary,
-            }}>
+            <p
+              style={{
+                fontFamily: DS.typography.fontFamily.body,
+                color: DS.colors.text.secondary,
+              }}
+            >
               {activeTags.length > 0 || activeCategory
                 ? 'Tente outro filtro.'
                 : 'Em breve teremos mais conteúdos aqui.'}
@@ -388,6 +418,9 @@ export default function ExplorarClient() {
             <div className="explorar-grid">
               {contents.map(item => {
                 const cat = getCategory(item.category)
+                // ✅ CORRIGIDO: Usar getContentTags() para extrair tags
+                const contentTags = getContentTags(item.content_tags)
+
                 return (
                   <VideoCard
                     key={item.id}
@@ -399,6 +432,8 @@ export default function ExplorarClient() {
                     duration={item.duration ?? ''}
                     isFeatured={item.is_featured}
                     thumbnail={item.url_thumb ?? undefined}
+                    tags={contentTags} // ✅ CORRIGIDO: Passar tags extraídas
+                    type={item.type} // ✅ ADICIONADO: type do conteúdo
                   />
                 )
               })}

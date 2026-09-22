@@ -1,6 +1,8 @@
-// src/lib/db.ts
+// ✅ lib/db.ts (CORRIGIDO E VALIDADO)
+// Caminho: src/lib/db.ts
+
 import { supabase } from '@/lib/supabase'
-import type { Content, Category } from '@/types'
+import type { Content } from '@/types'
 
 // ── Conteúdos ────────────────────────────────────────────────
 
@@ -14,13 +16,14 @@ export async function getContents(options?: {
     .select(`
       *,
       category:categories(id, name, slug, color, icon),
-      creator:profiles(id, full_name, avatar_url)
+      creator:profiles(id, full_name, avatar_url),
+      content_tags(tag:tags(id, name, slug, color, icon, text_color))
     `)
-    .eq('status', 'approved')
+    .eq('status', 'published') // ✅ CORRIGIDO: 'approved' → 'published'
     .order('created_at', { ascending: false })
 
   if (options?.categorySlug) {
-    query = query.eq('categories.slug', options.categorySlug)
+    query = query.eq('category.slug', options.categorySlug) // ✅ CORRIGIDO: 'categories.slug' → 'category.slug'
   }
   if (options?.featured) {
     query = query.eq('is_featured', true)
@@ -30,7 +33,7 @@ export async function getContents(options?: {
   }
 
   const { data, error } = await query
-  return { data, error }
+  return { data: (data as unknown as Content[]) ?? [], error }
 }
 
 export async function getContentById(id: string) {
@@ -39,13 +42,19 @@ export async function getContentById(id: string) {
     .select(`
       *,
       category:categories(id, name, slug, color, icon),
-      creator:profiles(id, full_name, avatar_url)
+      creator:profiles(id, full_name, avatar_url),
+      content_tags(tag:tags(id, name, slug, color, icon, text_color))
     `)
     .eq('id', id)
-    .eq('status', 'approved')
+    .eq('status', 'published') // ✅ CORRIGIDO: 'approved' → 'published'
     .single()
 
-  return { data, error }
+  if (error) {
+    console.error('[db] getContentById error:', error)
+    return { data: null, error }
+  }
+
+  return { data: data as unknown as Content, error: null }
 }
 
 export async function getContentsByCategory(slug: string) {
@@ -54,13 +63,14 @@ export async function getContentsByCategory(slug: string) {
     .select(`
       *,
       category:categories!inner(id, name, slug, color, icon),
-      creator:profiles(id, full_name, avatar_url)
+      creator:profiles(id, full_name, avatar_url),
+      content_tags(tag:tags(id, name, slug, color, icon, text_color))
     `)
-    .eq('status', 'approved')
-    .eq('categories.slug', slug)
+    .eq('status', 'published') // ✅ CORRIGIDO: 'approved' → 'published'
+    .eq('category.slug', slug) // ✅ CORRIGIDO: 'categories.slug' → 'category.slug'
     .order('created_at', { ascending: false })
 
-  return { data, error }
+  return { data: (data as unknown as Content[]) ?? [], error }
 }
 
 export async function getFeaturedContents(limit = 6) {
@@ -69,18 +79,27 @@ export async function getFeaturedContents(limit = 6) {
     .select(`
       *,
       category:categories(id, name, slug, color, icon),
-      creator:profiles(id, full_name, avatar_url)
+      creator:profiles(id, full_name, avatar_url),
+      content_tags(tag:tags(id, name, slug, color, icon, text_color))
     `)
-    .eq('status', 'approved')
+    .eq('status', 'published') // ✅ CORRIGIDO: 'approved' → 'published'
     .eq('is_featured', true)
     .order('created_at', { ascending: false })
     .limit(limit)
 
-  return { data, error }
+  return { data: (data as unknown as Content[]) ?? [], error }
 }
 
 export async function incrementViewCount(contentId: string) {
-  await supabase.rpc('increment_view_count', { content_id: contentId })
+  const { error } = await supabase.rpc('increment_view_count', {
+    content_id: contentId,
+  })
+
+  if (error) {
+    console.error('[db] incrementViewCount error:', error)
+  }
+
+  return error
 }
 
 // ── Categorias ───────────────────────────────────────────────
@@ -106,16 +125,26 @@ export async function getCategoryBySlug(slug: string) {
 
 // ── Histórico ────────────────────────────────────────────────
 
-export async function saveWatchHistory(userId: string, contentId: string, progressSec: number, completed: boolean) {
-  const { error } = await supabase
-    .from('watch_history')
-    .upsert({
-      user_id:      userId,
-      content_id:   contentId,
-      progress_sec: progressSec,
+export async function saveWatchHistory(
+  userId: string,
+  contentId: string,
+  progressSeconds: number, // ✅ CORRIGIDO: progressSec → progressSeconds
+  completed: boolean
+) {
+  const { error } = await supabase.from('watch_history').upsert(
+    {
+      user_id: userId,
+      content_id: contentId,
+      progress_seconds: progressSeconds, // ✅ CORRIGIDO: progress_sec → progress_seconds
       completed,
-      watched_at:   new Date().toISOString(),
-    }, { onConflict: 'user_id,content_id' })
+      watched_at: new Date().toISOString(),
+    },
+    { onConflict: 'user_id,content_id' }
+  )
+
+  if (error) {
+    console.error('[db] saveWatchHistory error:', error)
+  }
 
   return { error }
 }
@@ -135,6 +164,76 @@ export async function getWatchHistory(userId: string) {
     .limit(20)
 
   return { data, error }
+}
+
+// ── Favoritos ────────────────────────────────────────────────
+
+export async function addToFavorites(userId: string, contentId: string) {
+  const { error } = await supabase.from('favorites').insert({
+    user_id: userId,
+    content_id: contentId,
+  })
+
+  if (error) {
+    console.error('[db] addToFavorites error:', error)
+  }
+
+  return { error }
+}
+
+export async function removeFromFavorites(userId: string, contentId: string) {
+  const { error } = await supabase
+    .from('favorites')
+    .delete()
+    .eq('user_id', userId)
+    .eq('content_id', contentId)
+
+  if (error) {
+    console.error('[db] removeFromFavorites error:', error)
+  }
+
+  return { error }
+}
+
+export async function isFavorited(userId: string, contentId: string) {
+  const { data, error } = await supabase
+    .from('favorites')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('content_id', contentId)
+    .single()
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('[db] isFavorited error:', error)
+  }
+
+  return !!data
+}
+
+export async function getUserFavorites(userId: string) {
+  const { data, error } = await supabase
+    .from('favorites')
+    .select(`
+      id,
+      created_at,
+      content:contents(
+        id,
+        title,
+        url_thumb,
+        duration,
+        created_at,
+        category:categories(id, name, icon)
+      )
+    `)
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('[db] getUserFavorites error:', error)
+    return { data: [], error }
+  }
+
+  return { data, error: null }
 }
 
 // ── Notificações ─────────────────────────────────────────────
@@ -187,7 +286,12 @@ export async function deleteNotification(notificationId: string) {
   return { error }
 }
 
-export async function notifyAdminsOfPendingContent(contentId: string, contentTitle: string) {
+// ── Admins ───────────────────────────────────────────────────
+
+export async function notifyAdminsOfPendingContent(
+  contentId: string,
+  contentTitle: string
+) {
   try {
     // 1. Buscar todos os admins
     const { data: admins } = await supabase
@@ -213,46 +317,50 @@ export async function notifyAdminsOfPendingContent(contentId: string, contentTit
 
     if (error) throw error
   } catch (err) {
-    console.error('Erro ao notificar admins:', err)
+    console.error('[db] notifyAdminsOfPendingContent error:', err)
   }
 }
 
-export async function notifyAdminsOfApprovedContent(userId: string, contentTitle: string, contentId: string) {
+export async function notifyAdminsOfApprovedContent(
+  userId: string,
+  contentTitle: string,
+  contentId: string
+) {
   try {
     // Notificar o criador que seu conteúdo foi aprovado
-    const { error } = await supabase
-      .from('notifications')
-      .insert({
-        user_id: userId,
-        type: 'content_approved',
-        title: '✅ Conteúdo aprovado!',
-        message: `"${contentTitle}" foi aprovado e está publicado.`,
-        read: false,
-        metadata: { content_id: contentId },
-      })
+    const { error } = await supabase.from('notifications').insert({
+      user_id: userId,
+      type: 'content_approved',
+      title: '✅ Conteúdo aprovado!',
+      message: `"${contentTitle}" foi aprovado e está publicado.`,
+      read: false,
+      metadata: { content_id: contentId },
+    })
 
     if (error) throw error
   } catch (err) {
-    console.error('Erro ao notificar aprovação:', err)
+    console.error('[db] notifyAdminsOfApprovedContent error:', err)
   }
 }
 
-export async function notifyAdminsOfRejectedContent(userId: string, contentTitle: string, contentId: string) {
+export async function notifyAdminsOfRejectedContent(
+  userId: string,
+  contentTitle: string,
+  contentId: string
+) {
   try {
     // Notificar o criador que seu conteúdo foi rejeitado
-    const { error } = await supabase
-      .from('notifications')
-      .insert({
-        user_id: userId,
-        type: 'content_rejected',
-        title: '❌ Conteúdo rejeitado',
-        message: `"${contentTitle}" foi rejeitado. Revise e tente novamente.`,
-        read: false,
-        metadata: { content_id: contentId },
-      })
+    const { error } = await supabase.from('notifications').insert({
+      user_id: userId,
+      type: 'content_rejected',
+      title: '❌ Conteúdo rejeitado',
+      message: `"${contentTitle}" foi rejeitado. Revise e tente novamente.`,
+      read: false,
+      metadata: { content_id: contentId },
+    })
 
     if (error) throw error
   } catch (err) {
-    console.error('Erro ao notificar rejeição:', err)
+    console.error('[db] notifyAdminsOfRejectedContent error:', err)
   }
 }

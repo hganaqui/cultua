@@ -1,9 +1,13 @@
+// ✅ AdminClient.tsx (CORRIGIDO - COPIAR COMPLETO)
+// Linhas críticas corrigidas: 30, 52, 183, 184, 185, 343-352
+
 'use client'
 
 import { useEffect, useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { DESIGN_SYSTEM } from '@/lib/design-system'
+import { getContentTags } from '@/types' // ✅ ADICIONADO
 import type { Content } from '@/types'
 
 const DS = DESIGN_SYSTEM
@@ -42,13 +46,13 @@ export default function AdminClient() {
     try {
       const { data } = await supabase
         .from('contents')
-        .select(`*, category:categories(name,slug,color,icon), creator:profiles(full_name), tags:content_tags(tag:tags(*))`)
-        .eq('status', status)
+        .select(`*, category:categories(name,slug,color,icon), creator:profiles(full_name), content_tags(tag:tags(id, name, slug, color, icon))`)
+        .eq('status', status === 'approved' ? 'published' : status) // ✅ CORRIGIDO
         .order('created_at', { ascending: false })
 
       const processed = (data as any[])?.map(item => ({
         ...item,
-        tags: item.tags?.map((ct: any) => ct.tag).filter(Boolean) ?? [],
+        content_tags: item.content_tags ?? [], // ✅ CORRIGIDO
       })) ?? []
 
       setContents(prev => {
@@ -80,15 +84,15 @@ export default function AdminClient() {
 
         try {
           const [pendRes, appRes, rejRes] = await Promise.all([
-            supabase.from('contents').select(`*, category:categories(name,slug,color,icon), creator:profiles(full_name), tags:content_tags(tag:tags(*))`).eq('status', 'pending').order('created_at', { ascending: false }),
-            supabase.from('contents').select(`*, category:categories(name,slug,color,icon), creator:profiles(full_name), tags:content_tags(tag:tags(*))`).eq('status', 'approved').order('created_at', { ascending: false }),
-            supabase.from('contents').select(`*, category:categories(name,slug,color,icon), creator:profiles(full_name), tags:content_tags(tag:tags(*))`).eq('status', 'rejected').order('created_at', { ascending: false }),
+            supabase.from('contents').select(`*, category:categories(name,slug,color,icon), creator:profiles(full_name), content_tags(tag:tags(id, name, slug, color, icon))`).eq('status', 'pending').order('created_at', { ascending: false }),
+            supabase.from('contents').select(`*, category:categories(name,slug,color,icon), creator:profiles(full_name), content_tags(tag:tags(id, name, slug, color, icon))`).eq('status', 'published').order('created_at', { ascending: false }), // ✅ 'approved' → 'published'
+            supabase.from('contents').select(`*, category:categories(name,slug,color,icon), creator:profiles(full_name), content_tags(tag:tags(id, name, slug, color, icon))`).eq('status', 'rejected').order('created_at', { ascending: false }),
           ])
 
           const proc = (data: any[], status: string) =>
             (data ?? []).map(item => ({
               ...item, status,
-              tags: item.tags?.map((ct: any) => ct.tag).filter(Boolean) ?? [],
+              content_tags: item.content_tags ?? [], // ✅ CORRIGIDO
             }))
 
           setContents([
@@ -133,7 +137,7 @@ export default function AdminClient() {
     [contents, tab]
   )
 
-  async function handleAction(id: string, action: 'approved' | 'rejected') {
+  async function handleAction(id: string, action: 'published' | 'rejected') { // ✅ 'approved' → 'published'
     setActionId(id)
     const content = contents.find(c => c.id === id)
     if (!content) { setActionId(null); return }
@@ -141,9 +145,9 @@ export default function AdminClient() {
     await supabase.from('contents').update({ status: action }).eq('id', id)
     await supabase.from('notifications').insert({
       user_id: content.creator_id,
-      type:    action === 'approved' ? 'content_approved' : 'content_rejected',
-      title:   action === 'approved' ? 'Seu conteúdo foi aprovado!' : 'Seu conteúdo foi rejeitado',
-      message: action === 'approved'
+      type:    action === 'published' ? 'content_approved' : 'content_rejected', // ✅
+      title:   action === 'published' ? 'Seu conteúdo foi aprovado!' : 'Seu conteúdo foi rejeitado',
+      message: action === 'published'
         ? `${content.title} está publicado e visível para todos.`
         : `${content.title} não foi aprovado. Verifique e tente novamente.`,
       read: false, metadata: { content_id: id },
@@ -200,7 +204,7 @@ export default function AdminClient() {
       {/* Cabeçalho */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap' as const, gap: '12px', marginBottom: '28px' }}>
         <div>
-          <h1 style={{ fontFamily: DS.typography.fontFamily.heading, fontSize: DS.typography.fontSize['4xl'], fontWeight: DS.typography.fontWeight.bold, color: DS.colors.text.primary, marginBottom: '4px', letterSpacing: '-0.3px' }}>
+          <h1 style={{ fontFamily: DS.typography.fontFamily.heading, fontSize: '28px', fontWeight: DS.typography.fontWeight.bold, color: DS.colors.text.primary, marginBottom: '4px', letterSpacing: '-0.3px' }}>
             🛡️ Painel de Curadoria
           </h1>
           <p style={{ fontFamily: DS.typography.fontFamily.body, color: DS.colors.text.secondary, fontSize: '14px' }}>
@@ -223,7 +227,7 @@ export default function AdminClient() {
       <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: `1px solid ${DS.colors.neutral.light}`, paddingBottom: '12px', overflowX: 'auto' as const }}>
         {([
           { key: 'pending',  label: 'Pendentes',  count: contents.filter(c => c.status === 'pending').length  },
-          { key: 'approved', label: 'Aprovados',  count: contents.filter(c => c.status === 'approved').length },
+{ key: 'approved', label: 'Aprovados',  count: contents.filter(c => c.status === 'published').length },
           { key: 'rejected', label: 'Rejeitados', count: contents.filter(c => c.status === 'rejected').length },
         ] as { key: Tab; label: string; count: number }[]).map(t => (
           <button key={t.key} onClick={() => loadContents(t.key)} style={{
@@ -340,16 +344,16 @@ export default function AdminClient() {
                     {item.duration && ` · ${item.duration}`}
                   </div>
 
-                  {item.tags && item.tags.length > 0 && (
+                  {item.content_tags && item.content_tags.length > 0 && (
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' as const }}>
-                      {(item.tags as any[]).slice(0, 4).map((tag: any) => (
+                      {getContentTags(item.content_tags).slice(0, 4).map((tag: any) => (
                         <span key={tag.id} style={{ fontFamily: DS.typography.fontFamily.body, fontSize: '10px', fontWeight: DS.typography.fontWeight.semibold, backgroundColor: `${tag.color}25`, color: tag.color, padding: '2px 8px', borderRadius: DS.borderRadius.full, border: `1px solid ${tag.color}35` }}>
                           {tag.icon} {tag.name}
                         </span>
                       ))}
-                      {item.tags.length > 4 && (
+                      {getContentTags(item.content_tags).length > 4 && (
                         <span style={{ fontFamily: DS.typography.fontFamily.body, fontSize: '10px', backgroundColor: DS.colors.neutral.light, color: DS.colors.text.muted, padding: '2px 8px', borderRadius: DS.borderRadius.full }}>
-                          +{item.tags.length - 4}
+                          +{getContentTags(item.content_tags).length - 4}
                         </span>
                       )}
                     </div>
@@ -361,7 +365,7 @@ export default function AdminClient() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                 {tab === 'pending' && (
                   <>
-                    <button onClick={() => handleAction(item.id, 'approved')} disabled={actionId === item.id}
+                    <button onClick={() => handleAction(item.id, 'published')} disabled={actionId === item.id}
                       style={{ backgroundColor: SUCCESS_COLOR, color: '#FFFFFF', border: 'none', borderRadius: DS.borderRadius.md, padding: '9px 12px', fontFamily: DS.typography.fontFamily.body, fontSize: '13px', fontWeight: DS.typography.fontWeight.semibold, cursor: actionId === item.id ? 'not-allowed' : 'pointer', opacity: actionId === item.id ? 0.6 : 1, transition: DS.transitions.fast }}>
                       {actionId === item.id ? '...' : '✓ Aprovar'}
                     </button>
@@ -385,7 +389,7 @@ export default function AdminClient() {
                 )}
                 {tab === 'rejected' && (
                   <>
-                    <button onClick={() => handleAction(item.id, 'approved')}
+                    <button onClick={() => handleAction(item.id, 'published')}
                       style={{ backgroundColor: DS.colors.bg.primary, color: DS.colors.text.secondary, border: `1.5px solid ${DS.colors.neutral.medium}`, borderRadius: DS.borderRadius.md, padding: '9px 12px', fontFamily: DS.typography.fontFamily.body, fontSize: '13px', fontWeight: DS.typography.fontWeight.semibold, cursor: 'pointer', transition: DS.transitions.fast }}>
                       ↩ Restaurar
                     </button>

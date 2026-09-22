@@ -1,3 +1,6 @@
+// ✅ 1️⃣ VideoCard.tsx
+// Caminho: app/components/VideoCard.tsx
+
 'use client'
 
 import Link from 'next/link'

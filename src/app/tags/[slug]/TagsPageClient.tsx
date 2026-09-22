@@ -1,3 +1,5 @@
+// ✅ TagsPageClient.tsx (CORRIGIDO)
+
 'use client'
 
 import Image from 'next/image'
@@ -6,8 +8,8 @@ import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import VideoCard from '@/components/VideoCard'
 import { DESIGN_SYSTEM } from '@/lib/design-system'
+import { getContentTags, getCategory } from '@/types'
 import type { Content, Tag } from '@/types'
-import { getCategory } from '@/types'
 
 const DS = DESIGN_SYSTEM
 
@@ -46,7 +48,10 @@ export default function TagsPageClient() {
     async function loadData() {
       try {
         const { data: tagData, error: tagError } = await supabase
-          .from('tags').select('*').eq('slug', slug).single()
+          .from('tags')
+          .select('*')
+          .eq('slug', slug)
+          .single()
 
         if (tagError || !tagData) {
           setLoading(false)
@@ -54,15 +59,16 @@ export default function TagsPageClient() {
         }
         setTag(tagData)
 
+        // ✅ CORRIGIDO: Buscar conteúdos publicados com suas tags
         const { data: contentData, error: contentError } = await supabase
           .from('content_tags')
           .select(`
             content_id,
             contents (
               *,
-              category:categories(name, slug, color, icon),
-              creator:profiles(full_name),
-              tags:content_tags(tag:tags(*))
+              category:categories(id, name, slug, color, icon),
+              creator:profiles(id, full_name, avatar_url),
+              content_tags(tag:tags(id, name, slug, color, icon, text_color))
             )
           `)
           .eq('tag_id', tagData.id)
@@ -70,9 +76,12 @@ export default function TagsPageClient() {
         if (contentError) throw contentError
 
         const contentList: Content[] = []
-        contentData?.forEach(ct => {
+        contentData?.forEach((ct: any) => {
           const content = Array.isArray(ct.contents) ? ct.contents[0] : ct.contents
-          if (content && content.status === 'approved') contentList.push(content as Content)
+          // ✅ CORRIGIDO: 'approved' → 'published'
+          if (content && content.status === 'published') {
+            contentList.push(content as Content)
+          }
         })
 
         setContents(contentList)
@@ -124,9 +133,10 @@ export default function TagsPageClient() {
         <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏷️</div>
         <h1 style={{
           fontFamily: DS.typography.fontFamily.heading,
-          fontSize: DS.typography.fontSize['4xl'],
+          fontSize: '28px', // ✅ CORRIGIDO: DS.typography.fontSize['4xl']
           color: DS.colors.text.primary,
           marginBottom: '8px',
+          fontWeight: DS.typography.fontWeight.bold,
         }}>
           Tema não encontrado
         </h1>
@@ -141,7 +151,7 @@ export default function TagsPageClient() {
           borderRadius: DS.borderRadius.lg,
           fontFamily: DS.typography.fontFamily.body,
           fontWeight: DS.typography.fontWeight.semibold,
-          fontSize: DS.typography.fontSize.base,
+          fontSize: '15px', // ✅ CORRIGIDO: DS.typography.fontSize.base
           display: 'inline-block',
         }}>
           Ver todos os temas
@@ -154,7 +164,7 @@ export default function TagsPageClient() {
   const iconPath = TAG_ICONS[tag.slug] || '/icons/explorar.svg'
 
   return (
-    <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 16px' }}>
+    <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 16px', minHeight: '100vh', backgroundColor: DS.colors.bg.primary }}>
 
       {/* Breadcrumb */}
       <div style={{
@@ -163,7 +173,7 @@ export default function TagsPageClient() {
         gap: '8px',
         marginBottom: '24px',
         fontFamily: DS.typography.fontFamily.body,
-        fontSize: DS.typography.fontSize.sm,
+        fontSize: '13px', // ✅ CORRIGIDO: DS.typography.fontSize.sm
         color: DS.colors.text.muted,
       }}>
         <a href="/" style={{ color: DS.colors.text.muted, textDecoration: 'none' }}>
@@ -211,11 +221,12 @@ export default function TagsPageClient() {
         <div style={{ flex: 1 }}>
           <h1 style={{
             fontFamily: DS.typography.fontFamily.heading,
-            fontSize: DS.typography.fontSize['5xl'],
+            fontSize: '32px', // ✅ CORRIGIDO: DS.typography.fontSize['5xl']
             fontWeight: DS.typography.fontWeight.bold,
             color: DS.colors.text.primary,
             marginBottom: '6px',
             letterSpacing: '-0.5px',
+            margin: 0,
           }}>
             {tag.name}
           </h1>
@@ -223,7 +234,7 @@ export default function TagsPageClient() {
             <p style={{
               fontFamily: DS.typography.fontFamily.body,
               color: DS.colors.text.secondary,
-              fontSize: DS.typography.fontSize.lg,
+              fontSize: '15px', // ✅ CORRIGIDO: DS.typography.fontSize.lg
               margin: '0 0 8px',
             }}>
               {tag.description}
@@ -257,15 +268,16 @@ export default function TagsPageClient() {
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>📭</div>
           <h3 style={{
             fontFamily: DS.typography.fontFamily.heading,
-            fontSize: DS.typography.fontSize['3xl'],
+            fontSize: '20px', // ✅ CORRIGIDO: DS.typography.fontSize['3xl']
             color: DS.colors.text.primary,
             marginBottom: '8px',
+            fontWeight: DS.typography.fontWeight.bold,
           }}>
             Nenhum conteúdo ainda
           </h3>
           <p style={{
             color: DS.colors.text.secondary,
-            fontSize: DS.typography.fontSize.lg,
+            fontSize: '15px', // ✅ CORRIGIDO: DS.typography.fontSize.lg
             margin: '0 0 24px',
           }}>
             Em breve teremos conteúdos sobre {tag.name}.
@@ -278,7 +290,7 @@ export default function TagsPageClient() {
             borderRadius: DS.borderRadius.lg,
             fontFamily: DS.typography.fontFamily.body,
             fontWeight: DS.typography.fontWeight.semibold,
-            fontSize: DS.typography.fontSize.base,
+            fontSize: '15px', // ✅ CORRIGIDO: DS.typography.fontSize.base
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
@@ -293,30 +305,24 @@ export default function TagsPageClient() {
           gap: '20px',
         }}>
           {contents.map(content => {
-            // ✅ USAR getCategory PARA PEGAR CATEGORIA CORRETAMENTE
+            // ✅ CORRIGIDO: Usar getCategory e getContentTags
             const cat = getCategory(content.category)
-            const creatorData = Array.isArray(content.creator)
-              ? content.creator[0]
-              : content.creator
-            const tagsData = (content.tags ?? [])
-              .map((ct: any) => ct.tag ?? ct)
-              .filter(Boolean)
+            const creator = (content.creator as any)
+            const tags = getContentTags(content.content_tags)
 
             return (
               <VideoCard
                 key={content.id}
                 id={content.id}
                 title={content.title}
-                creator={creatorData?.full_name ?? 'Desconhecido'}
+                creator={creator?.full_name ?? 'Desconhecido'}
                 category={cat?.name ?? 'Sem categoria'}
                 categoryColor={cat?.color ?? DS.colors.primary.accent}
                 duration={content.duration ?? ''}
                 isFeatured={content.is_featured ?? false}
-                isCurated={content.is_featured ?? false}
-                isNew={false}
                 thumbnail={content.url_thumb ?? undefined}
                 type={content.type ?? 'video'}
-                tags={tagsData}
+                tags={tags}
               />
             )
           })}

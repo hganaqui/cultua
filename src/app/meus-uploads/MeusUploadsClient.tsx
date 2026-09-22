@@ -1,3 +1,5 @@
+// ✅ MeusUploadsClient.tsx (COMPLETO E CORRIGIDO)
+
 'use client'
 
 import Link from 'next/link'
@@ -12,14 +14,14 @@ const ERROR_COLOR   = '#C84C3C'
 
 const STATUS_CONFIG = {
   pending:  { label: 'Em análise', color: DS.colors.primary.accent,  bg: `${DS.colors.primary.accent}15`,  icon: '⏳' },
-  approved: { label: 'Aprovado',   color: SUCCESS_COLOR,             bg: `${SUCCESS_COLOR}15`,             icon: '✅' },
+  published: { label: 'Aprovado',   color: SUCCESS_COLOR,             bg: `${SUCCESS_COLOR}15`,             icon: '✅' },
   rejected: { label: 'Rejeitado',  color: ERROR_COLOR,               bg: `${ERROR_COLOR}15`,               icon: '❌' },
 } as const
 
 export default function MeusUploadsClient({ contents }: { contents: ContentWithStatus[] }) {
   const counts = {
     pending:  contents.filter(c => c.status === 'pending').length,
-    approved: contents.filter(c => c.status === 'approved').length,
+    published: contents.filter(c => c.status === 'published').length,
     rejected: contents.filter(c => c.status === 'rejected').length,
   }
 
@@ -33,17 +35,21 @@ export default function MeusUploadsClient({ contents }: { contents: ContentWithS
 
         {/* Header */}
         <div style={{
-          display: 'flex', alignItems: 'center',
-          justifyContent: 'space-between', marginBottom: '32px',
-          flexWrap: 'wrap' as const, gap: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '32px',
+          flexWrap: 'wrap' as const,
+          gap: '12px',
         }}>
           <div>
             <h1 style={{
               fontFamily: DS.typography.fontFamily.heading,
-              fontSize: DS.typography.fontSize['5xl'],
+              fontSize: '28px',
               fontWeight: DS.typography.fontWeight.bold,
               color: DS.colors.text.primary,
-              marginBottom: '4px', letterSpacing: '-0.5px',
+              marginBottom: '4px',
+              letterSpacing: '-0.5px',
             }}>
               📤 Meus Uploads
             </h1>
@@ -54,16 +60,23 @@ export default function MeusUploadsClient({ contents }: { contents: ContentWithS
           <Link
             href="/admin/upload"
             style={{
-              backgroundColor: DS.colors.primary.main, color: '#FFFFFF',
-              textDecoration: 'none', padding: '10px 20px',
+              backgroundColor: DS.colors.primary.main,
+              color: '#FFFFFF',
+              textDecoration: 'none',
+              padding: '10px 20px',
               borderRadius: DS.borderRadius.lg,
               fontFamily: DS.typography.fontFamily.body,
-              fontSize: '14px', fontWeight: DS.typography.fontWeight.semibold,
+              fontSize: '14px',
+              fontWeight: DS.typography.fontWeight.semibold,
               boxShadow: '0 4px 16px rgba(15,61,46,0.2)',
               transition: DS.transitions.fast,
             }}
-            onMouseEnter={e => (e.currentTarget.style.backgroundColor = DS.colors.primary.light)}
-            onMouseLeave={e => (e.currentTarget.style.backgroundColor = DS.colors.primary.main)}
+            onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
+              e.currentTarget.style.backgroundColor = DS.colors.primary.light
+            }}
+            onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
+              e.currentTarget.style.backgroundColor = DS.colors.primary.main
+            }}
           >
             + Novo Upload
           </Link>
@@ -73,9 +86,10 @@ export default function MeusUploadsClient({ contents }: { contents: ContentWithS
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '12px', marginBottom: '28px',
+          gap: '12px',
+          marginBottom: '28px',
         }}>
-          {(['pending', 'approved', 'rejected'] as const).map(s => {
+          {(['pending', 'published', 'rejected'] as const).map(s => {
             const cfg = STATUS_CONFIG[s]
             return (
               <div
@@ -84,31 +98,34 @@ export default function MeusUploadsClient({ contents }: { contents: ContentWithS
                   backgroundColor: DS.colors.bg.secondary,
                   border: `2px solid ${cfg.color}`,
                   borderRadius: DS.borderRadius.lg,
-                  padding: '20px', textAlign: 'center',
+                  padding: '20px',
+                  textAlign: 'center',
                   transition: DS.transitions.base,
                   boxShadow: DS.shadows.sm,
                 }}
-                onMouseEnter={e => {
-                  const el = e.currentTarget as HTMLElement
-                  el.style.boxShadow = DS.shadows.lg
-                  el.style.transform = 'translateY(-2px)'
+                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => {
+                  e.currentTarget.style.boxShadow = DS.shadows.lg
+                  e.currentTarget.style.transform = 'translateY(-2px)'
                 }}
-                onMouseLeave={e => {
-                  const el = e.currentTarget as HTMLElement
-                  el.style.boxShadow = DS.shadows.sm
-                  el.style.transform = 'translateY(0)'
+                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => {
+                  e.currentTarget.style.boxShadow = DS.shadows.sm
+                  e.currentTarget.style.transform = 'translateY(0)'
                 }}
               >
                 <div style={{ fontSize: '28px', marginBottom: '4px' }}>{cfg.icon}</div>
                 <div style={{
                   fontFamily: DS.typography.fontFamily.heading,
-                  fontSize: '28px', fontWeight: DS.typography.fontWeight.bold, color: cfg.color,
+                  fontSize: '28px',
+                  fontWeight: DS.typography.fontWeight.bold,
+                  color: cfg.color,
                 }}>
                   {counts[s]}
                 </div>
                 <div style={{
                   fontFamily: DS.typography.fontFamily.body,
-                  fontSize: '12px', color: DS.colors.text.secondary, marginTop: '2px',
+                  fontSize: '12px',
+                  color: DS.colors.text.secondary,
+                  marginTop: '2px',
                 }}>
                   {cfg.label}
                 </div>
@@ -123,26 +140,38 @@ export default function MeusUploadsClient({ contents }: { contents: ContentWithS
             backgroundColor: DS.colors.bg.secondary,
             border: `1px solid ${DS.colors.neutral.light}`,
             borderRadius: DS.borderRadius.xl,
-            padding: '60px 32px', textAlign: 'center',
+            padding: '60px 32px',
+            textAlign: 'center',
           }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>📭</div>
             <p style={{
               fontFamily: DS.typography.fontFamily.body,
-              fontSize: '16px', color: DS.colors.text.secondary, marginBottom: '20px',
+              fontSize: '16px',
+              color: DS.colors.text.secondary,
+              marginBottom: '20px',
             }}>
               Você ainda não enviou nenhum conteúdo.
             </p>
             <Link
               href="/admin/upload"
               style={{
-                backgroundColor: DS.colors.primary.main, color: '#FFFFFF',
-                textDecoration: 'none', padding: '12px 28px',
-                borderRadius: DS.borderRadius.lg, fontFamily: DS.typography.fontFamily.body,
-                fontSize: '15px', fontWeight: DS.typography.fontWeight.semibold,
-                display: 'inline-block', transition: DS.transitions.fast,
+                backgroundColor: DS.colors.primary.main,
+                color: '#FFFFFF',
+                textDecoration: 'none',
+                padding: '12px 28px',
+                borderRadius: DS.borderRadius.lg,
+                fontFamily: DS.typography.fontFamily.body,
+                fontSize: '15px',
+                fontWeight: DS.typography.fontWeight.semibold,
+                display: 'inline-block',
+                transition: DS.transitions.fast,
               }}
-              onMouseEnter={e => (e.currentTarget.style.backgroundColor = DS.colors.primary.light)}
-              onMouseLeave={e => (e.currentTarget.style.backgroundColor = DS.colors.primary.main)}
+              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                e.currentTarget.style.backgroundColor = DS.colors.primary.light
+              }}
+              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                e.currentTarget.style.backgroundColor = DS.colors.primary.main
+              }}
             >
               Enviar primeiro conteúdo
             </Link>
@@ -159,29 +188,34 @@ export default function MeusUploadsClient({ contents }: { contents: ContentWithS
                   style={{
                     backgroundColor: DS.colors.bg.secondary,
                     border: `1px solid ${DS.colors.neutral.light}`,
-                    borderRadius: DS.borderRadius.lg, padding: '16px',
-                    display: 'flex', alignItems: 'center', gap: '16px',
+                    borderRadius: DS.borderRadius.lg,
+                    padding: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
                     transition: DS.transitions.fast,
                     boxShadow: DS.shadows.sm,
                   }}
-                  onMouseEnter={e => {
-                    const el = e.currentTarget as HTMLElement
-                    el.style.borderColor = DS.colors.primary.main
-                    el.style.boxShadow = DS.shadows.md
+                  onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => {
+                    e.currentTarget.style.borderColor = DS.colors.primary.main
+                    e.currentTarget.style.boxShadow = DS.shadows.md
                   }}
-                  onMouseLeave={e => {
-                    const el = e.currentTarget as HTMLElement
-                    el.style.borderColor = DS.colors.neutral.light
-                    el.style.boxShadow = DS.shadows.sm
+                  onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => {
+                    e.currentTarget.style.borderColor = DS.colors.neutral.light
+                    e.currentTarget.style.boxShadow = DS.shadows.sm
                   }}
                 >
-                  {/* Thumbnail — sem next/image, usa <img> nativo conforme padrão CULTUA */}
+                  {/* Thumbnail */}
                   <div style={{
-                    width: '80px', height: '52px',
+                    width: '80px',
+                    height: '52px',
                     borderRadius: DS.borderRadius.md,
                     backgroundColor: DS.colors.neutral.light,
-                    flexShrink: 0, overflow: 'hidden',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}>
                     {item.url_thumb ? (
                       <img
@@ -201,14 +235,19 @@ export default function MeusUploadsClient({ contents }: { contents: ContentWithS
                       color: DS.colors.text.primary,
                       fontWeight: DS.typography.fontWeight.semibold,
                       fontSize: '15px',
-                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap' as const,
                       marginBottom: '4px',
+                      margin: 0,
                     }}>
                       {item.title}
                     </p>
                     <p style={{
                       fontFamily: DS.typography.fontFamily.body,
-                      color: DS.colors.text.secondary, fontSize: '12px',
+                      color: DS.colors.text.secondary,
+                      fontSize: '12px',
+                      margin: 0,
                     }}>
                       {cat?.name ?? 'Sem categoria'} · {new Date(item.created_at).toLocaleDateString('pt-BR')}
                     </p>
@@ -218,28 +257,37 @@ export default function MeusUploadsClient({ contents }: { contents: ContentWithS
                   <span style={{
                     flexShrink: 0,
                     fontFamily: DS.typography.fontFamily.body,
-                    fontSize: '12px', fontWeight: DS.typography.fontWeight.semibold,
-                    color: cfg.color, backgroundColor: cfg.bg,
-                    padding: '5px 14px', borderRadius: DS.borderRadius.full,
+                    fontSize: '12px',
+                    fontWeight: DS.typography.fontWeight.semibold,
+                    color: cfg.color,
+                    backgroundColor: cfg.bg,
+                    padding: '5px 14px',
+                    borderRadius: DS.borderRadius.full,
                     border: `1px solid ${cfg.color}44`,
                     whiteSpace: 'nowrap' as const,
                   }}>
                     {cfg.icon} {cfg.label}
                   </span>
 
-                  {/* Link ver — só aprovado */}
-                  {item.status === 'approved' && (
+                  {/* Link Ver - só publicado */}
+                  {item.status === 'published' && (
                     <Link
                       href={`/content/${item.id}`}
                       style={{
-                        flexShrink: 0, color: DS.colors.primary.main,
+                        flexShrink: 0,
+                        color: DS.colors.primary.main,
                         fontFamily: DS.typography.fontFamily.body,
-                        fontSize: '13px', textDecoration: 'none',
+                        fontSize: '13px',
+                        textDecoration: 'none',
                         fontWeight: DS.typography.fontWeight.semibold,
                         transition: DS.transitions.fast,
                       }}
-                      onMouseEnter={e => (e.currentTarget.style.color = DS.colors.primary.light)}
-                      onMouseLeave={e => (e.currentTarget.style.color = DS.colors.primary.main)}
+                      onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                        e.currentTarget.style.color = DS.colors.primary.light
+                      }}
+                      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                        e.currentTarget.style.color = DS.colors.primary.main
+                      }}
                     >
                       Ver →
                     </Link>
