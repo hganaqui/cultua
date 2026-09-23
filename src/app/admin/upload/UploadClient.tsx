@@ -12,22 +12,22 @@ import type { Tag } from '@/types'
 const DS = DESIGN_SYSTEM
 
 const SUCCESS_COLOR = '#6B7F6B'
-const ERROR_COLOR   = '#C84C3C'
+const ERROR_COLOR = '#C84C3C'
 
 type ContentType = 'video' | 'audio' | 'text'
-type UploadStep  = 'form' | 'uploading' | 'success' | 'error'
+type UploadStep = 'form' | 'uploading' | 'success' | 'error'
 
 interface FormState {
-  title:       string
+  title: string
   description: string
-  type:        ContentType
-  categoryId:  string
-  duration:    string
+  type: ContentType
+  categoryId: string
+  duration: string
 }
 
 interface UploadProgress {
-  video:   number
-  thumb:   number
+  video: number
+  thumb: number
   current: 'video' | 'thumb' | 'saving' | 'done'
 }
 
@@ -56,21 +56,21 @@ const TAG_ICONS: Record<string, string> = {
 export default function UploadClient() {
   const router = useRouter()
 
-  const [step, setStep]               = useState<UploadStep>('form')
-  const [authorized, setAuth]         = useState<boolean | null>(null)
-  const [categories, setCats]         = useState<{ id: string; name: string; icon: string | null }[]>([])
-  const [tags, setTags]               = useState<Tag[]>([])
+  const [step, setStep] = useState<UploadStep>('form')
+  const [authorized, setAuth] = useState<boolean | null>(null)
+  const [categories, setCats] = useState<{ id: string; name: string; icon: string | null }[]>([])
+  const [tags, setTags] = useState<Tag[]>([])
   const [selectedTags, setSelectedTags] = useState<string[]>([])
 
   const [form, setForm] = useState<FormState>({
     title: '', description: '', type: 'video', categoryId: '', duration: '',
   })
 
-  const [videoFile, setVideoFile]       = useState<File | null>(null)
-  const [thumbFile, setThumbFile]       = useState<File | null>(null)
+  const [videoFile, setVideoFile] = useState<File | null>(null)
+  const [thumbFile, setThumbFile] = useState<File | null>(null)
   const [thumbPreview, setThumbPreview] = useState<string | null>(null)
-  const [progress, setProgress]         = useState<UploadProgress>({ video: 0, thumb: 0, current: 'video' })
-  const [errorMsg, setErrorMsg]         = useState<string | null>(null)
+  const [progress, setProgress] = useState<UploadProgress>({ video: 0, thumb: 0, current: 'video' })
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   const videoRef = useRef<HTMLInputElement>(null)
   const thumbRef = useRef<HTMLInputElement>(null)
@@ -140,22 +140,46 @@ export default function UploadClient() {
     const res = await fetch('/api/upload/presigned', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileName: file.name, fileType: file.type, uploadType }),
+      body: JSON.stringify({
+        fileName: file.name,
+        fileType: file.type,
+        uploadType,
+      }),
     })
-    if (!res.ok) throw new Error('Erro ao gerar URL de upload')
-    const { presignedUrl, publicUrl } = await res.json()
+    const contentType = res.headers.get('content-type') ?? ''
+    if (!contentType.includes('application/json')) {
+      const text = await res.text()
+      console.error('[Upload] Resposta não-JSON recebida:', text.slice(0, 300))
+      throw new Error('Erro no servidor ao gerar URL de upload. Verifique as configurações do R2.')
+    }
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      throw new Error(data.error ?? 'Erro ao gerar URL de upload')
+    }
+
+    const { presignedUrl, publicUrl } = data
+
+    // ✅ Validar que recebeu as URLs
+    if (!presignedUrl || !publicUrl) {
+      throw new Error('URL de upload inválida recebida do servidor.')
+    }
 
     await new Promise<void>((resolve, reject) => {
       const xhr = new XMLHttpRequest()
       xhr.upload.onprogress = e => {
         if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100))
       }
-      xhr.onload  = () => xhr.status === 200 ? resolve() : reject(new Error(`Upload falhou: ${xhr.status}`))
-      xhr.onerror = () => reject(new Error('Erro de rede'))
+      xhr.onload = () => xhr.status === 200
+        ? resolve()
+        : reject(new Error(`Upload falhou com status: ${xhr.status}`))
+      xhr.onerror = () => reject(new Error('Erro de rede durante o upload'))
       xhr.open('PUT', presignedUrl)
       xhr.setRequestHeader('Content-Type', file.type)
       xhr.send(file)
     })
+
     return publicUrl
   }
 
@@ -194,15 +218,15 @@ export default function UploadClient() {
       const { data: content, error } = await supabase
         .from('contents')
         .insert({
-          title:       form.title.trim(),
+          title: form.title.trim(),
           description: form.description.trim() || null,
-          type:        form.type,
-          status:      'pending',
-          url_media:   urlMedia,
-          url_thumb:   urlThumb,
-          duration:    form.duration.trim() || null,
+          type: form.type,
+          status: 'pending',
+          url_media: urlMedia,
+          url_thumb: urlThumb,
+          duration: form.duration.trim() || null,
           category_id: form.categoryId,
-          creator_id:  user?.id ?? null,
+          creator_id: user?.id ?? null,
           is_featured: false,
         })
         .select('id')
@@ -273,10 +297,10 @@ export default function UploadClient() {
     <main style={{ maxWidth: '500px', margin: '80px auto', padding: '0 16px', textAlign: 'center' }}>
       <div style={{ fontSize: '48px', marginBottom: '20px' }}>⬆️</div>
       <h2 style={{ fontFamily: DS.typography.fontFamily.heading, color: DS.colors.text.primary, fontSize: '20px', fontWeight: DS.typography.fontWeight.bold, marginBottom: '24px' }}>
-        {progress.current === 'video'  && 'Enviando vídeo...'}
-        {progress.current === 'thumb'  && 'Enviando thumbnail...'}
+        {progress.current === 'video' && 'Enviando vídeo...'}
+        {progress.current === 'thumb' && 'Enviando thumbnail...'}
         {progress.current === 'saving' && 'Salvando no banco...'}
-        {progress.current === 'done'   && 'Concluído!'}
+        {progress.current === 'done' && 'Concluído!'}
       </h2>
       {videoFile && (
         <div style={{ marginBottom: '16px' }}>
@@ -335,7 +359,7 @@ export default function UploadClient() {
             {([
               { value: 'video', label: '🎬 Vídeo' },
               { value: 'audio', label: '🎵 Áudio' },
-              { value: 'text',  label: '📝 Texto' },
+              { value: 'text', label: '📝 Texto' },
             ] as { value: ContentType; label: string }[]).map(opt => (
               <button key={opt.value} type="button"
                 onClick={() => setForm(f => ({ ...f, type: opt.value }))}

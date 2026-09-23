@@ -1,5 +1,4 @@
 // ✅ AdminClient.tsx (CORRIGIDO - COPIAR COMPLETO)
-// Linhas críticas corrigidas: 30, 52, 183, 184, 185, 343-352
 
 'use client'
 
