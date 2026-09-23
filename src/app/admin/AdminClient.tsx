@@ -13,27 +13,27 @@ import type { Content } from '@/types'
 const DS = DESIGN_SYSTEM
 
 const SUCCESS_COLOR = '#6B7F6B'
-const ERROR_COLOR   = '#C84C3C'
+const ERROR_COLOR = '#C84C3C'
 
-type Tab    = 'pending' | 'approved' | 'rejected'
+type Tab = 'pending' | 'approved' | 'rejected'
 type SortBy = 'date' | 'name' | 'author'
 
 interface Filters {
   searchTerm: string
-  category:   string
-  author:     string
-  sortBy:     SortBy
+  category: string
+  author: string
+  sortBy: SortBy
 }
 
 export default function AdminClient() {
   const router = useRouter()
   const [authorized, setAuthorized] = useState(false)
-  const [contents, setContents]     = useState<Content[]>([])
-  const [tab, setTab]               = useState<Tab>('pending')
-  const [loading, setLoading]       = useState(true)
-  const [actionId, setActionId]     = useState<string | null>(null)
-  const [deleteId, setDeleteId]     = useState<string | null>(null)
-  const [deleting, setDeleting]     = useState(false)
+  const [contents, setContents] = useState<Content[]>([])
+  const [tab, setTab] = useState<Tab>('pending')
+  const [loading, setLoading] = useState(true)
+  const [actionId, setActionId] = useState<string | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   const [filters, setFilters] = useState<Filters>({
     searchTerm: '', category: '', author: '', sortBy: 'date',
@@ -89,16 +89,18 @@ export default function AdminClient() {
             supabase.from('contents').select(`*, category:categories(name,slug,color,icon), creator:profiles(full_name), content_tags(tag:tags(id, name, slug, color, icon))`).eq('status', 'rejected').order('created_at', { ascending: false }),
           ])
 
-          const proc = (data: any[], status: string) =>
+
+          const proc = (data: any[]) =>           // ✅ removido o parâmetro 'status'
             (data ?? []).map(item => ({
-              ...item, status,
-              content_tags: item.content_tags ?? [], // ✅ CORRIGIDO
+              ...item,
+              // ✅ NÃO sobrescrever item.status — usar o que veio do banco ('published', 'pending', 'rejected')
+              content_tags: item.content_tags ?? [],
             }))
 
           setContents([
-            ...proc(pendRes.data as any[], 'pending'),
-            ...proc(appRes.data  as any[], 'approved'),
-            ...proc(rejRes.data  as any[], 'rejected'),
+            ...proc(pendRes.data as any[]),       // ✅ sem segundo argumento
+            ...proc(appRes.data as any[]),
+            ...proc(rejRes.data as any[]),
           ])
           setTab('pending')
         } finally {
@@ -113,29 +115,57 @@ export default function AdminClient() {
   }, [router])
 
   const filteredContents = useMemo(() => {
-    let result = contents.filter(c => c.status === tab)
+    // ✅ tab 'approved' corresponde a status 'published' no banco
+    const statusMap: Record<Tab, string> = {
+      pending: 'pending',
+      approved: 'published',  // ✅ mapeamento correto
+      rejected: 'rejected',
+    }
+    let result = contents.filter(c => c.status === statusMap[tab])
+
+    // ... resto do useMemo permanece igual
     if (filters.searchTerm) {
       const term = filters.searchTerm.toLowerCase()
-      result = result.filter(c => c.title.toLowerCase().includes(term) || c.description?.toLowerCase().includes(term))
+      result = result.filter(c =>
+        c.title.toLowerCase().includes(term) ||
+        c.description?.toLowerCase().includes(term)
+      )
     }
     if (filters.category) result = result.filter(c => (c.category as any)?.name === filters.category)
-    if (filters.author)   result = result.filter(c => (c.creator as any)?.full_name === filters.author)
+    if (filters.author) result = result.filter(c => (c.creator as any)?.full_name === filters.author)
 
-    if (filters.sortBy === 'date')   result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    else if (filters.sortBy === 'name')   result.sort((a, b) => a.title.localeCompare(b.title))
+    if (filters.sortBy === 'date') result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    else if (filters.sortBy === 'name') result.sort((a, b) => a.title.localeCompare(b.title))
     else if (filters.sortBy === 'author') result.sort((a, b) => ((a.creator as any)?.full_name ?? '').localeCompare((b.creator as any)?.full_name ?? ''))
+
     return result
   }, [contents, filters, tab])
 
-  const categoriesList = useMemo(() =>
-    [...new Set(contents.filter(c => c.status === tab).map(c => (c.category as any)?.name).filter((x): x is string => !!x))].sort(),
-    [contents, tab]
-  )
+const statusMap: Record<Tab, string> = {
+  pending:  'pending',
+  approved: 'published',
+  rejected: 'rejected',
+}
 
-  const authorsList = useMemo(() =>
-    [...new Set(contents.filter(c => c.status === tab).map(c => (c.creator as any)?.full_name).filter((x): x is string => !!x))].sort(),
-    [contents, tab]
-  )
+const categoriesList = useMemo(() =>
+  [...new Set(
+    contents
+      .filter(c => c.status === statusMap[tab])  // ✅
+      .map(c => (c.category as any)?.name)
+      .filter((x): x is string => !!x)
+  )].sort(),
+  [contents, tab]
+)
+
+const authorsList = useMemo(() =>
+  [...new Set(
+    contents
+      .filter(c => c.status === statusMap[tab])  // ✅
+      .map(c => (c.creator as any)?.full_name)
+      .filter((x): x is string => !!x)
+  )].sort(),
+  [contents, tab]
+)
 
   async function handleAction(id: string, action: 'published' | 'rejected') { // ✅ 'approved' → 'published'
     setActionId(id)
@@ -145,8 +175,8 @@ export default function AdminClient() {
     await supabase.from('contents').update({ status: action }).eq('id', id)
     await supabase.from('notifications').insert({
       user_id: content.creator_id,
-      type:    action === 'published' ? 'content_approved' : 'content_rejected', // ✅
-      title:   action === 'published' ? 'Seu conteúdo foi aprovado!' : 'Seu conteúdo foi rejeitado',
+      type: action === 'published' ? 'content_approved' : 'content_rejected', // ✅
+      title: action === 'published' ? 'Seu conteúdo foi aprovado!' : 'Seu conteúdo foi rejeitado',
       message: action === 'published'
         ? `${content.title} está publicado e visível para todos.`
         : `${content.title} não foi aprovado. Verifique e tente novamente.`,
@@ -226,8 +256,8 @@ export default function AdminClient() {
       {/* Abas */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: `1px solid ${DS.colors.neutral.light}`, paddingBottom: '12px', overflowX: 'auto' as const }}>
         {([
-          { key: 'pending',  label: 'Pendentes',  count: contents.filter(c => c.status === 'pending').length  },
-{ key: 'approved', label: 'Aprovados',  count: contents.filter(c => c.status === 'published').length },
+          { key: 'pending', label: 'Pendentes', count: contents.filter(c => c.status === 'pending').length },
+          { key: 'approved', label: 'Aprovados', count: contents.filter(c => c.status === 'published').length }, // ✅ 'published' não 'approved'
           { key: 'rejected', label: 'Rejeitados', count: contents.filter(c => c.status === 'rejected').length },
         ] as { key: Tab; label: string; count: number }[]).map(t => (
           <button key={t.key} onClick={() => loadContents(t.key)} style={{
