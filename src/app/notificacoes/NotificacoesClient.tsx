@@ -14,9 +14,9 @@ interface Props { userId: string }
 export default function NotificacoesClient({ userId }: Props) {
   const router = useRouter()
   const [notifications, setNotifications] = useState<Notification[]>([])
-  const [loading, setLoading]             = useState(true)
-  const [filter, setFilter]               = useState<'all' | 'unread'>('all')
-  const [deleting, setDeleting]           = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState<'all' | 'unread'>('all')
+  const [deleting, setDeleting] = useState<string | null>(null)
 
   async function loadNotifications() {
     try {
@@ -35,9 +35,9 @@ export default function NotificacoesClient({ userId }: Props) {
     }
   }
 
-  useEffect(() => { 
+  useEffect(() => {
     console.log('[Notificacoes] useEffect loadNotifications')
-    loadNotifications() 
+    loadNotifications()
   }, [userId])
 
   // Realtime
@@ -45,15 +45,42 @@ export default function NotificacoesClient({ userId }: Props) {
     const channel = supabase
       .channel(`notificacoes-page-${userId}`)
       .on('postgres_changes', {
-        event: 'INSERT', 
-        schema: 'public', 
+        event: 'INSERT',
+        schema: 'public',
         table: 'notifications',
         filter: `user_id=eq.${userId}`,
       }, payload => {
-        console.log('[Notificacoes] Nova notificação via realtime:', payload.new)
+        console.log('[Notificacoes] INSERT via realtime:', payload.new)
         setNotifications(prev => [payload.new as Notification, ...prev])
       })
+      // ✅ ADICIONAR: sincroniza quando outra aba/dispositivo marca como lido
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${userId}`,
+      }, payload => {
+        console.log('[Notificacoes] UPDATE via realtime:', payload.new)
+        setNotifications(prev =>
+          prev.map(n => n.id === (payload.new as Notification).id
+            ? { ...n, ...(payload.new as Notification) }
+            : n
+          )
+        )
+      })
+      // ✅ ADICIONAR: sincroniza quando deleta
+      .on('postgres_changes', {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'notifications',
+      }, payload => {
+        console.log('[Notificacoes] DELETE via realtime:', payload.old)
+        setNotifications(prev =>
+          prev.filter(n => n.id !== (payload.old as Notification).id)
+        )
+      })
       .subscribe()
+
     return () => { supabase.removeChannel(channel) }
   }, [userId])
 
@@ -63,7 +90,7 @@ export default function NotificacoesClient({ userId }: Props) {
         .from('notifications')
         .update({ read: true })
         .eq('id', id)
-      
+
       if (error) throw error
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
     } catch (err) {
@@ -78,7 +105,7 @@ export default function NotificacoesClient({ userId }: Props) {
         .update({ read: true })
         .eq('user_id', userId)
         .eq('read', false)
-      
+
       if (error) throw error
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))
     } catch (err) {
@@ -91,14 +118,14 @@ export default function NotificacoesClient({ userId }: Props) {
     try {
       console.log('[Notificacoes] Iniciando delete para:', id)
       setDeleting(id)
-      
+
       // ✅ Verificar se a notificação existe
       const { data: notif, error: checkError } = await supabase
         .from('notifications')
         .select('id')
         .eq('id', id)
         .single()
-      
+
       if (checkError || !notif) {
         console.error('[Notificacoes] Notificação não encontrada:', checkError)
         alert('Notificação não encontrada')
@@ -144,7 +171,7 @@ export default function NotificacoesClient({ userId }: Props) {
     const map: Record<string, string> = {
       content_approved: '✅',
       content_rejected: '❌',
-      pending_content:  '⏳',
+      pending_content: '⏳',
     }
     return map[type] ?? '🔔'
   }
@@ -155,7 +182,7 @@ export default function NotificacoesClient({ userId }: Props) {
     else if (n.type === 'pending_content') router.push('/admin')
   }
 
-  const filtered   = filter === 'unread' ? notifications.filter(n => !n.read) : notifications
+  const filtered = filter === 'unread' ? notifications.filter(n => !n.read) : notifications
   const unreadCount = notifications.filter(n => !n.read).length
 
   return (

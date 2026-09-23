@@ -26,7 +26,7 @@ export default async function MeusUploadsPage() {
   const contents: ContentWithStatus[] = (rawContents ?? []).map((item: any) => ({
     id: item.id,
     title: item.title,
-    status: item.status,
+    status: item.status === 'approved' ? 'published' : item.status,
     created_at: item.created_at,
     url_thumb: item.url_thumb,
     creator_id: item.creator_id,

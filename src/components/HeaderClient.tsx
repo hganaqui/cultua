@@ -72,46 +72,61 @@ export default function HeaderClient({ user, profile }: HeaderClientProps) {
   }, [user])
 
   // ✅ Realtime com debug e retry
-  useEffect(() => {
-    if (!user) {
-      console.log('[Header] Sem user, pulando setup realtime')
-      return
-    }
+// HeaderClient.tsx — substituir o useEffect do realtime (linha ~60)
 
-    console.log('[Header] Setup realtime para user:', user.id)
-    fetchUnread()
+useEffect(() => {
+  if (!user) return
 
-    // Limpar canal anterior
+  fetchUnread()
+
+  if (channelRef.current) {
+    supabaseBrowser.removeChannel(channelRef.current)
+    channelRef.current = null
+  }
+
+  const channel = supabaseBrowser
+    .channel(`header-notifs-${user.id}`)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'notifications',
+      filter: `user_id=eq.${user.id}`,
+    }, (payload) => {
+      console.log('[Header] Nova notificação INSERT:', payload)
+      fetchUnread()
+    })
+    // ✅ ADICIONAR: escuta UPDATE para quando marcar como lido
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'notifications',
+      filter: `user_id=eq.${user.id}`,
+    }, (payload) => {
+      console.log('[Header] Notificação UPDATE (lida?):', payload)
+      fetchUnread() // ✅ Re-busca do banco → badge atualiza
+    })
+    // ✅ ADICIONAR: escuta DELETE para quando deletar notificação
+    .on('postgres_changes', {
+      event: 'DELETE',
+      schema: 'public',
+      table: 'notifications',
+    }, () => {
+      console.log('[Header] Notificação DELETE')
+      fetchUnread()
+    })
+    .subscribe((status) => {
+      console.log('[Header] Status do canal:', status)
+    })
+
+  channelRef.current = channel
+
+  return () => {
     if (channelRef.current) {
       supabaseBrowser.removeChannel(channelRef.current)
       channelRef.current = null
     }
-
-    // ✅ Criar novo canal
-    const channel = supabaseBrowser
-      .channel(`header-notifs-${user.id}`)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'notifications',
-        filter: `user_id=eq.${user.id}`,
-      }, (payload) => {
-        console.log('[Header] Nova notificação:', payload)
-        fetchUnread()
-      })
-      .subscribe((status) => {
-        console.log('[Header] Status do canal:', status)
-      })
-
-    channelRef.current = channel
-
-    return () => {
-      if (channelRef.current) {
-        supabaseBrowser.removeChannel(channelRef.current)
-        channelRef.current = null
-      }
-    }
-  }, [user?.id, fetchUnread])
+  }
+}, [user?.id, fetchUnread])
 
   // ── Fecha dropdown ao clicar fora ───────────────────────────────
   useEffect(() => {
