@@ -84,6 +84,8 @@ export default function NotificacoesClient({ userId }: Props) {
     return () => { supabase.removeChannel(channel) }
   }, [userId])
 
+  // NotificacoesClient.tsx — substituir markAsRead e markAllAsRead
+
   async function markAsRead(id: string) {
     try {
       const { error } = await supabase
@@ -92,7 +94,13 @@ export default function NotificacoesClient({ userId }: Props) {
         .eq('id', id)
 
       if (error) throw error
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+
+      // ✅ Atualiza estado local imediatamente (UI responsiva)
+      setNotifications(prev =>
+        prev.map(n => n.id === id ? { ...n, read: true } : n)
+      )
+      // ✅ Re-fetch completo para garantir sync
+      await loadNotifications()
     } catch (err) {
       console.error('[Notificacoes] markAsRead error:', err)
     }
@@ -107,7 +115,11 @@ export default function NotificacoesClient({ userId }: Props) {
         .eq('read', false)
 
       if (error) throw error
+
+      // ✅ Atualiza estado local imediatamente
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+      // ✅ Re-fetch completo para garantir sync
+      await loadNotifications()
     } catch (err) {
       console.error('[Notificacoes] markAllAsRead error:', err)
     }

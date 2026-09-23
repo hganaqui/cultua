@@ -47,10 +47,7 @@ export default function HeaderClient({ user, profile }: HeaderClientProps) {
 
   // ✅ fetchUnread com debug
   const fetchUnread = useCallback(async () => {
-    if (!user) {
-      console.log('[Header] Sem user, pulando fetch')
-      return
-    }
+    if (!user) return
     try {
       const { count, error } = await supabaseBrowser
         .from('notifications')
@@ -59,74 +56,64 @@ export default function HeaderClient({ user, profile }: HeaderClientProps) {
         .eq('read', false)
 
       if (error) {
-        console.error('[Header] Erro ao buscar notificações:', error)
+        console.error('[Header] Erro:', error)
         return
       }
-
-      const finalCount = count ?? 0
-      console.log('[Header] Notificações não lidas:', finalCount)
-      setUnreadCount(finalCount)
+      setUnreadCount(count ?? 0)
     } catch (err) {
-      console.error('[Header] Exceção ao buscar notificações:', err)
+      console.error('[Header] Exceção:', err)
     }
   }, [user])
 
-  // ✅ Realtime com debug e retry
-// HeaderClient.tsx — substituir o useEffect do realtime (linha ~60)
+  useEffect(() => {
+    if (!user) return
 
-useEffect(() => {
-  if (!user) return
+    // Fetch inicial
+    fetchUnread()
 
-  fetchUnread()
-
-  if (channelRef.current) {
-    supabaseBrowser.removeChannel(channelRef.current)
-    channelRef.current = null
-  }
-
-  const channel = supabaseBrowser
-    .channel(`header-notifs-${user.id}`)
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'notifications',
-      filter: `user_id=eq.${user.id}`,
-    }, (payload) => {
-      console.log('[Header] Nova notificação INSERT:', payload)
-      fetchUnread()
-    })
-    // ✅ ADICIONAR: escuta UPDATE para quando marcar como lido
-    .on('postgres_changes', {
-      event: 'UPDATE',
-      schema: 'public',
-      table: 'notifications',
-      filter: `user_id=eq.${user.id}`,
-    }, (payload) => {
-      console.log('[Header] Notificação UPDATE (lida?):', payload)
-      fetchUnread() // ✅ Re-busca do banco → badge atualiza
-    })
-    // ✅ ADICIONAR: escuta DELETE para quando deletar notificação
-    .on('postgres_changes', {
-      event: 'DELETE',
-      schema: 'public',
-      table: 'notifications',
-    }, () => {
-      console.log('[Header] Notificação DELETE')
-      fetchUnread()
-    })
-    .subscribe((status) => {
-      console.log('[Header] Status do canal:', status)
-    })
-
-  channelRef.current = channel
-
-  return () => {
+    // ✅ Realtime com INSERT + UPDATE + DELETE
     if (channelRef.current) {
       supabaseBrowser.removeChannel(channelRef.current)
       channelRef.current = null
     }
-  }
-}, [user?.id, fetchUnread])
+
+    const channel = supabaseBrowser
+      .channel(`header-notifs-${user.id}-${Date.now()}`) // ✅ nome único evita conflito
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${user.id}`,
+      }, () => fetchUnread())
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${user.id}`,
+      }, () => fetchUnread())
+      .on('postgres_changes', {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'notifications',
+        // ✅ DELETE não suporta filter no Supabase — sem filter mesmo
+      }, () => fetchUnread())
+      .subscribe((status) => {
+        console.log('[Header] Canal status:', status)
+      })
+
+    channelRef.current = channel
+
+    // ✅ FALLBACK: polling a cada 30s caso realtime falhe
+    const interval = setInterval(fetchUnread, 30_000)
+
+    return () => {
+      if (channelRef.current) {
+        supabaseBrowser.removeChannel(channelRef.current)
+        channelRef.current = null
+      }
+      clearInterval(interval)
+    }
+  }, [user?.id, fetchUnread])
 
   // ── Fecha dropdown ao clicar fora ───────────────────────────────
   useEffect(() => {
